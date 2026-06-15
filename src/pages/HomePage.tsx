@@ -110,7 +110,7 @@ export default function HomePage() {
 
         {/* ── 输入区 ───────────────────────────────────────────────── */}
         <div
-          className="rounded-2xl p-1"
+          className="rounded-2xl"
           style={{
             background: 'linear-gradient(135deg, #4f3fa8 0%, #1aad6b 50%, #d44800 100%)',
             padding: '1.5px',
@@ -118,14 +118,14 @@ export default function HomePage() {
         >
           <div className="rounded-[14px] bg-[#16151f]">
             {/* 顶部 Tab + 展开按钮 */}
-            <div className="flex items-center justify-between px-4 pt-3 pb-1">
-              <div className="flex items-center gap-0.5">
+            <div className="flex items-center justify-between px-3 md:px-4 pt-3 pb-1">
+              <div className="flex items-center gap-0.5 overflow-x-auto">
                 {INPUT_TABS.map(t => (
                   <button
                     key={t}
                     onClick={() => setInputTab(t)}
                     className={cn(
-                      'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-colors',
+                      'flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-lg text-sm transition-colors whitespace-nowrap shrink-0',
                       inputTab === t ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white/70',
                     )}
                   >
@@ -136,13 +136,13 @@ export default function HomePage() {
                   </button>
                 ))}
               </div>
-              <button className="text-white/30 hover:text-white/70 transition-colors">
+              <button className="text-white/30 hover:text-white/70 transition-colors shrink-0 ml-2">
                 <Maximize2 className="w-4 h-4" />
               </button>
             </div>
 
             {/* 文本输入 */}
-            <div className="px-4 pb-2 flex items-start gap-3">
+            <div className="px-3 md:px-4 pb-2 flex items-start gap-2 md:gap-3">
               <div className="flex gap-1.5 pt-1 shrink-0">
                 <button className="w-8 h-8 rounded-lg bg-white/6 hover:bg-white/10 flex items-center justify-center transition-colors">
                   <ImageIcon className="w-3.5 h-3.5 text-white/60" />
@@ -156,25 +156,26 @@ export default function HomePage() {
                 value={prompt}
                 onChange={e => setPrompt(e.target.value)}
                 placeholder="描述视频画面内容和动态过程，使用 @ 指定参考图或参考视频"
-                className="flex-1 bg-transparent resize-none text-sm text-white/80 placeholder:text-white/25 outline-none min-h-[72px] leading-relaxed"
+                className="flex-1 min-w-0 bg-transparent resize-none text-sm text-white/80 placeholder:text-white/25 outline-none min-h-[72px] leading-relaxed"
               />
-              <button className="shrink-0 mt-1 flex items-center gap-1.5 text-xs text-white/40 hover:text-white/70 transition-colors whitespace-nowrap border border-white/10 rounded-lg px-2.5 py-1.5">
+              <button className="shrink-0 mt-1 hidden md:flex items-center gap-1.5 text-xs text-white/40 hover:text-white/70 transition-colors whitespace-nowrap border border-white/10 rounded-lg px-2.5 py-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
                 提示词向导
               </button>
             </div>
 
             {/* 底部工具栏 */}
-            <div className="flex items-center justify-between px-4 pb-3 pt-1 border-t border-white/5 gap-2 flex-wrap">
+            <div className="flex items-center justify-between px-3 md:px-4 pb-3 pt-1 border-t border-white/5 gap-2 flex-wrap">
               <div className="flex items-center gap-1.5 flex-wrap">
                 {/* 模型选择 */}
                 <div className="relative">
                   <button
                     onClick={() => { setModelOpen(o => !o); setResOpen(false); }}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/6 hover:bg-white/10 text-xs text-white/70 transition-colors border border-white/8"
+                    className="flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-lg bg-white/6 hover:bg-white/10 text-xs text-white/70 transition-colors border border-white/8"
                   >
                     <Sparkles className="w-3 h-3 text-emerald-400" />
-                    {model}
+                    <span className="hidden sm:inline">{model}</span>
+                    <span className="sm:hidden">模型</span>
                     <ChevronDown className="w-3 h-3" />
                   </button>
                   {modelOpen && (
@@ -193,10 +194,11 @@ export default function HomePage() {
                 <div className="relative">
                   <button
                     onClick={() => { setResOpen(o => !o); setModelOpen(false); }}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/6 hover:bg-white/10 text-xs text-white/70 transition-colors border border-white/8"
+                    className="flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-lg bg-white/6 hover:bg-white/10 text-xs text-white/70 transition-colors border border-white/8"
                   >
                     <BarChart2 className="w-3 h-3" />
-                    {resolution}
+                    <span className="hidden sm:inline">{resolution}</span>
+                    <span className="sm:hidden">尺寸</span>
                     <ChevronDown className="w-3 h-3" />
                   </button>
                   {resOpen && (
@@ -211,22 +213,19 @@ export default function HomePage() {
                   )}
                 </div>
 
-                <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/6 hover:bg-white/10 text-xs text-white/70 transition-colors border border-white/8">
+                <button className="hidden sm:flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-lg bg-white/6 hover:bg-white/10 text-xs text-white/70 transition-colors border border-white/8">
                   <Copy className="w-3 h-3" />生成 1 条
                 </button>
-                <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/6 hover:bg-white/10 text-xs text-white/70 transition-colors border border-white/8">
+                <button className="hidden sm:flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-lg bg-white/6 hover:bg-white/10 text-xs text-white/70 transition-colors border border-white/8">
                   <Sparkles className="w-3 h-3 text-amber-400" />提示词增强
-                </button>
-                <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/6 hover:bg-white/10 text-xs text-white/70 transition-colors border border-white/8">
-                  <Captions className="w-3 h-3" />预设
                 </button>
               </div>
 
-              <div className="flex items-center gap-3">
-                <span className="text-xs text-white/25">{prompt.length}/8000</span>
+              <div className="flex items-center gap-2 md:gap-3 ml-auto">
+                <span className="text-xs text-white/25 hidden sm:block">{prompt.length}/8000</span>
                 <button
                   onClick={() => navigate('/video/create')}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 hover:scale-105 active:scale-95"
+                  className="flex items-center gap-1.5 px-3 md:px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 hover:scale-105 active:scale-95"
                   style={{ background: 'linear-gradient(135deg,#22c55e,#16a34a)', color: '#fff', boxShadow: '0 0 20px rgba(34,197,94,0.35)' }}
                 >
                   <Plus className="w-3.5 h-3.5" />
@@ -304,10 +303,10 @@ export default function HomePage() {
             <button
               key={label}
               onClick={() => navigate('/ai-toolbox')}
-              className="flex items-center justify-center gap-2 py-4 hover:bg-white/5 transition-colors group"
+              className="flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2 py-3 md:py-4 hover:bg-white/5 transition-colors group"
             >
               <Icon className="w-4 h-4 shrink-0 transition-transform group-hover:scale-110" style={{ color }} />
-              <span className="text-sm text-white/60 group-hover:text-white/90 transition-colors">{label}</span>
+              <span className="text-[11px] md:text-sm text-white/60 group-hover:text-white/90 transition-colors">{label}</span>
             </button>
           ))}
         </div>

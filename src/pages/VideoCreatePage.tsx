@@ -243,7 +243,7 @@ function Step1Product({ data, onChange, onNext }: {
   const [productSearch, setProductSearch] = useState('');
   const [productLoading, setProductLoading] = useState(false);
   const [linkedProduct, setLinkedProduct] = useState<import('@/types/types').Product | null>(null);
-  const [editMode, setEditMode] = useState(!data.name);
+  const [editMode, setEditMode] = useState(true);
 
   // URL一键提炼卖点
   const [extractUrl, setExtractUrl] = useState('');

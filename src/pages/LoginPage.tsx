@@ -143,7 +143,7 @@ export default function LoginPage() {
           const { error } = await supabase.auth.signInWithPassword({ email, password: form.password });
           if (error) throw error;
           toast.success('登录成功，欢迎回来！');
-          navigate('/');
+          navigate('/home');
         } else {
           // F-01: 完整注册
           const { data, error } = await supabase.auth.signUp({ 
@@ -185,7 +185,7 @@ export default function LoginPage() {
           }
           
           toast.success('注册成功，欢迎加入！');
-          navigate('/');
+          navigate('/home');
         }
       }
     } catch (err: unknown) {
@@ -430,7 +430,7 @@ export default function LoginPage() {
                         const { error: loginErr } = await supabase.auth.signInWithPassword({ email, password: pwd });
                         if (!loginErr) {
                           toast.success(`Demo 账号登录成功：${user}`);
-                          navigate('/');
+                          navigate('/home');
                           return;
                         }
                         // 登录失败则自动注册
@@ -472,7 +472,7 @@ export default function LoginPage() {
                             throw reLoginErr;
                           }
                           toast.success(`Demo 账号已创建并登录：${user}`);
-                          navigate('/');
+                          navigate('/home');
                         } else if (loginErr.message.includes('Email not confirmed')) {
                           toast.error('该账号邮箱尚未确认，请联系管理员');
                         } else {

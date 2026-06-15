@@ -17,7 +17,7 @@ import {
   Menu, ChevronRight, Sparkles,
   Package, Users2, CreditCard, Wand2,
   Search, X, ArrowRight, Scissors, Moon, Sun,
-  Layers, Share2, Code2, Gift, LayoutGrid, Bell, House,} from 'lucide-react';
+  Layers, Share2, Code2, Gift, LayoutGrid, Bell, House, CheckCheck,} from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/db/supabase';
@@ -321,7 +321,7 @@ function TopBarQuickLink({ to, icon: Icon, label }: { to: string; icon: React.El
 }
 
 // ── 通知 Bell（顶栏）─────────────────────────────────────────────────────
-const NOTIF_PREVIEWS = [
+const NOTIF_INITIAL = [
   { id: '1', title: '视频生成完成', body: '「烟酰胺精华28天变白挑战」已生成完毕', time: '2分钟前', unread: true },
   { id: '2', title: '限时积分奖励', body: '5月大促期间生成视频可获双倍积分', time: '1小时前', unread: true },
   { id: '3', title: '系统更新 v42', body: 'AI工具箱升级、数字人库融合视频模板', time: '5小时前', unread: false },
@@ -329,7 +329,17 @@ const NOTIF_PREVIEWS = [
 
 function TopBarNotificationBell() {
   const navigate = useNavigate();
-  const unread = NOTIF_PREVIEWS.filter(n => n.unread).length;
+  const [notifs, setNotifs] = useState(NOTIF_INITIAL);
+  const unread = notifs.filter(n => n.unread).length;
+
+  const markAllRead = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setNotifs(prev => prev.map(n => ({ ...n, unread: false })));
+  };
+
+  const markOneRead = (id: string) => {
+    setNotifs(prev => prev.map(n => n.id === id ? { ...n, unread: false } : n));
+  };
 
   return (
     <DropdownMenu>
@@ -350,16 +360,30 @@ function TopBarNotificationBell() {
               <Badge className="h-4 px-1.5 text-[10px] bg-destructive text-destructive-foreground">{unread}</Badge>
             )}
           </div>
-          <button
-            onClick={() => navigate('/notifications')}
-            className="text-xs text-primary hover:underline flex items-center gap-0.5"
-          >
-            查看全部<ArrowRight className="w-3 h-3" />
-          </button>
+          <div className="flex items-center gap-2">
+            {unread > 0 && (
+              <button
+                onClick={markAllRead}
+                className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-0.5"
+              >
+                <CheckCheck className="w-3 h-3" />一键已读
+              </button>
+            )}
+            <button
+              onClick={() => navigate('/notifications')}
+              className="text-xs text-primary hover:underline flex items-center gap-0.5"
+            >
+              全部<ArrowRight className="w-3 h-3" />
+            </button>
+          </div>
         </div>
         <div className="divide-y divide-border/30">
-          {NOTIF_PREVIEWS.map(n => (
-            <div key={n.id} className={cn('px-4 py-3 hover:bg-muted/50 cursor-pointer transition-colors', n.unread && 'bg-primary/3')}>
+          {notifs.map(n => (
+            <div
+              key={n.id}
+              onClick={() => markOneRead(n.id)}
+              className={cn('px-4 py-3 hover:bg-muted/50 cursor-pointer transition-colors', n.unread && 'bg-primary/3')}
+            >
               <div className="flex items-start gap-2">
                 {n.unread && <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0 mt-1.5" />}
                 <div className={cn('flex-1 min-w-0', !n.unread && 'pl-3.5')}>
