@@ -254,7 +254,7 @@ function ImagesSection({ form, imgUrlInput, setImgUrlInput, imgInputRef, addImag
   form: FormState;
   imgUrlInput: string;
   setImgUrlInput: (v: string) => void;
-  imgInputRef: React.RefObject<HTMLInputElement>;
+  imgInputRef: React.RefObject<HTMLInputElement | null>;
   addImageUrl: () => void;
   removeImage: (i: number) => void;
   setCoverImage: (url: string) => void;

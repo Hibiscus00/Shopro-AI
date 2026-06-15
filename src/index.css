@@ -479,3 +479,23 @@
 .blur-in {
   animation: blur-in 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
 }
+
+/* ── 评价无限滚动 marquee ── */
+@keyframes marquee-left {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+@keyframes marquee-right {
+  0%   { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
+}
+.animate-marquee-left {
+  animation: marquee-left 32s linear infinite;
+}
+.animate-marquee-right {
+  animation: marquee-right 36s linear infinite;
+}
+.animate-marquee-left:hover,
+.animate-marquee-right:hover {
+  animation-play-state: paused;
+}

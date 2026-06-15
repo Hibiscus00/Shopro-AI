@@ -134,6 +134,9 @@ const STORYBOARD_TEMPLATES = [
     name: '痛点解决型',
     description: '先展示痛点，再引出产品解决方案，适合功能型产品',
     cover: 'https://miaoda-site-img.cdn.bcebos.com/images/baidu_image_search_12f9ab35-d9b1-4338-bcb6-d7cde173f07a.jpg',
+    accentColor: '#f97316',
+    accentBg: 'rgba(249,115,22,0.12)',
+    accentBorder: 'rgba(249,115,22,0.6)',
     shots: [
       { id: 's1', order: 1, type: '开场钩子', description: '展示用户痛点场景', duration: 3, text_overlay: '你是否有这样的困扰？', transition: 'fade' },
       { id: 's2', order: 2, type: '产品亮相', description: '产品特写镜头', duration: 4, text_overlay: '全新解决方案来了', transition: 'zoom' },
@@ -147,6 +150,9 @@ const STORYBOARD_TEMPLATES = [
     name: '开箱测评型',
     description: '真实开箱体验，增强信任感，适合高价值产品',
     cover: 'https://miaoda-site-img.cdn.bcebos.com/images/baidu_image_search_39220fe7-a19a-4045-bba3-936910a9ed2b.jpg',
+    accentColor: '#3b82f6',
+    accentBg: 'rgba(59,130,246,0.12)',
+    accentBorder: 'rgba(59,130,246,0.6)',
     shots: [
       { id: 'u1', order: 1, type: '封面吸引', description: '产品外观展示', duration: 3, text_overlay: '收到这个超惊喜！', transition: 'fade' },
       { id: 'u2', order: 2, type: '开箱过程', description: '开箱细节展示', duration: 5, text_overlay: '开箱实录', transition: 'slide' },
@@ -160,6 +166,9 @@ const STORYBOARD_TEMPLATES = [
     name: '反差反转型',
     description: '通过前后的强烈反差吸引眼球，适合美妆、服饰等',
     cover: 'https://miaoda-site-img.cdn.bcebos.com/images/baidu_image_search_47f5b277-c955-4429-adfb-b3699d3d9d6f.jpg',
+    accentColor: '#a855f7',
+    accentBg: 'rgba(168,85,247,0.12)',
+    accentBorder: 'rgba(168,85,247,0.6)',
     shots: [
       { id: 'c1', order: 1, type: '低谷现状', description: '展示极差的现状或素颜', duration: 3, text_overlay: '以前的我...', transition: 'fade' },
       { id: 'c2', order: 2, type: '惊艳反转', description: '使用产品后的绝佳效果', duration: 4, text_overlay: '直到遇到了它！', transition: 'flash_white' },
@@ -173,6 +182,9 @@ const STORYBOARD_TEMPLATES = [
     name: '教程干货型',
     description: '通过提供价值吸引目标受众，适合教育、软件、工具',
     cover: 'https://miaoda-site-img.cdn.bcebos.com/images/baidu_image_search_e43a299a-588f-4d27-8e1f-43fd69c3e3d7.jpg',
+    accentColor: '#22c55e',
+    accentBg: 'rgba(34,197,94,0.12)',
+    accentBorder: 'rgba(34,197,94,0.6)',
     shots: [
       { id: 't1', order: 1, type: '抛出问题', description: '提出受众关心的问题', duration: 3, text_overlay: '还在用笨办法？', transition: 'fade' },
       { id: 't2', order: 2, type: '引出方案', description: '展示产品作为工具', duration: 3, text_overlay: '试试这个神器', transition: 'zoom' },
@@ -1015,23 +1027,48 @@ function Step3Storyboard({ shots, onShotsChange, onNext, onPrev, productData }: 
         <div className="space-y-3">
           <p className="text-sm font-medium text-muted-foreground">选择分镜模板快速开始，或让AI自动生成</p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {STORYBOARD_TEMPLATES.map(tpl => (
-              <button key={tpl.id} onClick={() => handleSelectTemplate(tpl)}
-                className="relative text-left rounded-xl border-2 border-border hover:border-primary transition-all duration-200 overflow-hidden group min-h-[110px]">
-                {/* 封面背景图 */}
-                {tpl.cover && (
-                  <img src={tpl.cover} alt={tpl.name} className="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-opacity duration-200" />
-                )}
-                {/* 渐变遮罩 */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent group-hover:from-primary/60 group-hover:via-primary/20 transition-colors duration-200" />
-                {/* 内容 */}
-                <div className="relative p-4 flex flex-col justify-end h-full">
-                  <p className="font-semibold text-sm text-white text-balance drop-shadow">{tpl.name}</p>
-                  <p className="text-xs text-white/75 mt-1 text-pretty line-clamp-2">{tpl.description}</p>
-                  <p className="text-xs text-white/50 mt-1.5">{tpl.shots.length} 个镜头</p>
-                </div>
-              </button>
-            ))}
+            {STORYBOARD_TEMPLATES.map(tpl => {
+              const isSelected = shots.length > 0 && shots[0]?.id === tpl.shots[0]?.id;
+              return (
+                <button
+                  key={tpl.id}
+                  onClick={() => handleSelectTemplate(tpl)}
+                  className="relative text-left rounded-xl border-2 overflow-hidden transition-all duration-200 min-h-[110px] group"
+                  style={{
+                    borderColor: isSelected ? tpl.accentColor : 'hsl(var(--border))',
+                    background: isSelected ? tpl.accentBg : 'hsl(var(--muted)/0.4)',
+                    boxShadow: isSelected ? `0 0 0 1px ${tpl.accentBorder}, 0 4px 20px ${tpl.accentBg}` : undefined,
+                  }}
+                >
+                  {/* 封面图，无遮罩 */}
+                  {tpl.cover && (
+                    <img
+                      src={tpl.cover}
+                      alt={tpl.name}
+                      className="absolute right-0 top-0 h-full w-32 object-cover"
+                      style={{ maskImage: 'linear-gradient(to left, rgba(0,0,0,0.5) 0%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to left, rgba(0,0,0,0.5) 0%, transparent 100%)' }}
+                    />
+                  )}
+                  {/* 选中态彩色左边框 */}
+                  {isSelected && (
+                    <div className="absolute left-0 top-0 bottom-0 w-1 rounded-l-xl" style={{ background: tpl.accentColor }} />
+                  )}
+                  {/* 内容 */}
+                  <div className="relative p-4 pr-28 flex flex-col h-full justify-between">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <p className="font-semibold text-sm text-balance" style={{ color: isSelected ? tpl.accentColor : undefined }}>{tpl.name}</p>
+                        {isSelected && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium text-white" style={{ background: tpl.accentColor }}>已选</span>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1 text-pretty line-clamp-2">{tpl.description}</p>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-2">{tpl.shots.length} 个镜头</p>
+                  </div>
+                </button>
+              );
+            })}
           </div>
           <Button variant="outline" onClick={handleAiGenerate} disabled={generating} className="w-full">
             {generating ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Sparkles className="w-4 h-4 mr-2" />}

@@ -1,5 +1,6 @@
 import type { RouteConfig } from '@/types/route';
 import LoginPage from '@/pages/LoginPage';
+import HomePage from '@/pages/HomePage';
 import DashboardPage from '@/pages/DashboardPage';
 import VideoCreatePage from '@/pages/VideoCreatePage';
 import VideoEditPage from '@/pages/VideoEditPage';
@@ -15,6 +16,7 @@ import BatchCreatePage from '@/pages/BatchCreatePage';
 
 const routes: RouteConfig[] = [
   { path: '/login', component: LoginPage, isPublic: true },
+  { path: '/home', component: HomePage },
   { path: '/', component: DashboardPage },
   { path: '/video/create', component: VideoCreatePage },
   { path: '/video/create/:projectId', component: VideoCreatePage },

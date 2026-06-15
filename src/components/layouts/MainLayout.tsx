@@ -17,7 +17,7 @@ import {
   Menu, ChevronRight, Sparkles,
   Package, Users2, CreditCard, Wand2,
   Search, X, ArrowRight, Scissors, Moon, Sun,
-  Layers, Share2, Code2, Gift, LayoutGrid, Bell,} from 'lucide-react';
+  Layers, Share2, Code2, Gift, LayoutGrid, Bell, House,} from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/db/supabase';
@@ -46,6 +46,7 @@ const navGroups = [
   {
     label: '主要功能',
     items: [
+      { path: '/home',          label: '首页',       icon: House },
       { path: '/',              label: '工作台',     icon: LayoutDashboard },
       { path: '/products',      label: '商品管理',   icon: Package },
       { path: '/script',        label: 'AI脚本生成', icon: Wand2 },

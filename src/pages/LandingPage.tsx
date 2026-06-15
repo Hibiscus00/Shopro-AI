@@ -144,6 +144,52 @@ function SectionTitle({ tag, title, sub }: { tag: string; title: React.ReactNode
   );
 }
 
+// ── 评价卡片组件 ──────────────────────────────────────────────────────────
+type ReviewItem = {
+  name: string; role: string; avatar: string; avatarColor: string;
+  rating: number; text: string; tags: string[]; duration: string;
+};
+function ReviewCard({ r }: { r: ReviewItem }) {
+  return (
+    <div
+      className="shrink-0 w-72 rounded-2xl p-5 flex flex-col gap-3 select-none"
+      style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)' }}
+    >
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div
+            className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
+            style={{ background: r.avatarColor + '33', color: r.avatarColor, border: `1.5px solid ${r.avatarColor}55` }}
+          >
+            {r.avatar}
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-white leading-tight">{r.name}</p>
+            <p className="text-xs text-white/45 leading-tight">{r.role}</p>
+          </div>
+        </div>
+        <div className="flex gap-0.5 shrink-0">
+          {Array.from({ length: r.rating }).map((_, i) => (
+            <Star key={i} className="w-3 h-3 fill-current" style={{ color: '#FFB347' }} />
+          ))}
+        </div>
+      </div>
+      <p className="text-sm text-white/70 leading-relaxed text-pretty line-clamp-3">
+        <span className="text-2xl leading-none mr-1 font-serif" style={{ color: '#FF6B00', opacity: 0.7 }}>"</span>
+        {r.text}
+      </p>
+      <div className="flex items-center justify-between gap-2 mt-auto pt-1 border-t border-white/6">
+        <div className="flex gap-1.5 flex-wrap">
+          {r.tags.map(tag => (
+            <span key={tag} className="text-[10px] px-2 py-0.5 rounded-full bg-white/7 text-white/50">{tag}</span>
+          ))}
+        </div>
+        <span className="text-[10px] text-white/35 shrink-0">{r.duration}</span>
+      </div>
+    </div>
+  );
+}
+
 // ── 雷达图数据 ────────────────────────────────────────────────────────────
 const radarData = [
   { subject: '生成效率', 本产品: 95, 传统制作: 20, 基础AI工具: 60 },
@@ -157,39 +203,104 @@ const radarData = [
 // ── 用户评价数据 ──────────────────────────────────────────────────────────
 const reviews = [
   {
-    name: '张磊 · 跨境电商运营',
+    name: '张磊',
+    role: '跨境电商运营',
     avatar: 'ZL',
+    avatarColor: '#f97316',
     rating: 5,
     text: '以前一条带货视频要花 2 天找剪辑师，现在 20 分钟搞定，效果还更好！复购率明显提升，简直不敢相信。',
-    tag: '节省 80% 时间',
+    tags: ['效率工具', '视频生成'],
+    duration: '使用 4 个月',
   },
   {
-    name: '刘欣 · MCN 内容负责人',
+    name: '刘欣',
+    role: 'MCN 内容负责人',
     avatar: 'LX',
+    avatarColor: '#8b5cf6',
     rating: 5,
     text: 'AI 脚本生成太智能了，分镜结构直接能用，改改细节就出片。管理 10 个账号再也不崩溃了，效率翻了 5 倍。',
-    tag: '效率提升 5x',
+    tags: ['AI脚本', '批量生产'],
+    duration: '使用 6 个月',
   },
   {
-    name: '王浩 · TikTok 个人卖家',
+    name: '王浩',
+    role: 'TikTok 个人卖家',
     avatar: 'WH',
+    avatarColor: '#3b82f6',
     rating: 5,
-    text: '爆款风格复刻功能是我用过最厉害的，把竞品爆款的节奏和剪辑风格直接复刻出来，第一条视频播放量就破了 10 万。',
-    tag: '播放量破10万',
+    text: '爆款风格复刻功能是我用过最厉害的，把竞品爆款节奏和剪辑风格直接复刻，第一条视频播放量就破 10 万。',
+    tags: ['爆款复刻', 'TikTok'],
+    duration: '使用 3 个月',
   },
   {
-    name: '陈雪 · 品牌电商总监',
+    name: '陈雪',
+    role: '品牌电商总监',
     avatar: 'CX',
+    avatarColor: '#ec4899',
     rating: 5,
-    text: '流量分析给了我们精准的优化建议，完播率从 28% 提升到了 61%，带货转化率也跟着涨了 40%，数据说话。',
-    tag: '完播率提升117%',
+    text: '流量分析给了精准优化建议，完播率从 28% 提升到 61%，带货转化率也跟着涨了 40%，数据说话。',
+    tags: ['数据分析', '转化率'],
+    duration: '使用 8 个月',
   },
   {
-    name: '李磊 · 独立创作者',
+    name: '李磊',
+    role: '独立创作者',
     avatar: 'LL',
+    avatarColor: '#22c55e',
     rating: 5,
     text: '零剪辑基础也能用，AI 帮我把商品卖点整理成完整脚本，知识库会记住我的风格偏好，越用越顺手。',
-    tag: '零基础上手',
+    tags: ['零基础', '个人卖家'],
+    duration: '使用 2 个月',
+  },
+  {
+    name: '赵阳',
+    role: '服装品牌主理人',
+    avatar: 'ZY',
+    avatarColor: '#f59e0b',
+    rating: 5,
+    text: '换装试穿功能帮我们省了大量外拍预算，上新款直接 AI 试穿出效果图，客户转化率提升了将近一倍。',
+    tags: ['换装试穿', '服装电商'],
+    duration: '使用 5 个月',
+  },
+  {
+    name: '孙婷',
+    role: '美妆博主',
+    avatar: 'ST',
+    avatarColor: '#e11d48',
+    rating: 5,
+    text: '去字幕、画质提升这些小工具太实用了，配合 AI 配音一起用，内容质感直接提升一个档次。',
+    tags: ['美妆', '内容创作'],
+    duration: '使用 1 年',
+  },
+  {
+    name: '吴鹏',
+    role: '3C 数码运营',
+    avatar: 'WP',
+    avatarColor: '#0ea5e9',
+    rating: 5,
+    text: '商品套图一键生成，省掉了请摄影师的费用。A+ 详情图效果专业，上架转化比之前高出 35%。',
+    tags: ['商品图', '3C数码'],
+    duration: '使用 7 个月',
+  },
+  {
+    name: '林佳',
+    role: '直播带货负责人',
+    avatar: 'LJ',
+    avatarColor: '#10b981',
+    rating: 5,
+    text: '直播切片自动提取爆款片段，加上字幕和背景音乐，发出去的短视频播放量远超手动剪辑的版本。',
+    tags: ['直播切片', '短视频'],
+    duration: '使用 9 个月',
+  },
+  {
+    name: '郑凯',
+    role: '跨境品牌运营',
+    avatar: 'ZK',
+    avatarColor: '#6366f1',
+    rating: 5,
+    text: '多语言视频翻译功能帮我们快速进入海外市场，不同语种同步发布，运营效率提升了好几倍。',
+    tags: ['跨境出海', '多语言'],
+    duration: '使用 6 个月',
   },
 ];
 
@@ -337,10 +448,8 @@ const stats = [
 // ── 主组件 ────────────────────────────────────────────────────────────────
 export default function LandingPage() {
   const navigate = useNavigate();
-  const [reviewIdx, setReviewIdx] = useState(0);
   const [navOpen, setNavOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const autoRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // 导航栏滚动透明→不透明
   useEffect(() => {
@@ -348,23 +457,6 @@ export default function LandingPage() {
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
-
-  // 自动轮播
-  const startAuto = useCallback(() => {
-    autoRef.current = setInterval(() => {
-      setReviewIdx(i => (i + 1) % reviews.length);
-    }, 4000);
-  }, []);
-  const stopAuto = useCallback(() => {
-    if (autoRef.current) clearInterval(autoRef.current);
-  }, []);
-  useEffect(() => {
-    startAuto();
-    return stopAuto;
-  }, [startAuto, stopAuto]);
-
-  const prevReview = () => { stopAuto(); setReviewIdx(i => (i - 1 + reviews.length) % reviews.length); startAuto(); };
-  const nextReview = () => { stopAuto(); setReviewIdx(i => (i + 1) % reviews.length); startAuto(); };
 
   const goToApp = () => navigate('/login');
 
@@ -707,104 +799,31 @@ export default function LandingPage() {
       </section>
 
       {/* ══════════════════════════════════════════════════════
-          用户评价轮播
+          用户评价 – 双排无限滚动
       ══════════════════════════════════════════════════════ */}
-      <section id="用户评价" className="py-24" style={{ background: 'rgba(255,255,255,0.015)' }}>
-        <div className="max-w-4xl mx-auto px-4 md:px-8">
+      <section id="用户评价" className="py-24 overflow-hidden" style={{ background: 'rgba(255,255,255,0.015)' }}>
+        <div className="max-w-6xl mx-auto px-4 md:px-8 mb-12">
           <SectionTitle
             tag="用户评价"
             title={<>真实用户<br /><span style={{ color: '#FF6B00' }}>亲口说</span></>}
             sub="来自 8,500+ 真实商家的反馈，他们的成绩就是我们的骄傲"
           />
+        </div>
 
-          {/* 主轮播卡片 */}
-          <div className="relative">
-            <div className="rounded-2xl p-8 md:p-10 text-center transition-all duration-500"
-              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
-              {/* 头像 */}
-              <div className="flex justify-center mb-6">
-                <div className="w-16 h-16 rounded-full flex items-center justify-center text-xl font-bold shadow-lg"
-                  style={{ background: 'linear-gradient(135deg, #FF6B00, #ff9500)', color: '#fff' }}>
-                  {reviews[reviewIdx].avatar}
-                </div>
-              </div>
-
-              {/* 星级 */}
-              <div className="flex justify-center gap-1 mb-4">
-                {Array.from({ length: reviews[reviewIdx].rating }).map((_, i) => (
-                  <Star key={i} className="w-4 h-4 fill-current" style={{ color: '#FFB347' }} />
-                ))}
-              </div>
-
-              {/* 评价内容 */}
-              <blockquote className="text-lg md:text-xl text-white/80 leading-relaxed mb-6 max-w-2xl mx-auto text-pretty italic">
-                "{reviews[reviewIdx].text}"
-              </blockquote>
-
-              {/* 姓名 & 标签 */}
-              <div className="flex items-center justify-center gap-3 flex-wrap">
-                <span className="text-white/60 font-medium">{reviews[reviewIdx].name}</span>
-                <span className="text-xs px-2.5 py-1 rounded-full font-semibold"
-                  style={{ background: 'rgba(0,229,153,0.12)', color: '#00E599', border: '1px solid rgba(0,229,153,0.25)' }}>
-                  {reviews[reviewIdx].tag}
-                </span>
-              </div>
-            </div>
-
-            {/* 翻页按钮 */}
-            <button onClick={prevReview}
-              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 md:-translate-x-6 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110"
-              style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}>
-              <ChevronLeft className="w-5 h-5 text-white/60" />
-            </button>
-            <button onClick={nextReview}
-              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 md:translate-x-6 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110"
-              style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}>
-              <ChevronRight className="w-5 h-5 text-white/60" />
-            </button>
-          </div>
-
-          {/* 圆点指示器 */}
-          <div className="flex justify-center gap-2 mt-6">
-            {reviews.map((_, i) => (
-              <button key={i}
-                onClick={() => { stopAuto(); setReviewIdx(i); startAuto(); }}
-                className="rounded-full transition-all duration-300"
-                style={{
-                  width: i === reviewIdx ? 24 : 8,
-                  height: 8,
-                  background: i === reviewIdx ? '#FF6B00' : 'rgba(255,255,255,0.2)',
-                }}
-              />
+        {/* 上排：向左滚动 */}
+        <div className="relative mb-4">
+          <div className="flex gap-4 animate-marquee-left" style={{ width: 'max-content' }}>
+            {[...reviews.slice(0, 5), ...reviews.slice(0, 5)].map((r, i) => (
+              <ReviewCard key={`top-${i}`} r={r} />
             ))}
           </div>
+        </div>
 
-          {/* 小评价卡缩略 */}
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mt-8">
-            {reviews.map((r, i) => (
-              <button key={i}
-                onClick={() => { stopAuto(); setReviewIdx(i); startAuto(); }}
-                className={cn(
-                  'rounded-xl p-3 text-left transition-all duration-200',
-                  i === reviewIdx
-                    ? 'border-opacity-100 scale-[1.03]'
-                    : 'opacity-50 hover:opacity-80'
-                )}
-                style={{
-                  background: 'rgba(255,255,255,0.03)',
-                  border: `1px solid ${i === reviewIdx ? 'rgba(255,107,0,0.5)' : 'rgba(255,255,255,0.07)'}`,
-                }}>
-                <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold mb-2"
-                  style={{ background: 'rgba(255,107,0,0.2)', color: '#FF6B00' }}>
-                  {r.avatar}
-                </div>
-                <p className="text-[11px] text-white/60 truncate">{r.name.split(' · ')[0]}</p>
-                <div className="flex gap-0.5 mt-1">
-                  {Array.from({ length: r.rating }).map((_, j) => (
-                    <Star key={j} className="w-2.5 h-2.5 fill-current" style={{ color: '#FFB347' }} />
-                  ))}
-                </div>
-              </button>
+        {/* 下排：向右滚动 */}
+        <div className="relative">
+          <div className="flex gap-4 animate-marquee-right" style={{ width: 'max-content' }}>
+            {[...reviews.slice(5), ...reviews.slice(5)].map((r, i) => (
+              <ReviewCard key={`bot-${i}`} r={r} />
             ))}
           </div>
         </div>

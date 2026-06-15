@@ -32,3 +32,4 @@ history/*.json
 
 .sync
 .vite_cache
+package.json.[0-9]*
