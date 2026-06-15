@@ -42,6 +42,24 @@ function useThemePersist() {
   return { theme, setTheme };
 }
 
+// AI工具箱二级菜单条目
+const AI_TOOLBOX_ITEMS = [
+  { label: 'AI 脚本生成',    badge: '热门', badgeColor: '#f97316', desc: '四层流水线自动生成带货分镜脚本' },
+  { label: '爆款风格复刻',   badge: '热门', badgeColor: '#f97316', desc: '一键复刻高转化内容风格' },
+  { label: '竞品爆款分析',   badge: '24h',  badgeColor: '#3b82f6', desc: '抓取竞品爆款视频策略' },
+  { label: '流量分析',       badge: '实时', badgeColor: '#22c55e', desc: '实时追踪完播率与转化漏斗' },
+  { label: '多语言翻译',     badge: '多语种', badgeColor: '#8b5cf6', desc: '一键翻译英/日/韩/泰等语言' },
+  { label: '数字人克隆',     badge: 'AI',   badgeColor: '#ec4899', desc: '上传照片一键克隆数字人主播' },
+  { label: '直播高光切片',   badge: 'NEW',  badgeColor: '#ef4444', desc: 'AI自动识别直播精华' },
+  { label: '知识库',         badge: '语义', badgeColor: '#14b8a6', desc: '沉淀带货话术，AI语义检索' },
+  { label: '情绪NLP分析',    badge: 'NLP',  badgeColor: '#6366f1', desc: '深度分析评论情感倾向' },
+  { label: '爆款特征库',     badge: '持续更新', badgeColor: '#f59e0b', desc: '沉淀千万级爆款特征' },
+  { label: 'AI个性化微调',   badge: 'Pro',  badgeColor: '#7c3aed', desc: '基于账号风格私有化训练' },
+  { label: 'AI卖点提炼',     badge: '一键', badgeColor: '#f97316', desc: '输入商品链接自动提炼卖点' },
+  { label: '批量生成工作台', badge: '批量', badgeColor: '#0ea5e9', desc: '批量导入商品一次产出多套视频' },
+  { label: '跨平台一键发布', badge: '4平台', badgeColor: '#22c55e', desc: '抖音/快手/小红书/TikTok分发' },
+];
+
 const navGroups = [
   {
     label: '主要功能',
@@ -53,8 +71,8 @@ const navGroups = [
       { path: '/avatars',       label: '数字人库',   icon: Users2 },
       { path: '/video/create',  label: '生成视频',   icon: Video },
       { path: '/video/edit',    label: '视频剪辑',   icon: Scissors },
-      { path: '/ai-toolbox',    label: 'AI工具箱',   icon: LayoutGrid },
       { path: '/works',         label: '作品管理',   icon: FolderOpen },
+      // AI工具箱通过 AIToolboxNavItem 单独渲染
       { path: '/export-formats', label: '跨平台导出', icon: Layers },
       { path: '/data-feedback',  label: '投放数据回流', icon: Share2 },
     ],
@@ -223,11 +241,60 @@ function GlobalSearch() {
   );
 }
 
+// AI工具箱二级子菜单导航项
+function AIToolboxNavItem({ onNavClick }: { onNavClick?: () => void }) {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(location.pathname.startsWith('/ai-toolbox'));
+  const isActive = location.pathname.startsWith('/ai-toolbox');
+
+  return (
+    <div>
+      {/* 主按钮 */}
+      <button
+        onClick={() => setOpen(v => !v)}
+        className={cn(
+          'w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 group',
+          isActive
+            ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+            : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground',
+        )}
+      >
+        <LayoutGrid className={cn('w-4 h-4 shrink-0 transition-colors', isActive ? 'text-primary' : 'text-sidebar-foreground/50 group-hover:text-sidebar-foreground')} />
+        <span className="flex-1 text-left">AI工具箱</span>
+        <ChevronRight className={cn('w-3.5 h-3.5 shrink-0 transition-transform duration-200 text-sidebar-foreground/40', open && 'rotate-90')} />
+      </button>
+
+      {/* 二级子菜单 */}
+      {open && (
+        <div className="ml-3 mt-0.5 border-l border-sidebar-border/50 pl-3 space-y-0.5 pb-1">
+          {AI_TOOLBOX_ITEMS.map((item) => (
+            <button
+              key={item.label}
+              onClick={() => { navigate('/ai-toolbox'); onNavClick?.(); }}
+              className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-xs text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 transition-all duration-100 group text-left"
+            >
+              <span className="flex-1 truncate">{item.label}</span>
+              <span
+                className="shrink-0 text-[9px] font-bold px-1.5 py-0.5 rounded-full leading-none"
+                style={{ background: `${item.badgeColor}22`, color: item.badgeColor, border: `1px solid ${item.badgeColor}44` }}
+              >
+                {item.badge}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function NavItem({ path, label, icon: Icon, active, onClick }: {
   path: string; label: string; icon: typeof LayoutDashboard; active: boolean; onClick?: () => void;
 }) {
   return (
     <Link to={path} onClick={onClick}>
+
       <div className={cn(
         'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group',
         active
@@ -287,11 +354,13 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
               {group.items.map((item) => (
                 <NavItem key={item.path} {...item} active={isActive(item.path)} onClick={onNavClick} />
               ))}
+              {/* 在「作品管理」后插入 AI工具箱 二级菜单 */}
+              {group.label === '主要功能' && (
+                <AIToolboxNavItem onNavClick={onNavClick} />
+              )}
             </div>
           </div>
         ))}
-
-        {/* 用户区已移至右上角 TopBarUserMenu，侧边栏不再显示 */}
       </nav>
     </div>
   );
