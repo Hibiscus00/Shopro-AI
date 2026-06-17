@@ -21,7 +21,7 @@ const stats = [
     icon: <Users className="w-8 h-8" />,
     value: "10K+",
     label: "满意创作者",
-    description: "超过1万名创作者每周使用脚本大师",
+    description: "超过1万名创作者每周使用本平台",
   },
 ];
 

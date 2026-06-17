@@ -1751,23 +1751,7 @@ export default function VideoCreatePage() {
   };
 
   return (
-    <div className="p-4 md:p-6 space-y-5 max-w-4xl mx-auto animate-fade-in">
-      {/* 草稿恢复提示 */}
-      {draftRestored && (
-        <div className="flex items-center gap-3 px-4 py-3 rounded-lg bg-warning/10 border border-warning/30 text-sm">
-          <Info className="w-4 h-4 text-warning shrink-0" />
-          <span className="flex-1 text-warning">已恢复上次未完成的视频项目草稿（步骤 {draft.step}）</span>
-          <button onClick={() => { clearDraft(); setDraftRestored(false); setProductData({}); setPromptConfig({ duration: 30 }); setStep(1); }} className="text-warning hover:text-warning/70">
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-      )}
-      {/* 页头 */}
-      <div>
-        <h1 className="text-xl md:text-2xl font-bold text-balance">新建视频项目</h1>
-        <p className="text-sm text-muted-foreground mt-1">{stepTitles[step]}</p>
-      </div>
-
+    <div className="p-0 space-y-5 max-w-full mx-auto animate-fade-in">
       {/* 步骤指示器 */}
       <StepIndicator currentStep={step} />
 

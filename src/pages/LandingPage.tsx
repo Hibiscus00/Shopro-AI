@@ -478,7 +478,7 @@ export default function LandingPage() {
               <Sparkles className="w-4 h-4 text-white" />
             </div>
             <span className="font-bold text-white text-sm md:text-base tracking-tight">
-              电商AIGC带货视频
+              Shopro-电商 AIGC 带货视频
             </span>
           </div>
           <div className="hidden md:flex items-center gap-8 text-sm text-white/60">
@@ -958,9 +958,9 @@ export default function LandingPage() {
                 style={{ background: 'linear-gradient(135deg, #FF6B00, #FFB347)' }}>
                 <Sparkles className="w-3 h-3 text-white" />
               </div>
-              <span className="text-white/40 font-medium">电商AIGC带货视频生成系统</span>
+              <span className="text-white/40 font-medium">Shopro-电商 AIGC 带货视频</span>
             </div>
-            <p>© 2025 电商AIGC. 保留所有权利</p>
+            <p>© 2025 Shopro. 保留所有权利</p>
           </div>
         </div>
       </footer>

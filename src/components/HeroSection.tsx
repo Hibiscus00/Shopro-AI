@@ -66,7 +66,7 @@ const HeroSection: React.FC = () => {
           </motion.h1>
           
           <motion.p variants={item} className="text-lg md:text-xl text-scriptgenius-black/70 max-w-2xl mx-auto mb-8">
-            脚本大师.ai生成前沿脚本，以独特且令人难忘的叙事风格吸引您的受众。
+            Shopro-电商 AIGC 带货视频生成前沿脚本，以独特且令人难忘的叙事风格吸引您的受众。
           </motion.p>
           
           <motion.div variants={item} className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
@@ -112,7 +112,7 @@ const HeroSection: React.FC = () => {
                   <div className="flex justify-between items-center mb-4">
                     <div className="flex items-center space-x-2">
                       <div className="w-4 h-4 rounded-full bg-scriptgenius-blue"></div>
-                      <span className="text-sm font-medium">脚本大师.ai</span>
+                      <span className="text-sm font-medium">Shopro-电商 AIGC 带货视频</span>
                     </div>
                     <div className="text-xs font-medium text-scriptgenius-blue bg-scriptgenius-blue/10 px-3 py-1 rounded-full shadow-soft backdrop-blur-sm">
                       电影级脚本 · 前沿技术

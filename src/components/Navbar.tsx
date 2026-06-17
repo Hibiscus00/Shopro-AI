@@ -28,7 +28,7 @@ const Navbar: React.FC = () => {
           <a href="/" className="flex items-center space-x-2">
             <LogoIcon className="w-8 h-8" />
             <span className="text-xl font-bold text-scriptgenius-black">
-              脚本大师<span className="text-scriptgenius-blue">.ai</span>
+              Shopro-电商 AIGC 带货视频
             </span>
           </a>
         </div>

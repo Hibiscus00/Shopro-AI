@@ -11,7 +11,7 @@ interface Testimonial {
 const testimonials: Testimonial[] = [{
   name: "张明轩",
   role: "科技博主",
-  content: "借助脚本大师，我能够用有效的钩子构建我的视频。结果：我的留存率提高了24%，收入也随之增长！",
+  content: "借助本平台，我能够用有效的钩子构建我的视频。结果：我的留存率提高了24%，收入也随之增长！",
   platform: "抖音",
   metrics: "观看时长+38%",
   avatar: "张"
@@ -25,7 +25,7 @@ const testimonials: Testimonial[] = [{
 }, {
   name: "王商杰",
   role: "商业教练",
-  content: "我过去花费数小时编写脚本。脚本大师为我节省了宝贵时间，同时让我的视频更加动态和引人入胜。",
+  content: "我过去花费数小时编写脚本。该系统为我节省了宝贵时间，同时让我的视频更加动态和引人入胜。",
   platform: "Instagram",
   metrics: "3个月内粉丝+64%",
   avatar: "王"
@@ -41,7 +41,7 @@ const TestimonialSection: React.FC = () => {
             提升<span className="text-gradient">表现</span>的创作者
           </h2>
           <p className="text-lg text-scriptgenius-black/70 max-w-2xl mx-auto">
-            了解像您一样的创作者如何通过脚本大师.ai转变内容并增加受众
+            了解像您一样的创作者如何通过本系统转变内容并增加受众
           </p>
         </div>
 

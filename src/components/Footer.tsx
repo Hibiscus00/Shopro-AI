@@ -5,7 +5,7 @@ const Footer = () => {
       <div className="container-custom">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="col-span-1 md:col-span-2">
-            <h3 className="text-xl font-bold mb-4 text-scriptgenius-blue">脚本大师</h3>
+            <h3 className="text-xl font-bold mb-4 text-scriptgenius-blue">Shopro-电商 AIGC 带货视频</h3>
             <p className="text-sm text-muted-foreground mb-4">为抖音，小红书快速生成优化脚本，借助我们的AI技术。</p>
             
           </div>

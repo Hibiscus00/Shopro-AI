@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 // FP-01: 路由级懒加载
 const LoginPage       = lazy(() => import("@/pages/LoginPage"));
 const LandingPage     = lazy(() => import("@/pages/LandingPage"));
+const HomePage        = lazy(() => import("@/pages/HomePage"));
 const DashboardPage   = lazy(() => import("@/pages/DashboardPage"));
 const VideoCreatePage = lazy(() => import("@/pages/VideoCreatePage"));
 const WorksPage       = lazy(() => import("@/pages/WorksPage"));
@@ -131,9 +132,10 @@ function AppRoutes() {
             <ErrorBoundary>
               <Suspense fallback={<PageLoader />}>
                 <Routes>
+                  <Route path="/home" element={<Navigate to="/video/create" replace />} />
                   <Route path="/" element={<DashboardPage />} />
-                  <Route path="/video/create" element={<VideoCreatePage />} />
-                  <Route path="/video/create/:projectId" element={<VideoCreatePage />} />
+                  <Route path="/video/create" element={<HomePage />} />
+                  <Route path="/video/create/:projectId" element={<HomePage />} />
                   <Route path="/works" element={<WorksPage />} />
                   <Route path="/analytics" element={<AnalyticsPage />} />
                   <Route path="/profile" element={<ProfilePage />} />
@@ -182,7 +184,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
-      <Sonner richColors position="top-right" />
+      <Sonner richColors position="top-center" />
       <BrowserRouter>
         <AuthProvider>
           <AppRoutes />

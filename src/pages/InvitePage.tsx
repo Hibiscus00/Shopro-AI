@@ -108,7 +108,7 @@ export default function InvitePage() {
       ctx.fillStyle = '#10b981';
       ctx.font = 'bold 56px sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('电商AIGC带货视频', 375, 200);
+      ctx.fillText('Shopro-电商 AIGC 带货视频', 375, 200);
       ctx.fillStyle = '#f8fafc';
       ctx.font = '36px sans-serif';
       ctx.fillText('邀请您体验革命性的视频创作', 375, 280);

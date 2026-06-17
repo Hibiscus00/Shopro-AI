@@ -61,7 +61,7 @@ const AI_TOOLS = [
   },
   {
     id: 'translate',
-    path: '/video/create',
+    path: '/multilang',
     label: '多语言翻译',
     desc: '一键将视频文案翻译为英/日/韩/泰等多国语言',
     icon: Languages,
@@ -157,7 +157,7 @@ const AI_TOOLS = [
   },
   {
     id: 'batch-generate',
-    path: '/batch',
+    path: '/batch-create',
     label: '批量生成工作台',
     desc: '批量导入商品，一次性产出多套带货视频',
     icon: Cpu,
