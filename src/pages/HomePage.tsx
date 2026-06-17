@@ -264,7 +264,7 @@ export default function HomePage() {
         {/* ── 大标题 ────────────────────────────────────────────────── */}
         <div className="text-center space-y-5">
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-balance leading-tight">
-            生成、编辑或复刻电商带货视频频
+            生成、编辑或复刻电商带货视频
           </h1>
           {/* 主 Tab */}
           <div className="inline-flex items-center gap-1 p-1 rounded-full border border-white/10 bg-white/5 backdrop-blur">

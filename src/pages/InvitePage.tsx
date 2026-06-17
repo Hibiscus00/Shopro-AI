@@ -50,12 +50,12 @@ export default function InvitePage() {
         `)
         .eq('inviter_id', user.id)
         .order('created_at', { ascending: false });
-        
+
       if (error) throw error;
-      
+
       const list = (data || []) as any[];
       setInvitations(list);
-      
+
       setStats({
         total: list.length,
         completed: list.filter(i => i.status === 'completed').length,
@@ -108,7 +108,7 @@ export default function InvitePage() {
       ctx.fillStyle = '#10b981';
       ctx.font = 'bold 56px sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('Shopro-电商 AIGC 带货视频', 375, 200);
+      ctx.fillText('Shopro-电商AIGC带货视频', 375, 200);
       ctx.fillStyle = '#f8fafc';
       ctx.font = '36px sans-serif';
       ctx.fillText('邀请您体验革命性的视频创作', 375, 280);
@@ -229,7 +229,7 @@ export default function InvitePage() {
                 {posterGenerating ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <ImageIcon className="w-4 h-4 mr-2" />}
                 生成专属微信分享海报
               </Button>
-              
+
               <div className="space-y-3 flex flex-col items-center border-t border-border pt-6">
                 <p className="text-sm font-medium text-muted-foreground mb-1">面对面扫码邀请</p>
                 <div className="bg-white p-3 rounded-xl border border-border shadow-sm">
@@ -238,7 +238,7 @@ export default function InvitePage() {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2"><Share2 className="w-4 h-4" />邀请规则</CardTitle>
@@ -321,7 +321,7 @@ export default function InvitePage() {
                             {inv.invitee?.username || '-'}
                           </TableCell>
                           <TableCell className="whitespace-nowrap">
-                            {inv.status === 'completed' 
+                            {inv.status === 'completed'
                               ? <Badge className="bg-success/10 text-success hover:bg-success/20 font-normal">已完成</Badge>
                               : <Badge variant="secondary" className="font-normal text-muted-foreground">处理中</Badge>
                             }
@@ -358,7 +358,7 @@ export default function InvitePage() {
                 <img src={posterUrl} alt="分享海报" className="w-full h-full object-cover" />
               ) : null}
             </div>
-            
+
             <div className="flex w-full gap-3">
               <Button className="flex-1" variant="outline" onClick={() => setPosterOpen(false)}>关闭</Button>
               {posterUrl && (

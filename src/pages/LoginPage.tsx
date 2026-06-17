@@ -43,7 +43,7 @@ function PhoneSmsPanel() {
     try {
       const { data, error } = await supabase.functions.invoke('send-sms-code', { body: { mobile: phone } });
       if (error) { const msg = await error?.context?.text(); throw new Error(msg || error.message); }
-      
+
       const isSuccess = data?.status === 0 || data?.success === true || data?.sessionId || data?.data?.sessionId;
       if (isSuccess) {
         const sid = data?.data?.sessionId || data?.sessionId || 'mock-session-id';
@@ -69,7 +69,7 @@ function PhoneSmsPanel() {
         body: { mobile: phone, sessionId, code },
       });
       if (error) { const msg = await error?.context?.text(); throw new Error(msg || error.message); }
-      
+
       const isVerified = data?.status === 0 || data?.success === true || data?.result === true || data?.data?.result === true || data?.data?.success === true;
       if (isVerified) {
         // F-03: 验证成功后自动登录并跳转至工作台
@@ -188,10 +188,10 @@ function PhoneSmsPanel() {
 }
 
 const BRAND_FEATURES = [
-  { icon: Zap,        title: 'AI一键生成',   desc: '秒出带货视频脚本，效率提升10倍' },
-  { icon: Video,      title: '可视化编辑',   desc: '分镜时间轴，拖拽式流畅操作' },
-  { icon: TrendingUp, title: '流量预测',     desc: '智能分析爆款潜力，精准投放' },
-  { icon: Sparkles,   title: '竞品监控',     desc: '实时追踪竞争对手，快速跟进' },
+  { icon: Zap, title: 'AI一键生成', desc: '秒出带货视频脚本，效率提升10倍' },
+  { icon: Video, title: '可视化编辑', desc: '分镜时间轴，拖拽式流畅操作' },
+  { icon: TrendingUp, title: '流量预测', desc: '智能分析爆款潜力，精准投放' },
+  { icon: Sparkles, title: '竞品监控', desc: '实时追踪竞争对手，快速跟进' },
 ];
 
 // 浮动粒子组件
@@ -201,8 +201,8 @@ function FloatingParticles() {
       {Array.from({ length: 24 }).map((_, i) => {
         const size = 2 + (i % 4);
         const left = (i * 37 + 11) % 95;
-        const top  = (i * 53 + 7)  % 90;
-        const dur  = 4 + (i % 5) * 1.4;
+        const top = (i * 53 + 7) % 90;
+        const dur = 4 + (i % 5) * 1.4;
         const delay = (i * 0.3) % 3;
         return (
           <div
@@ -328,7 +328,7 @@ export default function LoginPage() {
   const { user, loading: authLoading } = useAuth();
   const searchParams = new URLSearchParams(window.location.search);
   const inviteCodeParam = searchParams.get('invite');
-  
+
   // F-04: 默认直接进入“立即注册”界面
   const initialMode = (searchParams.get('mode') as Mode) || 'register';
   const [mode, setMode] = useState<Mode>(initialMode);
@@ -395,8 +395,8 @@ export default function LoginPage() {
           toast.success('登录成功，欢迎回来！');
           navigate('/');
         } else {
-          const { data, error } = await supabase.auth.signUp({ 
-            email, 
+          const { data, error } = await supabase.auth.signUp({
+            email,
             password: form.password,
             options: {
               data: {
@@ -452,7 +452,7 @@ export default function LoginPage() {
     phone: '手机号验证',
   };
   const subtitleMap: Record<Mode, string> = {
-    login: '使用您的账号登录 Shopro-电商 AIGC 带货视频平台',
+    login: '使用您的账号登录 Shopro-电商AIGC带货视频平台',
     register: '填写信息，开启 AI 视频创作之旅',
     forgot: '输入邮箱或用户名，我们将发送重置链接',
     phone: '验证手机号，安全绑定或快速登录',
@@ -759,8 +759,8 @@ export default function LoginPage() {
                     disabled={loading}
                     className={cn(
                       "relative overflow-hidden flex flex-col items-center justify-center p-3 rounded-2xl border transition-all duration-300 text-center text-xs group",
-                      color === 'orange' 
-                        ? "bg-orange-50/40 dark:bg-orange-950/10 border-orange-200 dark:border-orange-900/40 text-orange-600 dark:text-orange-400 hover:bg-orange-50/80 dark:hover:bg-orange-950/20 hover:border-orange-300" 
+                      color === 'orange'
+                        ? "bg-orange-50/40 dark:bg-orange-950/10 border-orange-200 dark:border-orange-900/40 text-orange-600 dark:text-orange-400 hover:bg-orange-50/80 dark:hover:bg-orange-950/20 hover:border-orange-300"
                         : "bg-emerald-50/40 dark:bg-emerald-950/10 border-emerald-200 dark:border-emerald-900/40 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50/80 dark:hover:bg-emerald-950/20 hover:border-emerald-300"
                     )}
                   >

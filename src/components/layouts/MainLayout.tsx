@@ -17,7 +17,8 @@ import {
   Menu, ChevronRight, Sparkles,
   Package, Users2, CreditCard, Wand2,
   Search, X, ArrowRight, Scissors, Moon, Sun,
-  Layers, Share2, Code2, Gift, LayoutGrid, Bell, House, CheckCheck, LogOut,} from 'lucide-react';
+  Layers, Share2, Code2, Gift, LayoutGrid, Bell, House, CheckCheck, LogOut,
+} from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/db/supabase';
@@ -44,37 +45,37 @@ function useThemePersist() {
 
 // AI工具箱二级菜单条目
 const AI_TOOLBOX_ITEMS = [
-  { label: '爆款风格复刻',   path: '/style-copy',       badge: '热门', badgeColor: '#f97316', desc: '一键复刻高转化内容风格' },
-  { label: '竞品爆款分析',   path: '/competitor',       badge: '24h',  badgeColor: '#3b82f6', desc: '抓取竞品爆款视频策略' },
-  { label: '流量分析',       path: '/analytics',        badge: '实时', badgeColor: '#22c55e', desc: '实时追踪完播率与转化漏斗' },
-  { label: '直播高光切片',   path: '/live-highlight',   badge: 'NEW',  badgeColor: '#ef4444', desc: 'AI自动识别直播精华' },
-  { label: '知识库',         path: '/knowledge',        badge: '语义', badgeColor: '#14b8a6', desc: '沉淀带货话术，AI语义检索' },
-  { label: '情绪NLP分析',    path: '/emotion-analysis', badge: 'NLP',  badgeColor: '#6366f1', desc: '深度分析评论情感倾向' },
-  { label: '爆款特征库',     path: '/trending-patterns', badge: '持续更新', badgeColor: '#f59e0b', desc: '沉淀千万级爆款特征' },
-  { label: 'AI个性化微调',   path: '/personalize',       badge: 'Pro',  badgeColor: '#7c3aed', desc: '基于账号风格私有化训练' },
+  { label: '爆款风格复刻', path: '/style-copy', badge: '热门', badgeColor: '#f97316', desc: '一键复刻高转化内容风格' },
+  { label: '竞品爆款分析', path: '/competitor', badge: '24h', badgeColor: '#3b82f6', desc: '抓取竞品爆款视频策略' },
+  { label: '流量分析', path: '/analytics', badge: '实时', badgeColor: '#22c55e', desc: '实时追踪完播率与转化漏斗' },
+  { label: '直播高光切片', path: '/live-highlight', badge: 'NEW', badgeColor: '#ef4444', desc: 'AI自动识别直播精华' },
+  { label: '知识库', path: '/knowledge', badge: '语义', badgeColor: '#14b8a6', desc: '沉淀带货话术，AI语义检索' },
+  { label: '情绪NLP分析', path: '/emotion-analysis', badge: 'NLP', badgeColor: '#6366f1', desc: '深度分析评论情感倾向' },
+  { label: '爆款特征库', path: '/trending-patterns', badge: '持续更新', badgeColor: '#f59e0b', desc: '沉淀千万级爆款特征' },
+  { label: 'AI个性化微调', path: '/personalize', badge: 'Pro', badgeColor: '#7c3aed', desc: '基于账号风格私有化训练' },
 ];
 
 const navGroups = [
   {
     label: '主要功能',
     items: [
-      { path: '/',              label: '工作台',     icon: LayoutDashboard },
-      { path: '/video/create',  label: '生成视频',   icon: Video },
-      { path: '/products',      label: '商品管理',   icon: Package },
-      { path: '/script',        label: 'AI脚本生成', icon: Wand2 },
-      { path: '/avatars',       label: '数字人库',   icon: Users2 },
-      { path: '/video/edit',    label: '视频剪辑',   icon: Scissors },
-      { path: '/works',         label: '作品管理',   icon: FolderOpen },
+      { path: '/', label: '工作台', icon: LayoutDashboard },
+      { path: '/video/create', label: '生成视频', icon: Video },
+      { path: '/products', label: '商品管理', icon: Package },
+      { path: '/script', label: 'AI脚本生成', icon: Wand2 },
+      { path: '/avatars', label: '数字人库', icon: Users2 },
+      { path: '/video/edit', label: '视频剪辑', icon: Scissors },
+      { path: '/works', label: '作品管理', icon: FolderOpen },
       // AI工具箱通过 AIToolboxNavItem 单独渲染
       { path: '/export-formats', label: '跨平台导出', icon: Layers },
-      { path: '/data-feedback',  label: '投放数据回流', icon: Share2 },
+      { path: '/data-feedback', label: '投放数据回流', icon: Share2 },
     ],
   },
   {
     label: '生态扩展',
     items: [
-      { path: '/team',      label: '团队协作空间', icon: Users2 },
-      { path: '/open-api',  label: '开放 API',     icon: Code2 },
+      { path: '/team', label: '团队协作空间', icon: Users2 },
+      { path: '/open-api', label: '开放 API', icon: Code2 },
     ],
   },
 ];
@@ -141,8 +142,8 @@ function GlobalSearch() {
   }, [query, doSearch]);
 
   const typeConfig = {
-    product:  { label: '商品', icon: Package,   color: 'text-orange-500 bg-orange-500/10' },
-    video:    { label: '视频', icon: Video,     color: 'text-primary bg-primary/10' },
+    product: { label: '商品', icon: Package, color: 'text-orange-500 bg-orange-500/10' },
+    video: { label: '视频', icon: Video, color: 'text-primary bg-primary/10' },
     material: { label: '素材', icon: ImageIcon, color: 'text-info bg-info/10' },
   };
 
@@ -327,7 +328,7 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
             <Sparkles className="w-5 h-5 text-primary-foreground" />
           </div>
           <div className="min-w-0">
-            <p className="text-sm font-bold text-sidebar-foreground truncate">电商 AIGC 带货视频</p>
+            <p className="text-sm font-bold text-sidebar-foreground truncate">电商AIGC带货视频</p>
             <p className="text-xs text-sidebar-foreground/50">AI驱动 · 高效带货</p>
           </div>
         </div>
@@ -524,80 +525,80 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       <div className="flex-1 min-w-0 flex flex-col overflow-x-hidden">
         {/* 顶部栏：移动端汉堡 + 全局搜索（桌面端也显示） */}
         <header className="flex items-center gap-3 px-4 h-14 border-b bg-card shrink-0" style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
-            {/* 移动端菜单 */}
-            <div className="lg:hidden">
-              <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-                <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon" className="shrink-0">
-                    <Menu className="w-5 h-5" />
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="left" className="w-64 p-0 bg-sidebar border-sidebar-border">
-                  <SidebarContent onNavClick={() => setMobileOpen(false)} />
-                </SheetContent>
-              </Sheet>
+          {/* 移动端菜单 */}
+          <div className="lg:hidden">
+            <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="shrink-0">
+                  <Menu className="w-5 h-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-64 p-0 bg-sidebar border-sidebar-border">
+                <SidebarContent onNavClick={() => setMobileOpen(false)} />
+              </SheetContent>
+            </Sheet>
+          </div>
+
+          {/* 移动端 Logo */}
+          <Link to="/landing" className="lg:hidden flex items-center gap-2 min-w-0 shrink-0">
+            <div className="w-7 h-7 rounded-md bg-primary flex items-center justify-center shrink-0">
+              <Sparkles className="w-4 h-4 text-primary-foreground" />
+            </div>
+            <span className="font-semibold text-sm truncate">电商AIGC带货视频</span>
+          </Link>
+
+          {/* F-09: 全局搜索 — 桌面端占满剩余空间，移动端缩小 */}
+          <div className="flex-1 min-w-0 flex items-center">
+            <GlobalSearch />
+          </div>
+
+          {/* 右上角工具栏：通知 + 主题切换 + 邀请/积分 + 头像 */}
+          <div className="flex items-center gap-1 shrink-0">
+            {/* 消息通知 */}
+            <TopBarNotificationBell />
+
+            {/* 主题切换 */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="shrink-0 text-muted-foreground hover:text-foreground"
+              title={theme === 'dark' ? '切换到浅色模式' : '切换到深色模式'}
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            >
+              {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </Button>
+
+            {/* 邀请有礼 + 积分套餐 */}
+            <div className="hidden md:flex items-center gap-0.5">
+              <TopBarQuickLink to="/invite" icon={Gift} label="邀请有礼" />
+              <TopBarQuickLink to="/credits" icon={CreditCard} label="积分套餐" />
             </div>
 
-            {/* 移动端 Logo */}
-            <Link to="/landing" className="lg:hidden flex items-center gap-2 min-w-0 shrink-0">
-              <div className="w-7 h-7 rounded-md bg-primary flex items-center justify-center shrink-0">
-                <Sparkles className="w-4 h-4 text-primary-foreground" />
-              </div>
-              <span className="font-semibold text-sm truncate">电商 AIGC 带货视频</span>
-            </Link>
+            {/* 头像 */}
+            <TopBarUserMenu />
 
-            {/* F-09: 全局搜索 — 桌面端占满剩余空间，移动端缩小 */}
-            <div className="flex-1 min-w-0 flex items-center">
-              <GlobalSearch />
-            </div>
-
-            {/* 右上角工具栏：通知 + 主题切换 + 邀请/积分 + 头像 */}
-            <div className="flex items-center gap-1 shrink-0">
-              {/* 消息通知 */}
-              <TopBarNotificationBell />
-
-              {/* 主题切换 */}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="shrink-0 text-muted-foreground hover:text-foreground"
-                title={theme === 'dark' ? '切换到浅色模式' : '切换到深色模式'}
-                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              >
-                {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-              </Button>
-
-              {/* 邀请有礼 + 积分套餐 */}
-              <div className="hidden md:flex items-center gap-0.5">
-                <TopBarQuickLink to="/invite"   icon={Gift}       label="邀请有礼" />
-                <TopBarQuickLink to="/credits"  icon={CreditCard} label="积分套餐" />
-              </div>
-
-              {/* 头像 */}
-              <TopBarUserMenu />
-
-              {/* 退出登录 */}
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="h-8 px-2 text-muted-foreground hover:text-destructive hover:bg-destructive/5 shrink-0 flex items-center gap-1.5 transition-colors rounded-lg"
-                title="退出登录"
-                onClick={async () => {
-                  try {
-                    await signOut();
-                    toast.success('已成功退出登录');
-                    navigate('/login');
-                  } catch (e: any) {
-                    toast.error('退出登录失败');
-                  }
-                }}
-              >
-                <LogOut className="w-4 h-4" />
-                <span className="text-xs font-semibold hidden md:inline">退出</span>
-              </Button>
-            </div>
-          </header>
+            {/* 退出登录 */}
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-8 px-2 text-muted-foreground hover:text-destructive hover:bg-destructive/5 shrink-0 flex items-center gap-1.5 transition-colors rounded-lg"
+              title="退出登录"
+              onClick={async () => {
+                try {
+                  await signOut();
+                  toast.success('已成功退出登录');
+                  navigate('/login');
+                } catch (e: any) {
+                  toast.error('退出登录失败');
+                }
+              }}
+            >
+              <LogOut className="w-4 h-4" />
+              <span className="text-xs font-semibold hidden md:inline">退出</span>
+            </Button>
+          </div>
+        </header>
 
         {/* 页面内容 */}
         <main className="flex-1 min-w-0 overflow-x-hidden">

@@ -270,7 +270,7 @@ export default function ProfilePage() {
       </div>
 
       <div className="px-4 md:px-6 pb-10 -mt-16 max-w-3xl mx-auto space-y-5">
-        
+
         {isEditing ? (
           /* ── 编辑资料页面 ── */
           <div className="rounded-3xl bg-card border border-border/60 shadow-lg overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300">
@@ -477,10 +477,10 @@ export default function ProfilePage() {
             <div>
               <p className="text-sm font-semibold text-muted-foreground mb-3 px-0.5">创作概览</p>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <StatCard icon={Video}     label="生成视频" value={stats.videos}    color="text-primary"    bg="bg-primary/10"    onClick={() => navigate('/works')} />
-                <StatCard icon={Film}      label="完成作品" value={stats.published} color="text-success"    bg="bg-success/10"    onClick={() => navigate('/works')} />
-                <StatCard icon={ImageIcon} label="素材文件" value={stats.materials} color="text-info"       bg="bg-info/10"       onClick={() => navigate('/works')} />
-                <StatCard icon={Package}   label="商品管理" value={stats.products}  color="text-warning"   bg="bg-warning/10"    onClick={() => navigate('/products')} />
+                <StatCard icon={Video} label="生成视频" value={stats.videos} color="text-primary" bg="bg-primary/10" onClick={() => navigate('/works')} />
+                <StatCard icon={Film} label="完成作品" value={stats.published} color="text-success" bg="bg-success/10" onClick={() => navigate('/works')} />
+                <StatCard icon={ImageIcon} label="素材文件" value={stats.materials} color="text-info" bg="bg-info/10" onClick={() => navigate('/works')} />
+                <StatCard icon={Package} label="商品管理" value={stats.products} color="text-warning" bg="bg-warning/10" onClick={() => navigate('/products')} />
               </div>
             </div>
 
@@ -516,11 +516,11 @@ export default function ProfilePage() {
             <Card className="rounded-3xl border-border/60">
               <CardContent className="p-2">
                 <p className="text-xs font-semibold text-muted-foreground px-4 pt-3 pb-1">快速入口</p>
-                <MenuRow icon={FolderOpen}  label="作品管理"    desc="查看我的视频作品和素材"        onClick={() => navigate('/works')} />
-                <MenuRow icon={Zap}         label="积分与套餐"  desc={userPlan ? `剩余 ${creditsLeft} 积分` : '查看用量和充值'} onClick={() => navigate('/credits')} badge={creditsLeft < 50 ? '不足' : undefined} />
-                <MenuRow icon={Globe}       label="跨平台导出"  desc="多格式导出和一键分发"           onClick={() => navigate('/export-formats')} />
-                <MenuRow icon={TrendingUp}  label="投放数据回流" desc="查看广告投放效果"              onClick={() => navigate('/data-feedback')} />
-                <MenuRow icon={Sparkles}    label="AI工具箱"    desc="风格复刻、知识库等高级工具"     onClick={() => navigate('/ai-toolbox')} />
+                <MenuRow icon={FolderOpen} label="作品管理" desc="查看我的视频作品和素材" onClick={() => navigate('/works')} />
+                <MenuRow icon={Zap} label="积分与套餐" desc={userPlan ? `剩余 ${creditsLeft} 积分` : '查看用量和充值'} onClick={() => navigate('/credits')} badge={creditsLeft < 50 ? '不足' : undefined} />
+                <MenuRow icon={Globe} label="跨平台导出" desc="多格式导出和一键分发" onClick={() => navigate('/export-formats')} />
+                <MenuRow icon={TrendingUp} label="投放数据回流" desc="查看广告投放效果" onClick={() => navigate('/data-feedback')} />
+                <MenuRow icon={Sparkles} label="AI工具箱" desc="风格复刻、知识库等高级工具" onClick={() => navigate('/ai-toolbox')} />
               </CardContent>
             </Card>
 
@@ -541,8 +541,8 @@ export default function ProfilePage() {
                   <Switch checked={notification} onCheckedChange={handleNotificationToggle} />
                 </div>
 
-                <MenuRow icon={Key}     label="修改密码"  desc="定期更换密码保护账号安全"  onClick={() => setPwOpen(true)} />
-                <MenuRow icon={Shield}  label="账号安全"  desc="登录记录与安全设置"         onClick={() => toast.info('安全设置功能开发中')} />
+                <MenuRow icon={Key} label="修改密码" desc="定期更换密码保护账号安全" onClick={() => setPwOpen(true)} />
+                <MenuRow icon={Shield} label="账号安全" desc="登录记录与安全设置" onClick={() => toast.info('安全设置功能开发中')} />
 
                 {/* User ID */}
                 <div className="flex items-center gap-3 px-4 py-3.5">
@@ -571,7 +571,7 @@ export default function ProfilePage() {
             <div className="text-center pb-2">
               <div className="inline-flex items-center gap-2 text-xs text-muted-foreground/60">
                 <Award className="w-3.5 h-3.5" />
-                <span>Shopro-电商 AIGC 带货视频 v1.0</span>
+                <span>Shopro-电商AIGC带货视频 v1.0</span>
                 <span>·</span>
                 <span>© 2025</span>
               </div>

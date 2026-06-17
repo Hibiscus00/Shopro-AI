@@ -17,10 +17,10 @@ import type { DashboardStats, VideoProject } from '@/types/types';
 import { cn } from '@/lib/utils';
 
 const statusConfig = {
-  draft:      { label: '草稿',   color: 'bg-muted/80 text-muted-foreground' },
+  draft: { label: '草稿', color: 'bg-muted/80 text-muted-foreground' },
   processing: { label: '生成中', color: 'bg-warning/15 text-warning' },
-  completed:  { label: '已完成', color: 'bg-success/15 text-success' },
-  failed:     { label: '失败',   color: 'bg-destructive/15 text-destructive' },
+  completed: { label: '已完成', color: 'bg-success/15 text-success' },
+  failed: { label: '失败', color: 'bg-destructive/15 text-destructive' },
 };
 
 // ── 统计卡片 ──────────────────────────────────────────────────────────────
@@ -138,10 +138,10 @@ export default function DashboardPage() {
       ]);
       const projects = projRes.data ?? [];
       setStats({
-        total_videos:       projects.length,
-        processing_videos:  projects.filter(p => p.status === 'processing').length,
-        completed_videos:   projects.filter(p => p.status === 'completed').length,
-        total_materials:    matRes.count ?? 0,
+        total_videos: projects.length,
+        processing_videos: projects.filter(p => p.status === 'processing').length,
+        completed_videos: projects.filter(p => p.status === 'completed').length,
+        total_materials: matRes.count ?? 0,
       });
       const recentRes = await supabase
         .from('video_projects').select('*')
@@ -179,42 +179,42 @@ export default function DashboardPage() {
 
   const quickActions = [
     {
-      icon: Video,      title: '生成视频',     to: '/video/create',
+      icon: Video, title: '生成视频', to: '/video/create',
       desc: 'AI全流程辅助，从商品到视频一键搞定',
-      accent: 'bg-primary/15 text-primary',   tag: '核心',
+      accent: 'bg-primary/15 text-primary', tag: '核心',
     },
     {
-      icon: Wand2,      title: 'AI脚本生成',   to: '/script',
+      icon: Wand2, title: 'AI脚本生成', to: '/script',
       desc: '输入商品信息，自动输出分镜脚本与Prompt',
-      accent: 'bg-violet-500/15 text-violet-500',  tag: 'AI',
+      accent: 'bg-violet-500/15 text-violet-500', tag: 'AI',
     },
     {
-      icon: Upload,     title: '上传素材',     to: '/works',
+      icon: Upload, title: '上传素材', to: '/works',
       desc: '管理商品图片和视频片段',
       accent: 'bg-success/15 text-success',
     },
     {
-      icon: Package,    title: '商品管理',     to: '/products',
+      icon: Package, title: '商品管理', to: '/products',
       desc: '管理带货商品信息，快速选品',
       accent: 'bg-orange-500/15 text-orange-500',
     },
     {
-      icon: Copy,       title: '爆款风格复刻', to: '/style-copy',
+      icon: Copy, title: '爆款风格复刻', to: '/style-copy',
       desc: 'AI分析爆款视频，提取并复制风格',
-      accent: 'bg-pink-500/15 text-pink-500',  tag: 'AI',
+      accent: 'bg-pink-500/15 text-pink-500', tag: 'AI',
     },
     {
-      icon: TrendingUp, title: '流量分析',     to: '/analytics',
+      icon: TrendingUp, title: '流量分析', to: '/analytics',
       desc: '预测完播率和点击率，优化视频效果',
       accent: 'bg-info/15 text-info',
     },
     {
-      icon: BookOpen,   title: '知识库',       to: '/knowledge',
+      icon: BookOpen, title: '知识库', to: '/knowledge',
       desc: '收集优化行为，驱动AI持续进化',
-      accent: 'bg-teal-500/15 text-teal-500',  tag: 'AI',
+      accent: 'bg-teal-500/15 text-teal-500', tag: 'AI',
     },
     {
-      icon: BarChart3,  title: '查看作品',     to: '/works',
+      icon: BarChart3, title: '查看作品', to: '/works',
       desc: '管理已生成的历史视频',
       accent: 'bg-muted-foreground/15 text-muted-foreground',
     },
@@ -227,7 +227,7 @@ export default function DashboardPage() {
     cr: 1.5,       // 转化率 %
     aov: 99,       // 客单价
   });
-  
+
   const roiCalculated = {
     revenue: (roiParams.views * (roiParams.cr / 100)) * roiParams.aov,
     profit: ((roiParams.views * (roiParams.cr / 100)) * roiParams.aov) - roiParams.cost,
@@ -256,7 +256,7 @@ export default function DashboardPage() {
           <div className="min-w-0">
             <div className="flex items-center gap-2 mb-1">
               <span className="text-xs font-semibold text-white/80 bg-white/15 backdrop-blur-sm px-2.5 py-1 rounded-full tracking-wide border border-white/10">
-                电商 AIGC 带货视频
+                电商AIGC带货视频
               </span>
             </div>
             <h1 className="text-xl md:text-2xl font-bold text-white text-balance leading-snug">
@@ -362,19 +362,19 @@ export default function DashboardPage() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
                 <Label className="text-xs text-muted-foreground">单个视频成本(元)</Label>
-                <Input type="number" value={roiParams.cost} onChange={e => setRoiParams({...roiParams, cost: Number(e.target.value)})} className="h-8 text-sm" />
+                <Input type="number" value={roiParams.cost} onChange={e => setRoiParams({ ...roiParams, cost: Number(e.target.value) })} className="h-8 text-sm" />
               </div>
               <div className="space-y-1">
                 <Label className="text-xs text-muted-foreground">预估播放量</Label>
-                <Input type="number" value={roiParams.views} onChange={e => setRoiParams({...roiParams, views: Number(e.target.value)})} className="h-8 text-sm" />
+                <Input type="number" value={roiParams.views} onChange={e => setRoiParams({ ...roiParams, views: Number(e.target.value) })} className="h-8 text-sm" />
               </div>
               <div className="space-y-1">
                 <Label className="text-xs text-muted-foreground">转化率(%)</Label>
-                <Input type="number" value={roiParams.cr} onChange={e => setRoiParams({...roiParams, cr: Number(e.target.value)})} className="h-8 text-sm" />
+                <Input type="number" value={roiParams.cr} onChange={e => setRoiParams({ ...roiParams, cr: Number(e.target.value) })} className="h-8 text-sm" />
               </div>
               <div className="space-y-1">
                 <Label className="text-xs text-muted-foreground">客单价(元)</Label>
-                <Input type="number" value={roiParams.aov} onChange={e => setRoiParams({...roiParams, aov: Number(e.target.value)})} className="h-8 text-sm" />
+                <Input type="number" value={roiParams.aov} onChange={e => setRoiParams({ ...roiParams, aov: Number(e.target.value) })} className="h-8 text-sm" />
               </div>
             </div>
 
