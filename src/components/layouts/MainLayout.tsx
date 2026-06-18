@@ -513,6 +513,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
   // 判断是否为生成视频界面
   const isVideoCreatePage = location.pathname.startsWith('/video/create');
+  const isVideoEditPage = location.pathname.startsWith('/video/edit');
 
   return (
     <div className="flex min-h-screen w-full bg-background">
@@ -524,81 +525,83 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       {/* 主内容区 */}
       <div className="flex-1 min-w-0 flex flex-col overflow-x-hidden">
         {/* 顶部栏：移动端汉堡 + 全局搜索（桌面端也显示） */}
-        <header className="flex items-center gap-3 px-4 h-14 border-b bg-card shrink-0" style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
-          {/* 移动端菜单 */}
-          <div className="lg:hidden">
-            <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="shrink-0">
-                  <Menu className="w-5 h-5" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-64 p-0 bg-sidebar border-sidebar-border">
-                <SidebarContent onNavClick={() => setMobileOpen(false)} />
-              </SheetContent>
-            </Sheet>
-          </div>
-
-          {/* 移动端 Logo */}
-          <Link to="/landing" className="lg:hidden flex items-center gap-2 min-w-0 shrink-0">
-            <div className="w-7 h-7 rounded-md bg-primary flex items-center justify-center shrink-0">
-              <Sparkles className="w-4 h-4 text-primary-foreground" />
-            </div>
-            <span className="font-semibold text-sm truncate">电商AIGC带货视频</span>
-          </Link>
-
-          {/* F-09: 全局搜索 — 桌面端占满剩余空间，移动端缩小 */}
-          <div className="flex-1 min-w-0 flex items-center">
-            <GlobalSearch />
-          </div>
-
-          {/* 右上角工具栏：通知 + 主题切换 + 邀请/积分 + 头像 */}
-          <div className="flex items-center gap-1 shrink-0">
-            {/* 消息通知 */}
-            <TopBarNotificationBell />
-
-            {/* 主题切换 */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="shrink-0 text-muted-foreground hover:text-foreground"
-              title={theme === 'dark' ? '切换到浅色模式' : '切换到深色模式'}
-              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-            >
-              {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </Button>
-
-            {/* 邀请有礼 + 积分套餐 */}
-            <div className="hidden md:flex items-center gap-0.5">
-              <TopBarQuickLink to="/invite" icon={Gift} label="邀请有礼" />
-              <TopBarQuickLink to="/credits" icon={CreditCard} label="积分套餐" />
+        {!isVideoEditPage && (
+          <header className="flex items-center gap-3 px-4 h-14 border-b bg-card shrink-0" style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
+            {/* 移动端菜单 */}
+            <div className="lg:hidden">
+              <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon" className="shrink-0">
+                    <Menu className="w-5 h-5" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="w-64 p-0 bg-sidebar border-sidebar-border">
+                  <SidebarContent onNavClick={() => setMobileOpen(false)} />
+                </SheetContent>
+              </Sheet>
             </div>
 
-            {/* 头像 */}
-            <TopBarUserMenu />
+            {/* 移动端 Logo */}
+            <Link to="/landing" className="lg:hidden flex items-center gap-2 min-w-0 shrink-0">
+              <div className="w-7 h-7 rounded-md bg-primary flex items-center justify-center shrink-0">
+                <Sparkles className="w-4 h-4 text-primary-foreground" />
+              </div>
+              <span className="font-semibold text-sm truncate">电商AIGC带货视频</span>
+            </Link>
 
-            {/* 退出登录 */}
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="h-8 px-2 text-muted-foreground hover:text-destructive hover:bg-destructive/5 shrink-0 flex items-center gap-1.5 transition-colors rounded-lg"
-              title="退出登录"
-              onClick={async () => {
-                try {
-                  await signOut();
-                  toast.success('已成功退出登录');
-                  navigate('/login');
-                } catch (e: any) {
-                  toast.error('退出登录失败');
-                }
-              }}
-            >
-              <LogOut className="w-4 h-4" />
-              <span className="text-xs font-semibold hidden md:inline">退出</span>
-            </Button>
-          </div>
-        </header>
+            {/* F-09: 全局搜索 — 桌面端占满剩余空间，移动端缩小 */}
+            <div className="flex-1 min-w-0 flex items-center">
+              <GlobalSearch />
+            </div>
+
+            {/* 右上角工具栏：通知 + 主题切换 + 邀请/积分 + 头像 */}
+            <div className="flex items-center gap-1 shrink-0">
+              {/* 消息通知 */}
+              <TopBarNotificationBell />
+
+              {/* 主题切换 */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="shrink-0 text-muted-foreground hover:text-foreground"
+                title={theme === 'dark' ? '切换到浅色模式' : '切换到深色模式'}
+                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              >
+                {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              </Button>
+
+              {/* 邀请有礼 + 积分套餐 */}
+              <div className="hidden md:flex items-center gap-0.5">
+                <TopBarQuickLink to="/invite" icon={Gift} label="邀请有礼" />
+                <TopBarQuickLink to="/credits" icon={CreditCard} label="积分套餐" />
+              </div>
+
+              {/* 头像 */}
+              <TopBarUserMenu />
+
+              {/* 退出登录 */}
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-8 px-2 text-muted-foreground hover:text-destructive hover:bg-destructive/5 shrink-0 flex items-center gap-1.5 transition-colors rounded-lg"
+                title="退出登录"
+                onClick={async () => {
+                  try {
+                    await signOut();
+                    toast.success('已成功退出登录');
+                    navigate('/login');
+                  } catch (e: any) {
+                    toast.error('退出登录失败');
+                  }
+                }}
+              >
+                <LogOut className="w-4 h-4" />
+                <span className="text-xs font-semibold hidden md:inline">退出</span>
+              </Button>
+            </div>
+          </header>
+        )}
 
         {/* 页面内容 */}
         <main className="flex-1 min-w-0 overflow-x-hidden">

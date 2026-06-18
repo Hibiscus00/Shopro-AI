@@ -1511,7 +1511,12 @@ function Step5Generate({ productData, promptConfig, shots, materials, onPrev, on
       if (stageIdx >= PROGRESS_STAGES.length) {
         clearInterval(interval);
         const { data } = await supabase.from('video_projects')
-          .update({ status: 'completed', progress: 100 })
+          .update({
+            status: 'completed',
+            progress: 100,
+            video_url: 'https://www.w3schools.com/html/mov_bbb.mp4',
+            thumbnail_url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=640&h=360&fit=crop'
+          })
           .eq('id', projectId).select().maybeSingle();
         setProgress(100);
         setStatusMsg('视频生成完成！');

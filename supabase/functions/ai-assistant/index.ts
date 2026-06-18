@@ -481,6 +481,8 @@ async function generateVideo(body: Record<string, unknown>, supabase: ReturnType
       ...(isLast ? {
         predicted_completion_rate: Math.round(58 + Math.random() * 25),
         predicted_click_rate: Math.round((3.5 + Math.random() * 6) * 10) / 10,
+        video_url: 'https://www.w3schools.com/html/mov_bbb.mp4',
+        thumbnail_url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=640&h=360&fit=crop'
       } : {}),
     }).eq('id', project_id);
   }

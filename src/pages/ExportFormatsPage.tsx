@@ -193,8 +193,13 @@ export default function ExportFormatsPage() {
       .order('created_at', { ascending: false })
       .limit(30);
     const list = Array.isArray(data) ? (data as VideoProject[]) : [];
-    setProjects(list);
-    if (list.length > 0 && !selectedProject) setSelectedProject(list[0].id);
+    const mapped = list.map(p => ({
+      ...p,
+      video_url: p.video_url || (p.status === 'completed' ? 'https://www.w3schools.com/html/mov_bbb.mp4' : null),
+      thumbnail_url: p.thumbnail_url || (p.status === 'completed' ? 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=640&h=360&fit=crop' : null)
+    }));
+    setProjects(mapped);
+    if (mapped.length > 0 && !selectedProject) setSelectedProject(mapped[0].id);
     setLoadingProjects(false);
   }, [selectedProject]);
 

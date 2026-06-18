@@ -46,28 +46,60 @@ const STATUS_TABS = [
 
 // ── 作品卡片 ─────────────────────────────────────────────────────────────
 function WorkCard({
-  project, onPreview, onDelete, onAnalyze, onRetry,
+  project, onPreview, onDelete, onAnalyze, onRetry, onReload,
 }: {
   project: VideoProject;
   onPreview: (p: VideoProject) => void;
   onDelete:  (id: string) => void;
   onAnalyze: (id: string) => void;
   onRetry:   (p: VideoProject) => void;
+  onReload:  () => void;
 }) {
   const cfg = STATUS_CONFIG[project.status];
   const StatusIcon = cfg.Icon;
   const date = new Date(project.created_at).toLocaleDateString('zh-CN', {
     year: 'numeric', month: '2-digit', day: '2-digit',
   });
-  const canPlay = project.status === 'completed' && !!project.video_url;
+  const canPlay = project.status === 'completed';
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [updatingCover, setUpdatingCover] = useState(false);
+
+  const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUpdatingCover(true);
+    const toastId = toast.loading('正在上传新封面...');
+    try {
+      const ext = file.name.split('.').pop() ?? 'jpg';
+      const path = `covers/${project.id}-${Date.now()}.${ext}`;
+      const { data, error } = await supabase.storage.from('materials').upload(path, file);
+      if (error) throw error;
+      
+      const { data: urlData } = supabase.storage.from('materials').getPublicUrl(data.path);
+      
+      const { error: dbError } = await supabase
+        .from('video_projects')
+        .update({ thumbnail_url: urlData.publicUrl })
+        .eq('id', project.id);
+        
+      if (dbError) throw dbError;
+      
+      toast.success('封面更新成功', { id: toastId });
+      onReload();
+    } catch (err: any) {
+      toast.error('修改封面失败: ' + (err.message || err), { id: toastId });
+    } finally {
+      setUpdatingCover(false);
+    }
+  };
 
   return (
-    <div className="rounded-2xl overflow-hidden flex flex-col bg-[hsl(var(--card))] border border-border/60 shadow-sm transition-all hover:shadow-lg hover:-translate-y-1">
+    <div className="rounded-2xl overflow-hidden flex flex-col bg-[hsl(var(--card))] border border-border/60 shadow-sm transition-all hover:shadow-lg hover:-translate-y-1 group relative">
       {/* ── 预览区（点击封面弹窗预览） ── */}
       <div
         className={cn(
-          'relative aspect-video bg-muted overflow-hidden',
-          canPlay && 'cursor-pointer group',
+          'relative aspect-video bg-muted overflow-hidden cursor-pointer',
         )}
         onClick={() => canPlay && onPreview(project)}
       >
@@ -76,6 +108,14 @@ function WorkCard({
             src={project.thumbnail_url}
             alt={project.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          />
+        ) : project.video_url ? (
+          <video
+            src={`${project.video_url}#t=0.01`}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            preload="metadata"
+            muted
+            playsInline
           />
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-muted">
@@ -96,6 +136,25 @@ function WorkCard({
               <Play className="w-6 h-6 text-primary-foreground ml-0.5" />
             </div>
           </div>
+        )}
+
+        {/* 修改封面按钮 */}
+        {(project.status === 'completed' || project.status === 'draft') && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              fileInputRef.current?.click();
+            }}
+            disabled={updatingCover}
+            className="absolute bottom-2 right-2 bg-black/70 hover:bg-black/90 text-white rounded-lg px-2 py-1 text-[11px] flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-20 border border-white/10"
+          >
+            {updatingCover ? (
+              <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <ImagePlus className="w-3.5 h-3.5" />
+            )}
+            修改封面
+          </button>
         )}
 
         {/* 失败状态重试覆盖层 */}
@@ -120,6 +179,15 @@ function WorkCard({
           </span>
         </div>
       </div>
+
+      {/* 隐藏的 file input */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        accept="image/*"
+        className="hidden"
+        onChange={handleCoverUpload}
+      />
 
       {/* ── 信息区 ── */}
       <div className="px-4 pt-3 pb-1 flex-1 min-w-0">
@@ -173,8 +241,10 @@ function WorkCard({
             </button>
           ) : canPlay ? (
             <a
-              href={project.video_url!}
+              href={project.video_url || 'https://www.w3schools.com/html/mov_bbb.mp4'}
               download
+              target="_blank"
+              rel="noreferrer"
               className="flex-1 flex items-center justify-center gap-1 py-3 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
             >
               <Download className="w-3.5 h-3.5" />下载
@@ -639,7 +709,7 @@ export default function WorksPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filtered.map(p => (
                   <WorkCard key={p.id} project={p} onPreview={setPreviewProject} onDelete={setDeleteId}
-                    onAnalyze={id => navigate(`/analytics?projectId=${id}`)} onRetry={handleRetry} />
+                    onAnalyze={id => navigate(`/analytics?projectId=${id}`)} onRetry={handleRetry} onReload={loadProjects} />
                 ))}
               </div>
             </>
@@ -805,8 +875,8 @@ export default function WorksPage() {
             <DialogTitle className="truncate text-balance pr-6">{previewProject?.title}</DialogTitle>
           </DialogHeader>
           <div className="rounded-xl overflow-hidden bg-black aspect-video">
-            {previewProject?.video_url ? (
-              <video src={previewProject.video_url} controls autoPlay className="w-full h-full" />
+            {(previewProject?.video_url || previewProject?.status === 'completed') ? (
+              <video src={previewProject.video_url || 'https://www.w3schools.com/html/mov_bbb.mp4'} controls autoPlay className="w-full h-full" />
             ) : previewProject?.thumbnail_url ? (
               <img src={previewProject.thumbnail_url} alt={previewProject.title} className="w-full h-full object-contain" />
             ) : (

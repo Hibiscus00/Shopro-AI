@@ -271,11 +271,12 @@ function SearchBar({ placeholder, onSearch }: { placeholder: string; onSearch?: 
 }
 
 // ── 面板1：媒体库 ────────────────────────────────────────────────────────
-function MediaLibraryPanel({ materials, onAdd, importedVideos, onImportVideo }: {
+function MediaLibraryPanel({ materials, onAdd, importedVideos, onImportVideo, onUpload }: {
   materials: { id: string; name: string; url: string; type: string }[];
   onAdd: (m: { id: string; name: string; url: string; type: string }) => void;
   importedVideos: { id: string; title: string; video_url: string; thumbnail_url: string | null }[];
   onImportVideo: (v: { id: string; title: string; video_url: string; thumbnail_url: string | null }) => void;
+  onUpload: (file: File) => Promise<void>;
 }) {
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('全部');
@@ -315,48 +316,80 @@ function MediaLibraryPanel({ materials, onAdd, importedVideos, onImportVideo }: 
         </button>
       </div>
 
-      {/* 已生成视频弹窗 */}
-      {pickerOpen && (
-        <div className="absolute inset-0 z-30 bg-zinc-950/95 flex flex-col">
-          <div className="flex items-center justify-between px-3 py-2.5 border-b border-zinc-800 shrink-0">
-            <span className="text-xs font-medium text-zinc-200 flex items-center gap-1.5">
-              <Film className="w-3.5 h-3.5 text-indigo-400" />选择已生成的视频
-            </span>
-            <button className="text-zinc-500 hover:text-white transition-colors" onClick={() => setPickerOpen(false)}>
-              <X className="w-4 h-4" />
-            </button>
+      {/* 已生成/上传视频弹窗 */}
+      <Dialog open={pickerOpen} onOpenChange={setPickerOpen}>
+        <DialogContent className="max-w-md bg-zinc-900 border-zinc-800 text-zinc-200 p-4">
+          <DialogHeader>
+            <DialogTitle className="text-sm font-medium text-zinc-200 flex items-center gap-1.5 border-b border-zinc-800 pb-2">
+              <Film className="w-3.5 h-3.5 text-indigo-400" />
+              选择已生成视频 / 上传本地视频
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            {/* 上传本地视频区域 */}
+            <div className="space-y-2">
+              <p className="text-[11px] text-zinc-400">上传本地视频或图片作为素材：</p>
+              <label className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-zinc-700 hover:border-indigo-500 rounded-lg py-5 cursor-pointer bg-zinc-800/30 hover:bg-indigo-600/5 transition-all">
+                <input
+                  type="file"
+                  accept="video/*,image/*,audio/*"
+                  className="hidden"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      setPickerOpen(false);
+                      await onUpload(file);
+                    }
+                  }}
+                />
+                <Upload className="w-5 h-5 text-zinc-500" />
+                <span className="text-xs text-zinc-300">点击选择本地视频/图片</span>
+                <span className="text-[10px] text-zinc-500">支持 MP4, MOV, WebM, JPG, PNG 等 (最大50MB)</span>
+              </label>
+            </div>
+
+            {/* 选择已生成的视频 */}
+            <div className="space-y-2">
+              <p className="text-[11px] text-zinc-400">选择您已生成的带货视频：</p>
+              <ScrollArea className="max-h-60 border border-zinc-800 rounded-lg bg-zinc-950 p-2">
+                {importedVideos.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-8 gap-2">
+                    <Film className="w-8 h-8 text-zinc-850 animate-pulse" />
+                    <p className="text-[10px] text-zinc-600 text-center">暂无已生成视频，请先前往「生成视频」页面创作</p>
+                  </div>
+                ) : (
+                  <div className="space-y-1.5">
+                    {importedVideos.map(v => (
+                      <button
+                        key={v.id}
+                        className="w-full flex items-center gap-2 p-1.5 rounded bg-zinc-900 border border-zinc-800 hover:border-indigo-500 hover:bg-indigo-600/10 transition-all group text-left"
+                        onClick={() => { onImportVideo(v); setPickerOpen(false); }}
+                      >
+                        <div className="w-14 h-8 rounded overflow-hidden bg-zinc-800 shrink-0">
+                          {v.thumbnail_url
+                            ? <img src={v.thumbnail_url} alt={v.title} className="w-full h-full object-cover" />
+                            : <div className="w-full h-full flex items-center justify-center"><Film className="w-3.5 h-3.5 text-zinc-700" /></div>}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[10px] text-zinc-300 truncate font-medium">{v.title}</p>
+                          <p className="text-[9px] text-zinc-500">点击导入到素材库</p>
+                        </div>
+                        <Plus className="w-3.5 h-3.5 text-zinc-600 group-hover:text-indigo-400 shrink-0 transition-colors" />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </ScrollArea>
+            </div>
           </div>
-          <ScrollArea className="flex-1">
-            {importedVideos.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 gap-3 px-4">
-                <Film className="w-10 h-10 text-zinc-700" />
-                <p className="text-[11px] text-zinc-500 text-center">暂无已生成视频，请先在「视频生成」页面完成创作</p>
-              </div>
-            ) : (
-              <div className="p-3 space-y-2">
-                {importedVideos.map(v => (
-                  <button
-                    key={v.id}
-                    className="w-full flex items-center gap-2.5 p-2 rounded-lg bg-zinc-800/60 border border-zinc-700 hover:border-indigo-500 hover:bg-indigo-600/10 transition-all group text-left"
-                    onClick={() => { onImportVideo(v); setPickerOpen(false); }}
-                  >
-                    <div className="w-16 h-10 rounded overflow-hidden bg-zinc-700 shrink-0">
-                      {v.thumbnail_url
-                        ? <img src={v.thumbnail_url} alt={v.title} className="w-full h-full object-cover" />
-                        : <div className="w-full h-full flex items-center justify-center"><Film className="w-4 h-4 text-zinc-500" /></div>}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[11px] text-zinc-200 truncate font-medium">{v.title}</p>
-                      <p className="text-[10px] text-zinc-500 mt-0.5">点击导入到素材库</p>
-                    </div>
-                    <Plus className="w-4 h-4 text-zinc-600 group-hover:text-indigo-400 shrink-0 transition-colors" />
-                  </button>
-                ))}
-              </div>
-            )}
-          </ScrollArea>
-        </div>
-      )}
+          <DialogFooter className="border-t border-zinc-800 pt-2.5">
+            <Button size="sm" variant="ghost" className="h-8 border border-zinc-800 text-zinc-400 hover:text-zinc-200" onClick={() => setPickerOpen(false)}>
+              关闭
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* 素材网格 */}
       <ScrollArea className="flex-1">
@@ -364,13 +397,20 @@ function MediaLibraryPanel({ materials, onAdd, importedVideos, onImportVideo }: 
           {filtered.map(m => (
             <div key={m.id} className="aspect-video bg-zinc-800 rounded border border-zinc-700 relative group overflow-hidden hover:border-zinc-500 transition-all hover:-translate-y-0.5 cursor-pointer">
               {m.url ? (
-                <img src={m.url} alt={m.name} className="w-full h-full object-cover" />
+                m.type === 'audio' ? (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-800/90 text-zinc-400 gap-1.5 p-2">
+                    <Music className="w-5 h-5 text-indigo-400" />
+                    <span className="text-[9px] truncate w-full text-center">{m.name}</span>
+                  </div>
+                ) : (
+                  <img src={m.url} alt={m.name} className="w-full h-full object-cover" />
+                )
               ) : (
                 <div className="absolute inset-0 flex items-center justify-center">
                   {m.type === 'audio' ? <Music className="w-5 h-5 text-zinc-600" /> : <ImageIcon className="w-5 h-5 text-zinc-600" />}
                 </div>
               )}
-              <div className="absolute bottom-0 left-0 right-0 bg-black/60 px-1.5 py-0.5 text-[10px] truncate text-zinc-300">{m.name}</div>
+              {m.type !== 'audio' && <div className="absolute bottom-0 left-0 right-0 bg-black/60 px-1.5 py-0.5 text-[10px] truncate text-zinc-300">{m.name}</div>}
               <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
                 <Button size="icon" variant="ghost" className="w-8 h-8 rounded-full bg-indigo-600/80 text-white hover:bg-indigo-600" onClick={() => onAdd(m)}>
                   <Plus className="w-4 h-4" />
@@ -1765,11 +1805,12 @@ const PANEL_ITEMS: { id: PanelId; icon: React.ElementType; label: string; shortc
   { id: 'shop',     icon: ShoppingBag,  label: '资源商城', shortcut: 'S' },
 ];
 
-function LeftSidebar({ materials, onAdd, importedVideos, onImportVideo }: {
+function LeftSidebar({ materials, onAdd, importedVideos, onImportVideo, onUpload }: {
   materials: { id: string; name: string; url: string; type: string }[];
   onAdd: (m: { id: string; name: string; url: string; type: string }) => void;
   importedVideos: { id: string; title: string; video_url: string; thumbnail_url: string | null }[];
   onImportVideo: (v: { id: string; title: string; video_url: string; thumbnail_url: string | null }) => void;
+  onUpload: (file: File) => Promise<void>;
 }) {
   const [activePanel, setActivePanel] = useState<PanelId>('media');
   const [collapsed, setCollapsed] = useState(false);
@@ -1834,7 +1875,7 @@ function LeftSidebar({ materials, onAdd, importedVideos, onImportVideo }: {
           </div>
           {/* 面板内容 */}
           <div className="flex-1 min-h-0 overflow-hidden">
-            {activePanel === 'media'    && <MediaLibraryPanel materials={materials} onAdd={onAdd} importedVideos={importedVideos} onImportVideo={onImportVideo} />}
+            {activePanel === 'media'    && <MediaLibraryPanel materials={materials} onAdd={onAdd} importedVideos={importedVideos} onImportVideo={onImportVideo} onUpload={onUpload} />}
             {activePanel === 'effects'  && <EffectsPanel />}
             {activePanel === 'text'     && <TextSubtitlePanel />}
             {activePanel === 'pip'      && <PipPanel />}
@@ -1850,6 +1891,44 @@ function LeftSidebar({ materials, onAdd, importedVideos, onImportVideo }: {
 }
 
 // ── 主页面组件 ───────────────────────────────────────────────────────────
+const DEFAULT_TRACKS: TrackItem[] = [
+  {
+    id: 'v1',
+    trackId: 'video',
+    name: '片段 1.mp4',
+    start: 0,
+    duration: 21,
+    type: 'video',
+    url: 'https://www.w3schools.com/html/mov_bbb.mp4'
+  },
+  {
+    id: 'a1',
+    trackId: 'audio',
+    name: 'BGM · 动感节奏',
+    start: 0,
+    duration: 27,
+    type: 'audio',
+    url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'
+  },
+  {
+    id: 't1',
+    trackId: 'text',
+    name: '全新解决方案来了',
+    start: 3,
+    duration: 9,
+    type: 'text'
+  },
+  {
+    id: 'fx1',
+    trackId: 'effects',
+    name: '光晕特效',
+    start: 7.5,
+    duration: 6,
+    type: 'image',
+    url: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=640&h=360&fit=crop'
+  }
+];
+
 export default function VideoEditPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -1864,7 +1943,7 @@ export default function VideoEditPage() {
   const [projectTitle, setProjectTitle] = useState('未命名项目');
   const [saving, setSaving] = useState(false);
   const [materials, setMaterials] = useState<{id: string; name: string; url: string; type: string}[]>([]);
-  const [tracks, setTracks] = useState<TrackItem[]>([]);
+  const [tracks, setTracks] = useState<TrackItem[]>(DEFAULT_TRACKS);
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [scale, setScale] = useState([100]);
   const [opacity, setOpacity] = useState([100]);
@@ -1874,6 +1953,33 @@ export default function VideoEditPage() {
   const [importedVideos, setImportedVideos] = useState<{id: string; title: string; video_url: string; thumbnail_url: string | null}[]>([]);
   const [previewVideoUrl, setPreviewVideoUrl] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const rulerRef = useRef<HTMLDivElement>(null);
+
+  // Find active video/image clip under the playhead
+  const activeVideoClip = tracks.find(track => {
+    const end = track.start + track.duration;
+    return currentTime >= track.start && currentTime <= end && track.type === 'video';
+  });
+
+  const activeImageClip = tracks.find(track => {
+    const end = track.start + track.duration;
+    return currentTime >= track.start && currentTime <= end && track.type === 'image';
+  });
+
+  const currentVideoSrc = activeVideoClip?.url || previewVideoUrl;
+
+  // Selected track item object
+  const selectedTrackObj = tracks.find(t => t.id === selectedTrackItem);
+
+  // Sync state with selected item attributes
+  useEffect(() => {
+    if (selectedTrackObj) {
+      if (selectedTrackObj.type === 'video' || selectedTrackObj.type === 'image') {
+        setScale([100]);
+        setOpacity([100]);
+      }
+    }
+  }, [selectedTrackItem]);
 
   // 示例项目选择器
   const [sampleProjects, setSampleProjects] = useState<{id: string; title: string; thumbnail_url: string | null; status: string}[]>([]);
@@ -1898,10 +2004,14 @@ export default function VideoEditPage() {
       .select('id,title,video_url,thumbnail_url')
       .eq('user_id', user.id)
       .eq('status', 'completed')
-      .not('video_url', 'is', null)
       .order('created_at', { ascending: false })
       .limit(20);
-    setImportedVideos((data ?? []).filter(v => v.video_url) as typeof importedVideos);
+    const mapped = (data ?? []).map(v => ({
+      ...v,
+      video_url: v.video_url || 'https://www.w3schools.com/html/mov_bbb.mp4',
+      thumbnail_url: v.thumbnail_url || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=640&h=360&fit=crop'
+    }));
+    setImportedVideos(mapped);
   }, [user]);
 
   // 加载素材库
@@ -1930,7 +2040,11 @@ export default function VideoEditPage() {
       setProjectTitle(data.title || '未命名项目');
       if ((data as any).video_url) setPreviewVideoUrl((data as any).video_url);
       const meta = (data.metadata || {}) as any;
-      if (meta.tracks) setTracks(meta.tracks);
+      if (meta.tracks && meta.tracks.length > 0) {
+        setTracks(meta.tracks);
+      } else {
+        setTracks(DEFAULT_TRACKS);
+      }
       if (meta.duration) setDuration(meta.duration);
     }
   }, [importId, user]);
@@ -1947,7 +2061,112 @@ export default function VideoEditPage() {
     if (!v) return;
     if (isPlaying) { v.play().catch(() => setIsPlaying(false)); }
     else { v.pause(); }
-  }, [isPlaying]);
+  }, [isPlaying, currentVideoSrc]);
+
+  // Fallback playhead timer for when no video is active
+  useEffect(() => {
+    let intervalId: any;
+    if (isPlaying && !currentVideoSrc) {
+      let lastTime = Date.now();
+      intervalId = setInterval(() => {
+        const now = Date.now();
+        const delta = (now - lastTime) / 1000;
+        lastTime = now;
+        setCurrentTime(prev => {
+          const next = prev + delta;
+          if (next >= duration) {
+            setIsPlaying(false);
+            return duration;
+          }
+          return next;
+        });
+      }, 30);
+    }
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [isPlaying, currentVideoSrc, duration]);
+
+  // Sync player time when scrubbing or when timeline currentTime changes
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    if (activeVideoClip) {
+      const localTime = currentTime - activeVideoClip.start;
+      if (Math.abs(v.currentTime - localTime) > 0.3) {
+        v.currentTime = Math.max(0, Math.min(activeVideoClip.duration, localTime));
+      }
+    } else if (previewVideoUrl) {
+      if (Math.abs(v.currentTime - currentTime) > 0.3) {
+        v.currentTime = Math.max(0, Math.min(duration, currentTime));
+      }
+    }
+  }, [currentTime, activeVideoClip, previewVideoUrl, duration]);
+
+  const handleTimeUpdate = () => {
+    const v = videoRef.current;
+    if (!v) return;
+    if (isPlaying) {
+      if (activeVideoClip) {
+        setCurrentTime(activeVideoClip.start + v.currentTime);
+      } else {
+        setCurrentTime(v.currentTime);
+      }
+    }
+  };
+
+  const handleSeek = (clientX: number) => {
+    const ruler = rulerRef.current;
+    if (!ruler) return;
+    const rect = ruler.getBoundingClientRect();
+    const relativeX = clientX - rect.left;
+    
+    // Ruler layout offset starts after: left padding (8px) + header (64px) + gap (8px mr-2) = 80px
+    const leftOffset = 80;
+    const rightPadding = 8;
+    const scrollableWidth = rect.width - leftOffset - rightPadding;
+    
+    if (scrollableWidth <= 0) return;
+    
+    let percentage = (relativeX - leftOffset) / scrollableWidth;
+    percentage = Math.max(0, Math.min(1, percentage));
+    
+    const newTime = percentage * duration;
+    setCurrentTime(newTime);
+    
+    if (videoRef.current) {
+      const activeVideo = tracks.find(track => {
+        const end = track.start + track.duration;
+        return newTime >= track.start && newTime <= end && track.type === 'video';
+      });
+      if (activeVideo) {
+        videoRef.current.currentTime = Math.max(0, Math.min(activeVideo.duration, newTime - activeVideo.start));
+      } else {
+        videoRef.current.currentTime = Math.max(0, Math.min(duration, newTime));
+      }
+    }
+  };
+
+  const handleRulerClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    handleSeek(e.clientX);
+  };
+
+  const handleRulerMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    handleSeek(e.clientX);
+    
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      handleSeek(moveEvent.clientX);
+    };
+    
+    const handleMouseUp = () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+    
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+  };
 
   // 保存草稿
   const handleSave = async () => {
@@ -2012,6 +2231,37 @@ export default function VideoEditPage() {
     }
   };
 
+  // 上传本地文件到素材库
+  const handleUpload = async (file: File) => {
+    if (!user) { toast.error('请先登录'); return; }
+    if (file.size > 50 * 1024 * 1024) { toast.error(`文件过大（最大50MB）：${file.name}`); return; }
+    const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
+    const isImage = ['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(ext);
+    const isVideo = ['mp4', 'mov', 'avi', 'webm'].includes(ext);
+    const isAudio = ['mp3', 'wav', 'ogg', 'm4a'].includes(ext);
+    if (!isImage && !isVideo && !isAudio) { toast.error(`不支持的格式：${ext}`); return; }
+    
+    const toastId = toast.loading(`正在上传 ${file.name}...`);
+    try {
+      const path = `${user.id}/${crypto.randomUUID()}.${ext}`;
+      const { data: up, error } = await supabase.storage.from('materials').upload(path, file);
+      if (error) throw error;
+      const { data: urlData } = supabase.storage.from('materials').getPublicUrl(up.path);
+      const { data: mat, error: insertError } = await supabase.from('materials').insert({
+        user_id: user.id,
+        name: file.name,
+        type: isImage ? 'image' : isVideo ? 'video' : 'audio',
+        url: urlData.publicUrl,
+        size: file.size,
+      }).select().maybeSingle();
+      if (insertError) throw insertError;
+      toast.success(`上传成功：${file.name}`, { id: toastId });
+      loadMaterials();
+    } catch (e: any) {
+      toast.error(`上传失败: ${e.message || e}`, { id: toastId });
+    }
+  };
+
   // 导出视频
   const handleExport = async () => {
     if (!user) { toast.error('请先登录'); return; }
@@ -2034,7 +2284,7 @@ export default function VideoEditPage() {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100dvh-3.5rem)] md:h-[calc(100vh-2rem)] bg-zinc-950 text-zinc-300 rounded-lg overflow-hidden border border-zinc-800">
+    <div className="flex flex-col h-screen w-full bg-zinc-950 text-zinc-300 overflow-hidden">
 
       {/* ─── 顶部工具栏 ──────────────────────────────────────────── */}
       <div className="h-12 border-b border-zinc-800 bg-zinc-900 flex items-center justify-between px-2 md:px-4 shrink-0 gap-2">
@@ -2073,39 +2323,14 @@ export default function VideoEditPage() {
       <div className="flex-1 min-h-0 flex overflow-hidden">
 
         {/* 左侧边栏 */}
-        <LeftSidebar materials={materials} onAdd={addToTimeline} importedVideos={importedVideos} onImportVideo={handleImportVideo} />
+        <LeftSidebar materials={materials} onAdd={addToTimeline} importedVideos={importedVideos} onImportVideo={handleImportVideo} onUpload={handleUpload} />
 
         {/* 中央预览区 */}
         <div className="flex-1 flex flex-col bg-black relative min-w-0">
           <div className="flex-1 flex items-center justify-center p-4 min-h-0">
             <div className="aspect-video w-full max-w-3xl bg-zinc-900 border border-zinc-800 shadow-2xl relative overflow-hidden flex items-center justify-center">
 
-              {/* 无项目时 — 示例项目入口 */}
-              {!importId && !showSamplePicker && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 p-6">
-                  <div className="w-16 h-16 rounded-2xl bg-zinc-800 flex items-center justify-center mb-2">
-                    <Play className="w-8 h-8 text-zinc-500 ml-1" />
-                  </div>
-                  <p className="text-sm text-zinc-500 text-center">新建空白项目，或从示例项目开始</p>
-                  <div className="flex gap-3">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="h-8 border border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800"
-                      onClick={() => setSaveDialogOpen(true)}
-                    >
-                      新建项目
-                    </Button>
-                    <Button
-                      size="sm"
-                      className="h-8 bg-indigo-600 hover:bg-indigo-500 text-white"
-                      onClick={() => setShowSamplePicker(true)}
-                    >
-                      打开示例项目
-                    </Button>
-                  </div>
-                </div>
-              )}
+              {/* 无项目时 — 示例项目入口已移除，方便直接播放/预览 */}
 
               {/* 示例项目选择器 */}
               {!importId && showSamplePicker && (
@@ -2141,24 +2366,32 @@ export default function VideoEditPage() {
                 </div>
               )}
 
-              {/* 已有项目时 — 显示视频预览 */}
-              {importId && (
-                previewVideoUrl ? (
-                  <video
-                    ref={videoRef}
-                    src={previewVideoUrl}
-                    className="w-full h-full object-contain"
-                    onTimeUpdate={() => setCurrentTime(videoRef.current?.currentTime ?? 0)}
-                    onLoadedMetadata={() => setDuration(videoRef.current?.duration ?? 30)}
-                    onEnded={() => setIsPlaying(false)}
-                    playsInline
-                  />
-                ) : (
-                  <div className="text-zinc-700 flex flex-col items-center gap-2">
-                    <Play className="w-14 h-14 opacity-20" />
-                    <p className="text-sm text-zinc-600">从素材库导入视频后可预览播放</p>
-                  </div>
-                )
+              {/* Preview content based on current time */}
+              {activeImageClip ? (
+                <img
+                  src={activeImageClip.url}
+                  alt={activeImageClip.name}
+                  className="w-full h-full object-contain"
+                />
+              ) : currentVideoSrc ? (
+                <video
+                  ref={videoRef}
+                  src={currentVideoSrc}
+                  className="w-full h-full object-contain"
+                  onTimeUpdate={handleTimeUpdate}
+                  onLoadedMetadata={() => {
+                    if (!activeVideoClip && videoRef.current) {
+                      setDuration(videoRef.current.duration || 30);
+                    }
+                  }}
+                  onEnded={() => setIsPlaying(false)}
+                  playsInline
+                />
+              ) : (
+                <div className="text-zinc-700 flex flex-col items-center gap-2">
+                  <Play className="w-14 h-14 opacity-20" />
+                  <p className="text-sm text-zinc-600">从素材库导入视频或添加素材到时间轴以预览</p>
+                </div>
               )}
 
               {/* 播放控制 */}
@@ -2289,7 +2522,13 @@ export default function VideoEditPage() {
 
         <div className="flex-1 overflow-auto relative bg-zinc-950">
           {/* 时间刻度 */}
-          <div className="h-6 sticky top-0 bg-zinc-900 border-b border-zinc-800 z-10 text-[10px] text-zinc-500 font-mono flex items-end px-2">
+          <div 
+            ref={rulerRef}
+            className="h-6 sticky top-0 bg-zinc-900 border-b border-zinc-800 z-10 text-[10px] text-zinc-500 font-mono flex items-end px-2 cursor-ew-resize select-none"
+            onClick={handleRulerClick}
+            onMouseDown={handleRulerMouseDown}
+          >
+            <div className="w-16 shrink-0 mr-2 h-full" />
             <div className="flex-1 border-b border-zinc-700/50 relative h-full">
               {[0, 5, 10, 15, 20, 25, 30].map(sec => (
                 <div key={sec} className="absolute bottom-0" style={{ left: `${(sec / 30) * 100}%` }}>
@@ -2308,12 +2547,16 @@ export default function VideoEditPage() {
                 <span className="text-[9px]">主轨道</span>
               </div>
               <div className="flex-1 relative h-14 bg-zinc-900/30 rounded border border-zinc-800/50">
-                <div
-                  className={`absolute top-1 bottom-1 left-[0%] right-[30%] bg-indigo-600/30 border border-indigo-500/50 rounded flex items-center px-2 cursor-pointer transition-all hover:bg-indigo-600/40 ${selectedTrackItem === 'v1' ? 'ring-2 ring-indigo-400' : ''}`}
-                  onClick={() => setSelectedTrackItem('v1')}
-                >
-                  <span className="text-xs text-indigo-200 truncate">片段 1.mp4</span>
-                </div>
+                {tracks.filter(item => item.type === 'video').map(item => (
+                  <div
+                    key={item.id}
+                    className={`absolute top-1 bottom-1 bg-indigo-600/30 border border-indigo-500/50 rounded flex items-center px-2 cursor-pointer transition-all hover:bg-indigo-600/40 ${selectedTrackItem === item.id ? 'ring-2 ring-indigo-400' : ''}`}
+                    style={{ left: `${(item.start / duration) * 100}%`, width: `${(item.duration / duration) * 100}%` }}
+                    onClick={() => setSelectedTrackItem(item.id)}
+                  >
+                    <span className="text-xs text-indigo-200 truncate">{item.name}</span>
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -2324,12 +2567,16 @@ export default function VideoEditPage() {
                 <span className="text-[9px]">音频</span>
               </div>
               <div className="flex-1 relative h-10 bg-zinc-900/30 rounded border border-zinc-800/50">
-                <div
-                  className={`absolute top-1 bottom-1 left-[0%] right-[10%] bg-emerald-600/30 border border-emerald-500/50 rounded flex items-center px-2 cursor-pointer hover:bg-emerald-600/40 transition-all ${selectedTrackItem === 'a1' ? 'ring-2 ring-emerald-400' : ''}`}
-                  onClick={() => setSelectedTrackItem('a1')}
-                >
-                  <span className="text-xs text-emerald-200">BGM · 动感节奏</span>
-                </div>
+                {tracks.filter(item => item.type === 'audio').map(item => (
+                  <div
+                    key={item.id}
+                    className={`absolute top-1 bottom-1 bg-emerald-600/30 border border-emerald-500/50 rounded flex items-center px-2 cursor-pointer hover:bg-emerald-600/40 transition-all ${selectedTrackItem === item.id ? 'ring-2 ring-emerald-400' : ''}`}
+                    style={{ left: `${(item.start / duration) * 100}%`, width: `${(item.duration / duration) * 100}%` }}
+                    onClick={() => setSelectedTrackItem(item.id)}
+                  >
+                    <span className="text-xs text-emerald-200 truncate font-mono">{item.name}</span>
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -2339,12 +2586,16 @@ export default function VideoEditPage() {
                 <Type className="w-4 h-4" />
               </div>
               <div className="flex-1 relative h-8 bg-zinc-900/30 rounded border border-zinc-800/50">
-                <div
-                  className={`absolute top-1 bottom-1 left-[10%] right-[60%] bg-amber-600/30 border border-amber-500/50 rounded flex items-center justify-center cursor-pointer hover:bg-amber-600/40 transition-all ${selectedTrackItem === 't1' ? 'ring-2 ring-amber-400' : ''}`}
-                  onClick={() => setSelectedTrackItem('t1')}
-                >
-                  <span className="text-[10px] text-amber-200 truncate px-1">全新解决方案来了</span>
-                </div>
+                {tracks.filter(item => item.type === 'text').map(item => (
+                  <div
+                    key={item.id}
+                    className={`absolute top-1 bottom-1 bg-amber-600/30 border border-amber-500/50 rounded flex items-center justify-center cursor-pointer hover:bg-amber-600/40 transition-all ${selectedTrackItem === item.id ? 'ring-2 ring-amber-400' : ''}`}
+                    style={{ left: `${(item.start / duration) * 100}%`, width: `${(item.duration / duration) * 100}%` }}
+                    onClick={() => setSelectedTrackItem(item.id)}
+                  >
+                    <span className="text-[10px] text-amber-200 truncate px-1">{item.name}</span>
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -2354,36 +2605,25 @@ export default function VideoEditPage() {
                 <Sparkles className="w-4 h-4" />
               </div>
               <div className="flex-1 relative h-8 bg-zinc-900/30 rounded border border-zinc-800/50">
-                <div
-                  className={`absolute top-1 bottom-1 left-[25%] right-[55%] bg-purple-600/30 border border-purple-500/50 rounded flex items-center justify-center cursor-pointer hover:bg-purple-600/40 transition-all ${selectedTrackItem === 'fx1' ? 'ring-2 ring-purple-400' : ''}`}
-                  onClick={() => setSelectedTrackItem('fx1')}
-                >
-                  <span className="text-[10px] text-purple-200 px-1">光晕特效</span>
-                </div>
-              </div>
-            </div>
-
-            {/* 来自素材库的真实轨道 */}
-            {tracks.map(item => (
-              <div key={item.id} className="flex gap-2">
-                <div className="w-16 shrink-0 h-8 bg-zinc-900 border border-zinc-800 rounded flex items-center justify-center text-zinc-500 text-[9px]">
-                  {item.type === 'video' ? '视频' : item.type === 'audio' ? '音频' : item.type === 'image' ? '图片' : '文本'}
-                </div>
-                <div className="flex-1 relative h-8 bg-zinc-900/30 rounded border border-zinc-800/50">
+                {tracks.filter(item => item.type === 'image').map(item => (
                   <div
-                    className={`absolute top-0.5 bottom-0.5 rounded flex items-center px-2 cursor-pointer transition-all ${selectedTrackItem === item.id ? 'ring-2 ring-indigo-400' : ''} ${item.type === 'audio' ? 'bg-emerald-600/30 border border-emerald-500/50 hover:bg-emerald-600/40' : 'bg-indigo-600/30 border border-indigo-500/50 hover:bg-indigo-600/40'}`}
+                    key={item.id}
+                    className={`absolute top-1 bottom-1 bg-purple-600/30 border border-purple-500/50 rounded flex items-center justify-center cursor-pointer hover:bg-purple-600/40 transition-all ${selectedTrackItem === item.id ? 'ring-2 ring-purple-400' : ''}`}
                     style={{ left: `${(item.start / duration) * 100}%`, width: `${(item.duration / duration) * 100}%` }}
                     onClick={() => setSelectedTrackItem(item.id)}
                   >
-                    <span className="text-[10px] truncate">{item.name}</span>
+                    <span className="text-[10px] text-purple-200 px-1 truncate">{item.name}</span>
                   </div>
-                </div>
+                ))}
               </div>
-            ))}
+            </div>
           </div>
 
           {/* 播放指针 */}
-          <div className="absolute top-0 bottom-0 w-px bg-red-500 z-20 pointer-events-none" style={{ left: `calc(4rem + ${(currentTime / duration) * (100 - 8)}% + 8px)` }}>
+          <div 
+            className="absolute top-0 bottom-0 w-px bg-red-500 z-20 pointer-events-none" 
+            style={{ left: `calc(80px + (100% - 88px) * ${currentTime / duration})` }}
+          >
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3 h-3 rotate-45 bg-red-500" />
           </div>
         </div>
