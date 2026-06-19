@@ -525,7 +525,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       {/* 主内容区 */}
       <div className="flex-1 min-w-0 flex flex-col overflow-x-hidden">
         {/* 顶部栏：移动端汉堡 + 全局搜索（桌面端也显示） */}
-        {!isVideoEditPage && (
+        {!isVideoEditPage && !isVideoCreatePage && (
           <header className="flex items-center gap-3 px-4 h-14 border-b bg-card shrink-0" style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
             {/* 移动端菜单 */}
             <div className="lg:hidden">

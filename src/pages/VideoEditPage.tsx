@@ -271,12 +271,13 @@ function SearchBar({ placeholder, onSearch }: { placeholder: string; onSearch?: 
 }
 
 // ── 面板1：媒体库 ────────────────────────────────────────────────────────
-function MediaLibraryPanel({ materials, onAdd, importedVideos, onImportVideo, onUpload }: {
+function MediaLibraryPanel({ materials, onAdd, importedVideos, onImportVideo, onUpload, onDelete }: {
   materials: { id: string; name: string; url: string; type: string }[];
   onAdd: (m: { id: string; name: string; url: string; type: string }) => void;
   importedVideos: { id: string; title: string; video_url: string; thumbnail_url: string | null }[];
   onImportVideo: (v: { id: string; title: string; video_url: string; thumbnail_url: string | null }) => void;
   onUpload: (file: File) => Promise<void>;
+  onDelete: (id: string) => void;
 }) {
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('全部');
@@ -336,11 +337,11 @@ function MediaLibraryPanel({ materials, onAdd, importedVideos, onImportVideo, on
                   accept="video/*,image/*,audio/*"
                   className="hidden"
                   onChange={async (e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      setPickerOpen(false);
-                      await onUpload(file);
-                    }
+                     const file = e.target.files?.[0];
+                     if (file) {
+                       setPickerOpen(false);
+                       await onUpload(file);
+                     }
                   }}
                 />
                 <Upload className="w-5 h-5 text-zinc-500" />
@@ -403,7 +404,19 @@ function MediaLibraryPanel({ materials, onAdd, importedVideos, onImportVideo, on
                     <span className="text-[9px] truncate w-full text-center">{m.name}</span>
                   </div>
                 ) : (
-                  <img src={m.url} alt={m.name} className="w-full h-full object-cover" />
+                  <img
+                    src={m.url && (m.url.startsWith('http://') || m.url.startsWith('https://') || m.url.startsWith('data:')) ? m.url : 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop'}
+                    alt={m.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      const name = m.name.toLowerCase();
+                      if (name.includes('小米') || name.includes('phone') || name.includes('手机')) {
+                        e.currentTarget.src = 'https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=400&h=300&fit=crop';
+                      } else {
+                        e.currentTarget.src = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop';
+                      }
+                    }}
+                  />
                 )
               ) : (
                 <div className="absolute inset-0 flex items-center justify-center">
@@ -411,9 +424,12 @@ function MediaLibraryPanel({ materials, onAdd, importedVideos, onImportVideo, on
                 </div>
               )}
               {m.type !== 'audio' && <div className="absolute bottom-0 left-0 right-0 bg-black/60 px-1.5 py-0.5 text-[10px] truncate text-zinc-300">{m.name}</div>}
-              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                <Button size="icon" variant="ghost" className="w-8 h-8 rounded-full bg-indigo-600/80 text-white hover:bg-indigo-600" onClick={() => onAdd(m)}>
+              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-3 transition-opacity">
+                <Button size="icon" variant="ghost" className="w-8 h-8 rounded-full bg-indigo-600/80 text-white hover:bg-indigo-600" onClick={(e) => { e.stopPropagation(); onAdd(m); }}>
                   <Plus className="w-4 h-4" />
+                </Button>
+                <Button size="icon" variant="ghost" className="w-8 h-8 rounded-full bg-red-600/80 text-white hover:bg-red-500" onClick={(e) => { e.stopPropagation(); onDelete(m.id); }}>
+                  <Trash2 className="w-4 h-4" />
                 </Button>
               </div>
             </div>
@@ -1805,12 +1821,13 @@ const PANEL_ITEMS: { id: PanelId; icon: React.ElementType; label: string; shortc
   { id: 'shop',     icon: ShoppingBag,  label: '资源商城', shortcut: 'S' },
 ];
 
-function LeftSidebar({ materials, onAdd, importedVideos, onImportVideo, onUpload }: {
+function LeftSidebar({ materials, onAdd, importedVideos, onImportVideo, onUpload, onDelete }: {
   materials: { id: string; name: string; url: string; type: string }[];
   onAdd: (m: { id: string; name: string; url: string; type: string }) => void;
   importedVideos: { id: string; title: string; video_url: string; thumbnail_url: string | null }[];
   onImportVideo: (v: { id: string; title: string; video_url: string; thumbnail_url: string | null }) => void;
   onUpload: (file: File) => Promise<void>;
+  onDelete: (id: string) => void;
 }) {
   const [activePanel, setActivePanel] = useState<PanelId>('media');
   const [collapsed, setCollapsed] = useState(false);
@@ -1875,7 +1892,7 @@ function LeftSidebar({ materials, onAdd, importedVideos, onImportVideo, onUpload
           </div>
           {/* 面板内容 */}
           <div className="flex-1 min-h-0 overflow-hidden">
-            {activePanel === 'media'    && <MediaLibraryPanel materials={materials} onAdd={onAdd} importedVideos={importedVideos} onImportVideo={onImportVideo} onUpload={onUpload} />}
+            {activePanel === 'media'    && <MediaLibraryPanel materials={materials} onAdd={onAdd} importedVideos={importedVideos} onImportVideo={onImportVideo} onUpload={onUpload} onDelete={onDelete} />}
             {activePanel === 'effects'  && <EffectsPanel />}
             {activePanel === 'text'     && <TextSubtitlePanel />}
             {activePanel === 'pip'      && <PipPanel />}
@@ -1948,6 +1965,108 @@ export default function VideoEditPage() {
   const [scale, setScale] = useState([100]);
   const [opacity, setOpacity] = useState([100]);
   const [volume, setVolume] = useState([100]);
+
+  const [dragInfo, setDragInfo] = useState<{
+    id: string;
+    startX: number;
+    startY: number;
+    initialStart: number;
+    initialTrackId: string;
+    offsetX: number;
+    offsetY: number;
+  } | null>(null);
+
+  const handleTrackItemMouseDown = (e: React.MouseEvent, item: TrackItem) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setSelectedTrackItem(item.id);
+    setDragInfo({
+      id: item.id,
+      startX: e.clientX,
+      startY: e.clientY,
+      initialStart: item.start,
+      initialTrackId: item.trackId,
+      offsetX: 0,
+      offsetY: 0,
+    });
+  };
+
+  useEffect(() => {
+    if (!dragInfo) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const dx = e.clientX - dragInfo.startX;
+      const dy = e.clientY - dragInfo.startY;
+      setDragInfo(prev => prev ? { ...prev, offsetX: dx, offsetY: dy } : null);
+    };
+
+    const handleMouseUp = (e: MouseEvent) => {
+      const dx = e.clientX - dragInfo.startX;
+      const dy = e.clientY - dragInfo.startY;
+
+      const item = tracks.find(t => t.id === dragInfo.id);
+      if (item) {
+        const trackContainer = rulerRef.current;
+        let finalStart = item.start;
+        if (trackContainer) {
+          const rect = trackContainer.getBoundingClientRect();
+          const leftOffset = 80;
+          const scrollableWidth = rect.width - leftOffset - 8;
+          if (scrollableWidth > 0) {
+            const secondsPerPixel = duration / scrollableWidth;
+            const dt = dx * secondsPerPixel;
+            finalStart = Math.max(0, Math.min(duration - item.duration, dragInfo.initialStart + dt));
+          }
+        }
+
+        const trackTypes: ('video' | 'audio' | 'text' | 'image')[] = ['video', 'audio', 'text', 'image'];
+        const currentIdx = trackTypes.indexOf(item.type);
+        const trackShift = Math.round(dy / 38);
+        let newIdx = currentIdx + trackShift;
+        newIdx = Math.max(0, Math.min(trackTypes.length - 1, newIdx));
+        const newType = trackTypes[newIdx];
+        const newTrackId = newType === 'text' ? 'text' : newType === 'image' ? 'effects' : newType;
+
+        setTracks(prev => prev.map(t => {
+          if (t.id === dragInfo.id) {
+            return {
+              ...t,
+              start: Number(finalStart.toFixed(2)),
+              type: newType,
+              trackId: newTrackId,
+            };
+          }
+          return t;
+        }));
+        
+        if (newType !== item.type) {
+          toast.success(`已将片段拖动至新轨道`, { description: `新位置: ${newType === 'video' ? '主视频' : newType === 'audio' ? '音频' : newType === 'text' ? '字幕' : '特效'}` });
+        }
+      }
+
+      setDragInfo(null);
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [dragInfo, tracks, duration]);
+
+  const handleDeleteMaterial = async (id: string) => {
+    setMaterials(prev => prev.filter(m => m.id !== id));
+    try {
+      const { error } = await supabase.from('materials').delete().eq('id', id);
+      if (error) {
+        console.warn('DB delete failed:', error.message);
+      }
+      toast.success('素材已从媒体库删除');
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   // 生成视频列表（用于一键导入）& 预览 URL
   const [importedVideos, setImportedVideos] = useState<{id: string; title: string; video_url: string; thumbnail_url: string | null}[]>([]);
@@ -2323,7 +2442,7 @@ export default function VideoEditPage() {
       <div className="flex-1 min-h-0 flex overflow-hidden">
 
         {/* 左侧边栏 */}
-        <LeftSidebar materials={materials} onAdd={addToTimeline} importedVideos={importedVideos} onImportVideo={handleImportVideo} onUpload={handleUpload} />
+        <LeftSidebar materials={materials} onAdd={addToTimeline} importedVideos={importedVideos} onImportVideo={handleImportVideo} onUpload={handleUpload} onDelete={handleDeleteMaterial} />
 
         {/* 中央预览区 */}
         <div className="flex-1 flex flex-col bg-black relative min-w-0">
@@ -2550,9 +2669,16 @@ export default function VideoEditPage() {
                 {tracks.filter(item => item.type === 'video').map(item => (
                   <div
                     key={item.id}
-                    className={`absolute top-1 bottom-1 bg-indigo-600/30 border border-indigo-500/50 rounded flex items-center px-2 cursor-pointer transition-all hover:bg-indigo-600/40 ${selectedTrackItem === item.id ? 'ring-2 ring-indigo-400' : ''}`}
-                    style={{ left: `${(item.start / duration) * 100}%`, width: `${(item.duration / duration) * 100}%` }}
+                    className={`absolute top-1 bottom-1 bg-indigo-600/30 border border-indigo-500/50 rounded flex items-center px-2 cursor-pointer hover:bg-indigo-600/40 select-none ${selectedTrackItem === item.id ? 'ring-2 ring-indigo-400' : ''}`}
+                    style={{
+                      left: `${(item.start / duration) * 100}%`,
+                      width: `${(item.duration / duration) * 100}%`,
+                      transform: dragInfo?.id === item.id ? `translate(${dragInfo.offsetX}px, ${dragInfo.offsetY}px)` : undefined,
+                      zIndex: dragInfo?.id === item.id ? 50 : undefined,
+                      opacity: dragInfo?.id === item.id ? 0.8 : undefined,
+                    }}
                     onClick={() => setSelectedTrackItem(item.id)}
+                    onMouseDown={(e) => handleTrackItemMouseDown(e, item)}
                   >
                     <span className="text-xs text-indigo-200 truncate">{item.name}</span>
                   </div>
@@ -2570,9 +2696,16 @@ export default function VideoEditPage() {
                 {tracks.filter(item => item.type === 'audio').map(item => (
                   <div
                     key={item.id}
-                    className={`absolute top-1 bottom-1 bg-emerald-600/30 border border-emerald-500/50 rounded flex items-center px-2 cursor-pointer hover:bg-emerald-600/40 transition-all ${selectedTrackItem === item.id ? 'ring-2 ring-emerald-400' : ''}`}
-                    style={{ left: `${(item.start / duration) * 100}%`, width: `${(item.duration / duration) * 100}%` }}
+                    className={`absolute top-1 bottom-1 bg-emerald-600/30 border border-emerald-500/50 rounded flex items-center px-2 cursor-pointer hover:bg-emerald-600/40 select-none ${selectedTrackItem === item.id ? 'ring-2 ring-emerald-400' : ''}`}
+                    style={{
+                      left: `${(item.start / duration) * 100}%`,
+                      width: `${(item.duration / duration) * 100}%`,
+                      transform: dragInfo?.id === item.id ? `translate(${dragInfo.offsetX}px, ${dragInfo.offsetY}px)` : undefined,
+                      zIndex: dragInfo?.id === item.id ? 50 : undefined,
+                      opacity: dragInfo?.id === item.id ? 0.8 : undefined,
+                    }}
                     onClick={() => setSelectedTrackItem(item.id)}
+                    onMouseDown={(e) => handleTrackItemMouseDown(e, item)}
                   >
                     <span className="text-xs text-emerald-200 truncate font-mono">{item.name}</span>
                   </div>
@@ -2589,9 +2722,16 @@ export default function VideoEditPage() {
                 {tracks.filter(item => item.type === 'text').map(item => (
                   <div
                     key={item.id}
-                    className={`absolute top-1 bottom-1 bg-amber-600/30 border border-amber-500/50 rounded flex items-center justify-center cursor-pointer hover:bg-amber-600/40 transition-all ${selectedTrackItem === item.id ? 'ring-2 ring-amber-400' : ''}`}
-                    style={{ left: `${(item.start / duration) * 100}%`, width: `${(item.duration / duration) * 100}%` }}
+                    className={`absolute top-1 bottom-1 bg-amber-600/30 border border-amber-500/50 rounded flex items-center justify-center cursor-pointer hover:bg-amber-600/40 select-none ${selectedTrackItem === item.id ? 'ring-2 ring-amber-400' : ''}`}
+                    style={{
+                      left: `${(item.start / duration) * 100}%`,
+                      width: `${(item.duration / duration) * 100}%`,
+                      transform: dragInfo?.id === item.id ? `translate(${dragInfo.offsetX}px, ${dragInfo.offsetY}px)` : undefined,
+                      zIndex: dragInfo?.id === item.id ? 50 : undefined,
+                      opacity: dragInfo?.id === item.id ? 0.8 : undefined,
+                    }}
                     onClick={() => setSelectedTrackItem(item.id)}
+                    onMouseDown={(e) => handleTrackItemMouseDown(e, item)}
                   >
                     <span className="text-[10px] text-amber-200 truncate px-1">{item.name}</span>
                   </div>
@@ -2608,9 +2748,16 @@ export default function VideoEditPage() {
                 {tracks.filter(item => item.type === 'image').map(item => (
                   <div
                     key={item.id}
-                    className={`absolute top-1 bottom-1 bg-purple-600/30 border border-purple-500/50 rounded flex items-center justify-center cursor-pointer hover:bg-purple-600/40 transition-all ${selectedTrackItem === item.id ? 'ring-2 ring-purple-400' : ''}`}
-                    style={{ left: `${(item.start / duration) * 100}%`, width: `${(item.duration / duration) * 100}%` }}
+                    className={`absolute top-1 bottom-1 bg-purple-600/30 border border-purple-500/50 rounded flex items-center justify-center cursor-pointer hover:bg-purple-600/40 select-none ${selectedTrackItem === item.id ? 'ring-2 ring-purple-400' : ''}`}
+                    style={{
+                      left: `${(item.start / duration) * 100}%`,
+                      width: `${(item.duration / duration) * 100}%`,
+                      transform: dragInfo?.id === item.id ? `translate(${dragInfo.offsetX}px, ${dragInfo.offsetY}px)` : undefined,
+                      zIndex: dragInfo?.id === item.id ? 50 : undefined,
+                      opacity: dragInfo?.id === item.id ? 0.8 : undefined,
+                    }}
                     onClick={() => setSelectedTrackItem(item.id)}
+                    onMouseDown={(e) => handleTrackItemMouseDown(e, item)}
                   >
                     <span className="text-[10px] text-purple-200 px-1 truncate">{item.name}</span>
                   </div>
