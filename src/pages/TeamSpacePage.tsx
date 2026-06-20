@@ -65,18 +65,6 @@ function RoleBadge({ role }: { role: Role }) {
   );
 }
 
-// ─── UUID Generator ──────────────────────────────────────────────────────────
-const generateUUID = () => {
-  if (typeof window !== 'undefined' && window.crypto && window.crypto.randomUUID) {
-    return window.crypto.randomUUID();
-  }
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-    const r = (Math.random() * 16) | 0;
-    const v = c === 'x' ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
-  });
-};
-
 // ─── 主页面 ──────────────────────────────────────────────────────────────────
 export default function TeamSpacePage() {
   const { user } = useAuth();
@@ -97,7 +85,7 @@ export default function TeamSpacePage() {
     if (!user) return;
     setLoading(true);
     try {
-      // 查询当前 user 所在的活跃团队成员记录
+      // 查询当前用户所在的活跃团队成员记录
       const { data: memberRecord, error: memErr } = await supabase
         .from('team_members')
         .select('team_id')
@@ -154,29 +142,27 @@ export default function TeamSpacePage() {
         .maybeSingle();
       if (existingMember) throw new Error('您已经加入了一个团队，不能重复创建');
 
-      // 1. 在前端生成团队 ID
-      const teamId = generateUUID();
-
-      // 2. 直接插入团队记录
-      const { error: teamErr } = await supabase
+      // 创建团队
+      const { data: newTeam, error: teamErr } = await supabase
         .from('teams')
-        .insert({ id: teamId, name: teamName.trim(), owner_id: user.id });
+        .insert({ name: teamName.trim(), owner_id: user.id })
+        .select()
+        .maybeSingle();
       if (teamErr) throw teamErr;
+      if (!newTeam) throw new Error('团队创建失败，请重试');
 
-      // 3. 创建者自动成为 owner 成员
+      // 创建者自动成为 owner 成员
       const { error: memErr } = await supabase
         .from('team_members')
-        .insert({ team_id: teamId, user_id: user.id, role: 'owner', status: 'active' });
+        .insert({ team_id: newTeam.id, user_id: user.id, role: 'owner', status: 'active' });
       if (memErr) throw memErr;
 
       toast.success('团队创建成功！');
       setCreateOpen(false);
       setTeamName('');
       await loadTeam();
-    } catch (e: any) {
-      console.error('Create team error:', e);
-      const msg = e?.message || (typeof e === 'string' ? e : JSON.stringify(e)) || '未知错误';
-      toast.error(`创建失败：${msg}`);
+    } catch (e) {
+      toast.error(`创建失败：${e instanceof Error ? e.message : '未知错误'}`);
     } finally {
       setCreating(false);
     }
@@ -201,10 +187,8 @@ export default function TeamSpacePage() {
       const link = `${window.location.origin}/team/join?token=${inv.token}`;
       setInviteLink(link);
       toast.success('邀请链接已生成');
-    } catch (e: any) {
-      console.error('Invite member error:', e);
-      const msg = e?.message || (typeof e === 'string' ? e : JSON.stringify(e)) || '未知错误';
-      toast.error(`邀请失败：${msg}`);
+    } catch (e) {
+      toast.error(`邀请失败：${e instanceof Error ? e.message : '未知错误'}`);
     } finally {
       setInviting(false);
     }
@@ -226,10 +210,8 @@ export default function TeamSpacePage() {
       if (error) throw error;
       setMembers(prev => prev.filter(m => m.id !== memberId));
       toast.success('成员已移除');
-    } catch (e: any) {
-      console.error('Remove member error:', e);
-      const msg = e?.message || (typeof e === 'string' ? e : JSON.stringify(e)) || '未知错误';
-      toast.error(`移除失败：${msg}`);
+    } catch (e) {
+      toast.error(`移除失败：${e instanceof Error ? e.message : '未知错误'}`);
     }
   };
 
@@ -242,10 +224,8 @@ export default function TeamSpacePage() {
       if (error) throw error;
       setMembers(prev => prev.map(m => m.id === memberId ? { ...m, role } : m));
       toast.success('角色已更新');
-    } catch (e: any) {
-      console.error('Change role error:', e);
-      const msg = e?.message || (typeof e === 'string' ? e : JSON.stringify(e)) || '未知错误';
-      toast.error(`更新失败：${msg}`);
+    } catch (e) {
+      toast.error(`更新失败：${e instanceof Error ? e.message : '未知错误'}`);
     }
   };
 

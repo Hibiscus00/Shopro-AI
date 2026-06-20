@@ -1,59 +1,80 @@
 import { createClient } from '@supabase/supabase-js';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const envPath = path.resolve(__dirname, '../.env');
-const envContent = fs.readFileSync(envPath, 'utf8');
-
-const env = {};
-envContent.split('\n').forEach(line => {
-  const match = line.match(/^\s*([\w.-]+)\s*=\s*(.*)?\s*$/);
-  if (match) {
-    const key = match[1];
-    let value = match[2] || '';
-    if (value.startsWith('"') && value.endsWith('"')) {
-      value = value.substring(1, value.length - 1);
-    } else if (value.startsWith("'") && value.endsWith("'")) {
-      value = value.substring(1, value.length - 1);
-    }
-    env[key] = value;
-  }
-});
-
-const supabaseUrl = env.VITE_SUPABASE_URL;
-const supabaseAnonKey = env.VITE_SUPABASE_ANON_KEY;
+const supabaseUrl = 'https://backend.appmiaoda.com/projects/supabase313589630060507136';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoyMDk0MTkyNzk0LCJpc3MiOiJzdXBhYmFzZSIsInJvbGUiOiJhbm9uIiwic3ViIjoiYW5vbiJ9.3UpUbJneKoVq-1JI3dnb1ck6byGIrdBEE-ji9qLntoQ';
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-async function test() {
-  console.log('Connecting to Supabase:', supabaseUrl);
-
-  // Let's sign in with demo user
-  const { data: authData, error: authErr } = await supabase.auth.signInWithPassword({
-    email: 'demo@miaoda.com',
+async function run() {
+  console.log('Logging in...');
+  // Sign in with demo account
+  const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+    email: 'demo_user@example.com',
     password: 'demo123456'
   });
 
-  if (authErr) {
-    console.error('Auth error:', authErr.message);
+  if (authError) {
+    console.error('Login failed:', authError.message);
+    // Try sign up or other demo account if fails
     return;
   }
-  console.log('Auth success, user ID:', authData.user.id);
 
-  // Try to create a team
-  const { data: newTeam, error: teamErr } = await supabase
+  const user = authData.user;
+  console.log('Logged in as:', user.email, 'ID:', user.id);
+
+  console.log('\n--- Testing Team Creation ---');
+  // Try inserting a team
+  const teamName = 'Test Team ' + Date.now();
+  const { data: teamData, error: teamErr } = await supabase
     .from('teams')
-    .insert({ name: 'Test Team from Node', owner_id: authData.user.id })
-    .select('*')
+    .insert({ name: teamName, owner_id: user.id })
+    .select()
     .maybeSingle();
 
   if (teamErr) {
-    console.error('Create team error:', teamErr.message || teamErr);
+    console.error('Team insertion failed:', teamErr);
   } else {
-    console.log('Create team success:', newTeam);
+    console.log('Team inserted successfully:', teamData);
+
+    // Try inserting team member
+    const { data: memData, error: memErr } = await supabase
+      .from('team_members')
+      .insert({ team_id: teamData.id, user_id: user.id, role: 'owner', status: 'active' })
+      .select();
+
+    if (memErr) {
+      console.error('Member insertion failed:', memErr);
+    } else {
+      console.log('Member inserted successfully:', memData);
+    }
+  }
+
+  console.log('\n--- Testing API Key Creation ---');
+  // Try inserting an API Key
+  const rawKey = 'ak_test_' + Date.now();
+  const prefix = rawKey.slice(0, 10);
+  const keyHash = 'hash_' + Date.now();
+  
+  const { data: keyRecord, error: keyErr } = await supabase
+    .from('api_keys')
+    .insert({
+      user_id: user.id,
+      name: 'Test Key',
+      key_hash: keyHash,
+      key_prefix: prefix,
+      scopes: ['video:create', 'script:generate'],
+      rate_limit: 100,
+      is_active: true,
+      total_calls: 0
+    })
+    .select()
+    .maybeSingle();
+
+  if (keyErr) {
+    console.error('API Key insertion failed:', keyErr);
+  } else {
+    console.log('API Key inserted successfully:', keyRecord);
   }
 }
 
-test();
+run();
