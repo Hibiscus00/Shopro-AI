@@ -84,26 +84,29 @@ export default function TeamSpacePage() {
   const loadTeam = useCallback(async () => {
     if (!user) return;
     setLoading(true);
-    // 查用户拥有或加入的团队
-    const { data: owned } = await supabase
-      .from('teams')
-      .select('*')
-      .eq('owner_id', user.id)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
 
-    if (owned) {
-      setTeam(owned as Team);
-      const { data: mems } = await supabase
-        .from('team_members')
-        .select('*')
-        .eq('team_id', owned.id)
-        .eq('status', 'active')
-        .order('joined_at');
-      setMembers((mems ?? []) as TeamMember[]);
+      const { data, error } = await supabase.functions.invoke('phase3-assistant', {
+        body: { action: 'get_team' },
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+
+      if (error) { const t = await error.context?.text?.(); throw new Error(t || error.message); }
+      if (data?.code === 0) {
+        setTeam(data.data.team as Team);
+        setMembers((data.data.members ?? []) as TeamMember[]);
+      } else {
+        setTeam(null);
+        setMembers([]);
+      }
+    } catch (err: any) {
+      console.error('loadTeam error:', err);
+      toast.error(`加载团队数据失败: ${err.message}`);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, [user]);
 
   useEffect(() => { loadTeam(); }, [loadTeam]);
@@ -112,16 +115,19 @@ export default function TeamSpacePage() {
     if (!teamName.trim() || !user) return;
     setCreating(true);
     try {
-      const { data: newTeam, error } = await supabase
-        .from('teams')
-        .insert({ name: teamName.trim(), owner_id: user.id })
-        .select('*')
-        .maybeSingle();
-      if (error) throw error;
-      // 创建者自动加入
-      await supabase.from('team_members').insert({
-        team_id: newTeam!.id, user_id: user.id, role: 'owner', status: 'active',
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error('请先登录');
+        return;
+      }
+      const { data, error } = await supabase.functions.invoke('phase3-assistant', {
+        body: { action: 'create_team', name: teamName.trim() },
+        headers: { Authorization: `Bearer ${session.access_token}` },
       });
+      if (error) { const t = await error.context?.text?.(); throw new Error(t || error.message); }
+      if (data?.code !== 0) {
+        throw new Error(data?.message ?? '创建失败');
+      }
       toast.success('团队创建成功！');
       setCreateOpen(false);
       setTeamName('');
@@ -137,13 +143,20 @@ export default function TeamSpacePage() {
     if (!inviteEmail || !team) return;
     setInviting(true);
     try {
-      const { data: inv, error } = await supabase
-        .from('team_invitations')
-        .insert({ team_id: team.id, email: inviteEmail, role: inviteRole, invited_by: user!.id })
-        .select('token')
-        .maybeSingle();
-      if (error) throw error;
-      const link = `${window.location.origin}/team/join?token=${inv!.token}`;
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error('请先登录');
+        return;
+      }
+      const { data, error } = await supabase.functions.invoke('phase3-assistant', {
+        body: { action: 'create_invitation', team_id: team.id, email: inviteEmail, role: inviteRole },
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      if (error) { const t = await error.context?.text?.(); throw new Error(t || error.message); }
+      if (data?.code !== 0) {
+        throw new Error(data?.message ?? '邀请失败');
+      }
+      const link = `${window.location.origin}/team/join?token=${data.data.token}`;
       setInviteLink(link);
       toast.success('邀请链接已生成');
     } catch (e) {
@@ -161,15 +174,47 @@ export default function TeamSpacePage() {
   };
 
   const handleRemoveMember = async (memberId: string) => {
-    await supabase.from('team_members').update({ status: 'removed' }).eq('id', memberId);
-    setMembers(prev => prev.filter(m => m.id !== memberId));
-    toast.success('成员已移除');
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error('请先登录');
+        return;
+      }
+      const { data, error } = await supabase.functions.invoke('phase3-assistant', {
+        body: { action: 'remove_member', member_id: memberId },
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      if (error) { const t = await error.context?.text?.(); throw new Error(t || error.message); }
+      if (data?.code !== 0) {
+        throw new Error(data?.message ?? '移除失败');
+      }
+      setMembers(prev => prev.filter(m => m.id !== memberId));
+      toast.success('成员已移除');
+    } catch (e) {
+      toast.error(`移除失败：${e instanceof Error ? e.message : '未知错误'}`);
+    }
   };
 
   const handleChangeRole = async (memberId: string, role: Role) => {
-    await supabase.from('team_members').update({ role }).eq('id', memberId);
-    setMembers(prev => prev.map(m => m.id === memberId ? { ...m, role } : m));
-    toast.success('角色已更新');
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error('请先登录');
+        return;
+      }
+      const { data, error } = await supabase.functions.invoke('phase3-assistant', {
+        body: { action: 'change_member_role', member_id: memberId, role },
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      if (error) { const t = await error.context?.text?.(); throw new Error(t || error.message); }
+      if (data?.code !== 0) {
+        throw new Error(data?.message ?? '更新失败');
+      }
+      setMembers(prev => prev.map(m => m.id === memberId ? { ...m, role } : m));
+      toast.success('角色已更新');
+    } catch (e) {
+      toast.error(`更新失败：${e instanceof Error ? e.message : '未知错误'}`);
+    }
   };
 
   if (loading) {

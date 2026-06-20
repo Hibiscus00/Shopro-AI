@@ -95,11 +95,20 @@ export default function OpenAPIPage() {
     if (!keyName.trim()) return;
     setCreating(true);
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error('请先登录');
+        return;
+      }
       const { data, error } = await supabase.functions.invoke('phase3-assistant', {
         body: { action: 'generate_api_key', name: keyName.trim() },
+        headers: { Authorization: `Bearer ${session.access_token}` },
       });
       if (error) { const t = await error.context?.text?.(); throw new Error(t || error.message); }
-      setNewKey(data.raw_key);
+      if (data?.code !== 0) {
+        throw new Error(data?.message ?? '创建失败');
+      }
+      setNewKey(data.data.raw_key);
       toast.success('API Key 创建成功，请立即保存！');
       setKeyName('');
       await loadKeys();
@@ -111,12 +120,24 @@ export default function OpenAPIPage() {
   };
 
   const handleRevoke = async (id: string) => {
-    const { error } = await supabase.functions.invoke('phase3-assistant', {
-      body: { action: 'revoke_api_key', key_id: id },
-    });
-    if (!error) {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error('请先登录');
+        return;
+      }
+      const { data, error } = await supabase.functions.invoke('phase3-assistant', {
+        body: { action: 'revoke_api_key', key_id: id },
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      if (error) { const t = await error.context?.text?.(); throw new Error(t || error.message); }
+      if (data?.code !== 0) {
+        throw new Error(data?.message ?? '撤销失败');
+      }
       setKeys(prev => prev.map(k => k.id === id ? { ...k, is_active: false } : k));
       toast.success('API Key 已撤销');
+    } catch (e) {
+      toast.error(`撤销失败：${e instanceof Error ? e.message : '未知错误'}`);
     }
   };
 

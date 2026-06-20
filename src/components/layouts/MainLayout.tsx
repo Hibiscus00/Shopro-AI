@@ -559,21 +559,16 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
               {/* 消息通知 */}
               <TopBarNotificationBell />
 
-              {/* 主题切换 */}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="shrink-0 text-muted-foreground hover:text-foreground"
-                title={theme === 'dark' ? '切换到浅色模式' : '切换到深色模式'}
-                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              >
-                {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-              </Button>
+
 
               {/* 邀请有礼 + 积分套餐 */}
-              <div className="hidden md:flex items-center gap-0.5">
-                <TopBarQuickLink to="/invite" icon={Gift} label="邀请有礼" />
-                <TopBarQuickLink to="/credits" icon={CreditCard} label="积分套餐" />
+              <div className="hidden md:flex items-center">
+                <Link to="/credits">
+                  <button className="flex items-center gap-1.5 h-8 px-3.5 rounded-full font-bold text-[11px] sm:text-xs text-white bg-gradient-to-r from-[#FFB706] to-[#FF5E03] shadow-md shadow-orange-500/20 hover:brightness-110 active:scale-95 transition-all duration-200">
+                    <Gift className="w-3.5 h-3.5 shrink-0 text-white" />
+                    <span>邀请有礼 · 积分</span>
+                  </button>
+                </Link>
               </div>
 
               {/* 头像 */}

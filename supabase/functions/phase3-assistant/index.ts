@@ -215,6 +215,144 @@ Deno.serve(async (req) => {
         return ok({ message: 'API Key 已撤销' });
       }
 
+      // ─── P3-M03: 团队协作空间 ─────────────────────────────────────────────
+      case 'create_team': {
+        if (!userId) return err('未登录', 401);
+        const { name } = body as Record<string, string>;
+        if (!name?.trim()) return err('团队名称不能为空');
+
+        // 检查用户是否已在团队中
+        const { data: existingMember } = await supabase
+          .from('team_members')
+          .select('id')
+          .eq('user_id', userId)
+          .eq('status', 'active')
+          .maybeSingle();
+
+        if (existingMember) {
+          return err('您已经加入了一个团队，不能创建新团队。');
+        }
+
+        // 1. 创建团队
+        const { data: newTeam, error: teamErr } = await supabase
+          .from('teams')
+          .insert({ name: name.trim(), owner_id: userId })
+          .select('*')
+          .maybeSingle();
+        if (teamErr) return err(teamErr.message);
+        if (!newTeam) return err('团队创建失败');
+
+        // 2. 创建者自动加入
+        const { error: memErr } = await supabase.from('team_members').insert({
+          team_id: newTeam.id,
+          user_id: userId,
+          role: 'owner',
+          status: 'active',
+        });
+        if (memErr) return err(memErr.message);
+
+        return ok(newTeam);
+      }
+
+      case 'get_team': {
+        if (!userId) return err('未登录', 401);
+
+        // 获取用户当前的活跃团队成员记录
+        const { data: memberRecord, error: memErr } = await supabase
+          .from('team_members')
+          .select('team_id')
+          .eq('user_id', userId)
+          .eq('status', 'active')
+          .limit(1)
+          .maybeSingle();
+        if (memErr) return err(memErr.message);
+        if (!memberRecord) {
+          return ok({ team: null, members: [] });
+        }
+
+        // 获取团队详情
+        const { data: teamData, error: teamErr } = await supabase
+          .from('teams')
+          .select('*')
+          .eq('id', memberRecord.team_id)
+          .maybeSingle();
+        if (teamErr) return err(teamErr.message);
+        if (!teamData) {
+          return ok({ team: null, members: [] });
+        }
+
+        // 获取团队所有成员
+        const { data: mems, error: listErr } = await supabase
+          .from('team_members')
+          .select('*')
+          .eq('team_id', teamData.id)
+          .eq('status', 'active')
+          .order('joined_at');
+        if (listErr) return err(listErr.message);
+
+        return ok({ team: teamData, members: mems ?? [] });
+      }
+
+      case 'create_invitation': {
+        if (!userId) return err('未登录', 401);
+        const { team_id, email, role } = body as Record<string, string>;
+        if (!team_id || !email) return err('参数缺失');
+
+        // 验证用户是团队所有者
+        const { data: team } = await supabase.from('teams').select('id').eq('id', team_id).eq('owner_id', userId).maybeSingle();
+        if (!team) return err('您不是团队所有者，无权邀请成员');
+
+        const { data: inv, error: invErr } = await supabase
+          .from('team_invitations')
+          .insert({ team_id, email, role: role ?? 'member', invited_by: userId })
+          .select('token')
+          .maybeSingle();
+        if (invErr) return err(invErr.message);
+        return ok(inv);
+      }
+
+      case 'remove_member': {
+        if (!userId) return err('未登录', 401);
+        const { member_id } = body as Record<string, string>;
+        if (!member_id) return err('参数缺失');
+
+        const { data: member } = await supabase.from('team_members').select('team_id, user_id').eq('id', member_id).maybeSingle();
+        if (!member) return err('成员未找到');
+
+        // 验证所有者身份
+        const { data: team } = await supabase.from('teams').select('id').eq('id', member.team_id).eq('owner_id', userId).maybeSingle();
+        if (!team) return err('无权移除该成员');
+
+        if (member.user_id === userId) {
+          return err('您是团队所有者，不能移除自己');
+        }
+
+        const { error } = await supabase.from('team_members').update({ status: 'removed' }).eq('id', member_id);
+        if (error) return err(error.message);
+        return ok({ message: '成员已移除' });
+      }
+
+      case 'change_member_role': {
+        if (!userId) return err('未登录', 401);
+        const { member_id, role } = body as Record<string, string>;
+        if (!member_id || !role) return err('参数缺失');
+
+        const { data: member } = await supabase.from('team_members').select('team_id, user_id').eq('id', member_id).maybeSingle();
+        if (!member) return err('成员未找到');
+
+        // 验证所有者身份
+        const { data: team } = await supabase.from('teams').select('id').eq('id', member.team_id).eq('owner_id', userId).maybeSingle();
+        if (!team) return err('无权修改角色');
+
+        if (member.user_id === userId) {
+          return err('您是团队所有者，不能修改自己的角色');
+        }
+
+        const { error } = await supabase.from('team_members').update({ role }).eq('id', member_id);
+        if (error) return err(error.message);
+        return ok({ message: '角色已更新' });
+      }
+
       // ─── P3-S01: 创建发布任务 ─────────────────────────────────────────────
       case 'create_publish_task': {
         if (!userId) return err('未登录', 401);

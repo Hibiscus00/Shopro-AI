@@ -35,6 +35,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .eq('id', userId)
       .maybeSingle();
     if (data) {
+      if (!data.invite_code) {
+        const code = Math.random().toString(36).substring(2, 10).toUpperCase();
+        const { data: updatedData, error: updateErr } = await supabase
+          .from('profiles')
+          .update({ invite_code: code })
+          .eq('id', userId)
+          .select()
+          .maybeSingle();
+        if (!updateErr && updatedData) {
+          setProfile(updatedData as Profile);
+          return;
+        }
+      }
       setProfile(data as Profile);
       return;
     }
@@ -43,11 +56,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const user = userData?.user;
     if (!user) return;
     const username = user.email ? user.email.split('@')[0] : 'user';
+    const code = Math.random().toString(36).substring(2, 10).toUpperCase();
     const { error: insertErr } = await supabase.from('profiles').insert({
       id: userId,
       email: user.email,
       username,
       role: 'user',
+      invite_code: code,
     });
     if (insertErr) {
       console.error('自动创建 profile 失败:', insertErr);

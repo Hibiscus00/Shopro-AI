@@ -17,7 +17,7 @@ import { toast } from 'sonner';
 import {
   CreditCard, Zap, Star, Building2, CheckCircle2, ArrowUpCircle,
   Loader2, TrendingDown, TrendingUp, AlertCircle, Calendar,
-  PackagePlus, Wallet
+  PackagePlus, Wallet, ClipboardList
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import QRCodeDataUrl from '@/components/ui/qrcodedataurl';
@@ -264,11 +264,36 @@ export default function CreditsPage() {
         <p className="text-sm text-muted-foreground mt-0.5">管理您的套餐订阅和积分使用情况</p>
       </div>
 
-      <Tabs defaultValue="overview">
-        <TabsList className="h-9">
-          <TabsTrigger value="overview">套餐概览</TabsTrigger>
-          <TabsTrigger value="plans" id="tab-plans">套餐对比</TabsTrigger>
-          <TabsTrigger value="logs">积分记录</TabsTrigger>
+      <Tabs defaultValue="plans">
+        <TabsList className="grid grid-cols-3 gap-2 sm:gap-3 w-full max-w-4xl bg-transparent h-auto p-0 mb-6">
+          <TabsTrigger
+            value="plans"
+            id="tab-plans"
+            className="h-12 rounded-full font-semibold text-xs sm:text-sm md:text-base px-2 sm:px-4 transition-all duration-300 gap-1.5 sm:gap-2 flex items-center justify-center border
+              data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#FFB706] data-[state=active]:to-[#FF5E03] data-[state=active]:text-white data-[state=active]:shadow-md data-[state=active]:shadow-orange-500/20 data-[state=active]:border-transparent
+              data-[state=inactive]:bg-orange-50/40 data-[state=inactive]:text-orange-950/80 data-[state=inactive]:border-orange-100/60 data-[state=inactive]:hover:bg-orange-50"
+          >
+            <Zap className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+            <span className="truncate">套餐对比 · 尊享特权</span>
+          </TabsTrigger>
+          <TabsTrigger
+            value="overview"
+            className="h-12 rounded-full font-semibold text-xs sm:text-sm md:text-base px-2 sm:px-4 transition-all duration-300 gap-1.5 sm:gap-2 flex items-center justify-center border
+              data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#FFB706] data-[state=active]:to-[#FF5E03] data-[state=active]:text-white data-[state=active]:shadow-md data-[state=active]:shadow-orange-500/20 data-[state=active]:border-transparent
+              data-[state=inactive]:bg-orange-50/40 data-[state=inactive]:text-orange-950/80 data-[state=inactive]:border-orange-100/60 data-[state=inactive]:hover:bg-orange-50"
+          >
+            <Wallet className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+            <span className="truncate">套餐概览 · 我的资产</span>
+          </TabsTrigger>
+          <TabsTrigger
+            value="logs"
+            className="h-12 rounded-full font-semibold text-xs sm:text-sm md:text-base px-2 sm:px-4 transition-all duration-300 gap-1.5 sm:gap-2 flex items-center justify-center border
+              data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#FFB706] data-[state=active]:to-[#FF5E03] data-[state=active]:text-white data-[state=active]:shadow-md data-[state=active]:shadow-orange-500/20 data-[state=active]:border-transparent
+              data-[state=inactive]:bg-orange-50/40 data-[state=inactive]:text-orange-950/80 data-[state=inactive]:border-orange-100/60 data-[state=inactive]:hover:bg-orange-50"
+          >
+            <ClipboardList className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+            <span className="truncate">积分记录 · 收支明细</span>
+          </TabsTrigger>
         </TabsList>
 
         {/* ── 概览 Tab ── */}
@@ -283,58 +308,53 @@ export default function CreditsPage() {
           ) : (
             <>
               {/* 当前套餐卡片 */}
-              <Card className="border-primary/40 bg-primary/5">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base flex items-center gap-2 text-balance">
-                    <Zap className="w-4 h-4 text-primary" />
-                    当前套餐：{userPlan.plan?.name ?? '未知套餐'}
-                    <Badge className="ml-1 text-xs">{userPlan.status === 'active' ? '生效中' : '已过期'}</Badge>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {/* 积分进度条 */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">积分使用情况</span>
-                      <span className="font-semibold">{userPlan.credits_used.toLocaleString()} / {userPlan.credits_total.toLocaleString()}</span>
+              <Card className="border-primary/30 bg-primary/5/30 overflow-hidden shadow-none">
+                <CardContent className="p-4 sm:p-5 space-y-4">
+                  {/* 第一行：标题 + 套餐状态 & 升级套餐按钮 */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-primary/10 pb-3">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                        <Zap className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-sm sm:text-base">当前套餐：{userPlan.plan?.name ?? '未知套餐'}</span>
+                          <Badge className="text-[10px] px-1.5 py-0 bg-success/20 text-success hover:bg-success/20 border-none shrink-0">{userPlan.status === 'active' ? '生效中' : '已过期'}</Badge>
+                        </div>
+                        {/* 周期信息小字 */}
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          计费周期：{format(new Date(userPlan.cycle_start), 'yyyy/MM/dd')} ~ {format(new Date(userPlan.cycle_end), 'yyyy/MM/dd')}
+                        </p>
+                      </div>
                     </div>
-                    <Progress value={usagePercent} className="h-3" />
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span>已使用 {usagePercent}%</span>
-                      <span className={cn('font-medium', creditsLeft < 50 ? 'text-destructive' : 'text-success')}>
+                    <Button size="sm" onClick={() => document.getElementById('tab-plans')?.click()} className="h-8 text-xs font-medium rounded-full bg-gradient-to-r from-[#FFB706] to-[#FF5E03] hover:brightness-110 border-none shrink-0 self-start sm:self-center">
+                      <ArrowUpCircle className="w-3.5 h-3.5 mr-1" />升级套餐
+                    </Button>
+                  </div>
+
+                  {/* 第二行：积分使用情况进度条 */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-xs sm:text-sm">
+                      <span className="text-muted-foreground font-medium">积分使用情况</span>
+                      <span className="font-semibold text-muted-foreground">
+                        <span className="text-foreground text-sm font-bold">{userPlan.credits_used.toLocaleString()}</span> / {userPlan.credits_total.toLocaleString()}
+                      </span>
+                    </div>
+                    <Progress value={usagePercent} className="h-2" />
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground">已使用 {usagePercent}%</span>
+                      <span className={cn('font-semibold', creditsLeft < 50 ? 'text-destructive' : 'text-success')}>
                         剩余 {creditsLeft.toLocaleString()} 积分
                       </span>
                     </div>
                   </div>
 
-                  {/* 周期信息 */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div className="p-3 bg-background rounded-lg border border-border">
-                      <div className="flex items-center gap-1.5 mb-1">
-                        <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
-                        <p className="text-xs text-muted-foreground">计费周期开始</p>
-                      </div>
-                      <p className="text-sm font-semibold">{format(new Date(userPlan.cycle_start), 'yyyy-MM-dd')}</p>
-                    </div>
-                    <div className="p-3 bg-background rounded-lg border border-border">
-                      <div className="flex items-center gap-1.5 mb-1">
-                        <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
-                        <p className="text-xs text-muted-foreground">下次续费日期</p>
-                      </div>
-                      <p className="text-sm font-semibold">{format(new Date(userPlan.cycle_end), 'yyyy-MM-dd')}</p>
-                    </div>
-                  </div>
-
                   {creditsLeft < 100 && (
-                    <div className="flex items-center gap-2 p-3 bg-warning/10 border border-warning/30 rounded-lg">
-                      <AlertCircle className="w-4 h-4 text-warning shrink-0" />
-                      <p className="text-xs text-warning">积分余量不足，建议升级套餐或购买流量加油包获取更多积分</p>
+                    <div className="flex items-center gap-1.5 p-2 bg-warning/10 border border-warning/20 rounded-lg">
+                      <AlertCircle className="w-3.5 h-3.5 text-warning shrink-0" />
+                      <p className="text-[11px] text-warning-foreground leading-none">积分余量不足，建议升级套餐或购买加油包</p>
                     </div>
                   )}
-
-                  <Button size="sm" onClick={() => document.getElementById('tab-plans')?.click()} className="w-full md:w-auto">
-                    <ArrowUpCircle className="w-4 h-4 mr-2" />升级套餐
-                  </Button>
                 </CardContent>
               </Card>
 
@@ -438,7 +458,38 @@ export default function CreditsPage() {
 
           {/* 表格 */}
           {loadingLogs ? (
-            <div className="flex items-center justify-center py-12"><Loader2 className="w-5 h-5 animate-spin text-primary" /></div>
+            <Card>
+              <div className="overflow-x-auto w-full max-w-full">
+                <Table className="[&>div]:max-w-full">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="whitespace-nowrap">时间</TableHead>
+                      <TableHead className="whitespace-nowrap">事项描述</TableHead>
+                      <TableHead className="whitespace-nowrap">类型</TableHead>
+                      <TableHead className="whitespace-nowrap text-right">积分变动</TableHead>
+                      <TableHead className="whitespace-nowrap text-right">剩余积分</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {[...Array(5)].map((_, i) => (
+                      <TableRow key={i} className="animate-pulse">
+                        <TableCell className="whitespace-nowrap"><div className="h-4 bg-muted-foreground/10 rounded w-24"></div></TableCell>
+                        <TableCell className="whitespace-nowrap"><div className="h-4 bg-muted-foreground/10 rounded w-40"></div></TableCell>
+                        <TableCell className="whitespace-nowrap">
+                          <div className="h-5 bg-muted-foreground/10 rounded-full w-16"></div>
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap text-right">
+                          <div className="h-4 bg-muted-foreground/10 rounded w-12 ml-auto"></div>
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap text-right">
+                          <div className="h-4 bg-muted-foreground/10 rounded w-16 ml-auto"></div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </Card>
           ) : logs.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 gap-3">
               <CreditCard className="w-10 h-10 text-muted-foreground/30" />
