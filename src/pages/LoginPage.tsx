@@ -489,9 +489,9 @@ export default function LoginPage() {
           )}
 
           {/* 标题 */}
-          <div className="mb-6 text-left">
+          <div className="mb-3 text-left">
             <h2 className="text-2xl font-black text-foreground tracking-tight">{titleMap[mode]}</h2>
-            <p className="text-xs text-muted-foreground mt-2 leading-relaxed">{subtitleMap[mode]}</p>
+            <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{subtitleMap[mode]}</p>
           </div>
 
           {/* 找回密码成功状态 / 手机号验证面板 / 普通表单 */}

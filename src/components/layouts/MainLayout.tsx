@@ -510,6 +510,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   const [mobileOpen, setMobileOpen] = useState(false);
   const { theme, setTheme } = useThemePersist();
   const location = useLocation();
+  const { signOut } = useAuth();
 
   // 判断是否为生成视频界面
   const isVideoCreatePage = location.pathname.startsWith('/video/create');
@@ -584,11 +585,11 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                 onClick={async () => {
                   try {
                     await signOut();
-                    toast.success('已成功退出登录');
-                    navigate('/login');
                   } catch (e: any) {
-                    toast.error('退出登录失败');
+                    console.error('Logout error:', e);
                   }
+                  toast.success('已成功退出登录');
+                  navigate('/login');
                 }}
               >
                 <LogOut className="w-4 h-4" />
