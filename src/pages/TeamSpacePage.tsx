@@ -65,6 +65,18 @@ function RoleBadge({ role }: { role: Role }) {
   );
 }
 
+// ─── UUID Generator ──────────────────────────────────────────────────────────
+const generateUUID = () => {
+  if (typeof window !== 'undefined' && window.crypto && window.crypto.randomUUID) {
+    return window.crypto.randomUUID();
+  }
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+};
+
 // ─── 主页面 ──────────────────────────────────────────────────────────────────
 export default function TeamSpacePage() {
   const { user } = useAuth();
@@ -85,7 +97,7 @@ export default function TeamSpacePage() {
     if (!user) return;
     setLoading(true);
     try {
-      // 查询当前用户所在的活跃团队成员记录
+      // 查询当前 user 所在的活跃团队成员记录
       const { data: memberRecord, error: memErr } = await supabase
         .from('team_members')
         .select('team_id')
@@ -142,19 +154,19 @@ export default function TeamSpacePage() {
         .maybeSingle();
       if (existingMember) throw new Error('您已经加入了一个团队，不能重复创建');
 
-      // 创建团队
-      const { data: newTeam, error: teamErr } = await supabase
-        .from('teams')
-        .insert({ name: teamName.trim(), owner_id: user.id })
-        .select()
-        .maybeSingle();
-      if (teamErr) throw teamErr;
-      if (!newTeam) throw new Error('团队创建失败，请重试');
+      // 1. 在前端生成团队 ID
+      const teamId = generateUUID();
 
-      // 创建者自动成为 owner 成员
+      // 2. 直接插入团队记录
+      const { error: teamErr } = await supabase
+        .from('teams')
+        .insert({ id: teamId, name: teamName.trim(), owner_id: user.id });
+      if (teamErr) throw teamErr;
+
+      // 3. 创建者自动成为 owner 成员
       const { error: memErr } = await supabase
         .from('team_members')
-        .insert({ team_id: newTeam.id, user_id: user.id, role: 'owner', status: 'active' });
+        .insert({ team_id: teamId, user_id: user.id, role: 'owner', status: 'active' });
       if (memErr) throw memErr;
 
       toast.success('团队创建成功！');
