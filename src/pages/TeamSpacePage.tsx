@@ -173,8 +173,10 @@ export default function TeamSpacePage() {
       setCreateOpen(false);
       setTeamName('');
       await loadTeam();
-    } catch (e) {
-      toast.error(`创建失败：${e instanceof Error ? e.message : '未知错误'}`);
+    } catch (e: any) {
+      console.error('Create team error:', e);
+      const msg = e?.message || (typeof e === 'string' ? e : JSON.stringify(e)) || '未知错误';
+      toast.error(`创建失败：${msg}`);
     } finally {
       setCreating(false);
     }
@@ -199,8 +201,10 @@ export default function TeamSpacePage() {
       const link = `${window.location.origin}/team/join?token=${inv.token}`;
       setInviteLink(link);
       toast.success('邀请链接已生成');
-    } catch (e) {
-      toast.error(`邀请失败：${e instanceof Error ? e.message : '未知错误'}`);
+    } catch (e: any) {
+      console.error('Invite member error:', e);
+      const msg = e?.message || (typeof e === 'string' ? e : JSON.stringify(e)) || '未知错误';
+      toast.error(`邀请失败：${msg}`);
     } finally {
       setInviting(false);
     }
@@ -222,8 +226,10 @@ export default function TeamSpacePage() {
       if (error) throw error;
       setMembers(prev => prev.filter(m => m.id !== memberId));
       toast.success('成员已移除');
-    } catch (e) {
-      toast.error(`移除失败：${e instanceof Error ? e.message : '未知错误'}`);
+    } catch (e: any) {
+      console.error('Remove member error:', e);
+      const msg = e?.message || (typeof e === 'string' ? e : JSON.stringify(e)) || '未知错误';
+      toast.error(`移除失败：${msg}`);
     }
   };
 
@@ -236,8 +242,10 @@ export default function TeamSpacePage() {
       if (error) throw error;
       setMembers(prev => prev.map(m => m.id === memberId ? { ...m, role } : m));
       toast.success('角色已更新');
-    } catch (e) {
-      toast.error(`更新失败：${e instanceof Error ? e.message : '未知错误'}`);
+    } catch (e: any) {
+      console.error('Change role error:', e);
+      const msg = e?.message || (typeof e === 'string' ? e : JSON.stringify(e)) || '未知错误';
+      toast.error(`更新失败：${msg}`);
     }
   };
 
