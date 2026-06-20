@@ -85,25 +85,42 @@ export default function TeamSpacePage() {
     if (!user) return;
     setLoading(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
+      // 查询当前用户所在的活跃团队成员记录
+      const { data: memberRecord, error: memErr } = await supabase
+        .from('team_members')
+        .select('team_id')
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .limit(1)
+        .maybeSingle();
+      if (memErr) throw memErr;
+      if (!memberRecord) { setTeam(null); setMembers([]); return; }
 
-      const { data, error } = await supabase.functions.invoke('phase3-assistant', {
-        body: { action: 'get_team' },
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      });
+      // 查询团队详情
+      const { data: teamData, error: teamErr } = await supabase
+        .from('teams')
+        .select('*')
+        .eq('id', memberRecord.team_id)
+        .maybeSingle();
+      if (teamErr) throw teamErr;
+      if (!teamData) { setTeam(null); setMembers([]); return; }
 
-      if (error) { const t = await error.context?.text?.(); throw new Error(t || error.message); }
-      if (data?.code === 0) {
-        setTeam(data.data.team as Team);
-        setMembers((data.data.members ?? []) as TeamMember[]);
-      } else {
-        setTeam(null);
-        setMembers([]);
-      }
+      // 查询所有活跃成员
+      const { data: mems, error: listErr } = await supabase
+        .from('team_members')
+        .select('*')
+        .eq('team_id', teamData.id)
+        .eq('status', 'active')
+        .order('joined_at', { ascending: true });
+      if (listErr) throw listErr;
+
+      setTeam(teamData as Team);
+      setMembers((mems ?? []) as TeamMember[]);
     } catch (err: any) {
       console.error('loadTeam error:', err);
-      toast.error(`加载团队数据失败: ${err.message}`);
+      // 加载失败时显示空状态，不阻断页面
+      setTeam(null);
+      setMembers([]);
     } finally {
       setLoading(false);
     }
@@ -115,19 +132,31 @@ export default function TeamSpacePage() {
     if (!teamName.trim() || !user) return;
     setCreating(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        toast.error('请先登录');
-        return;
-      }
-      const { data, error } = await supabase.functions.invoke('phase3-assistant', {
-        body: { action: 'create_team', name: teamName.trim() },
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      });
-      if (error) { const t = await error.context?.text?.(); throw new Error(t || error.message); }
-      if (data?.code !== 0) {
-        throw new Error(data?.message ?? '创建失败');
-      }
+      // 检查是否已在团队中
+      const { data: existingMember } = await supabase
+        .from('team_members')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .limit(1)
+        .maybeSingle();
+      if (existingMember) throw new Error('您已经加入了一个团队，不能重复创建');
+
+      // 创建团队
+      const { data: newTeam, error: teamErr } = await supabase
+        .from('teams')
+        .insert({ name: teamName.trim(), owner_id: user.id })
+        .select()
+        .maybeSingle();
+      if (teamErr) throw teamErr;
+      if (!newTeam) throw new Error('团队创建失败，请重试');
+
+      // 创建者自动成为 owner 成员
+      const { error: memErr } = await supabase
+        .from('team_members')
+        .insert({ team_id: newTeam.id, user_id: user.id, role: 'owner', status: 'active' });
+      if (memErr) throw memErr;
+
       toast.success('团队创建成功！');
       setCreateOpen(false);
       setTeamName('');
@@ -143,20 +172,19 @@ export default function TeamSpacePage() {
     if (!inviteEmail || !team) return;
     setInviting(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        toast.error('请先登录');
-        return;
-      }
-      const { data, error } = await supabase.functions.invoke('phase3-assistant', {
-        body: { action: 'create_invitation', team_id: team.id, email: inviteEmail, role: inviteRole },
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      });
-      if (error) { const t = await error.context?.text?.(); throw new Error(t || error.message); }
-      if (data?.code !== 0) {
-        throw new Error(data?.message ?? '邀请失败');
-      }
-      const link = `${window.location.origin}/team/join?token=${data.data.token}`;
+      // 验证当前用户是团队所有者
+      if (team.owner_id !== user?.id) throw new Error('您不是团队所有者，无权邀请成员');
+
+      // 生成邀请记录
+      const { data: inv, error: invErr } = await supabase
+        .from('team_invitations')
+        .insert({ team_id: team.id, email: inviteEmail, role: inviteRole, invited_by: user!.id })
+        .select('token')
+        .maybeSingle();
+      if (invErr) throw invErr;
+      if (!inv?.token) throw new Error('邀请链接生成失败，请重试');
+
+      const link = `${window.location.origin}/team/join?token=${inv.token}`;
       setInviteLink(link);
       toast.success('邀请链接已生成');
     } catch (e) {
@@ -175,19 +203,11 @@ export default function TeamSpacePage() {
 
   const handleRemoveMember = async (memberId: string) => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        toast.error('请先登录');
-        return;
-      }
-      const { data, error } = await supabase.functions.invoke('phase3-assistant', {
-        body: { action: 'remove_member', member_id: memberId },
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      });
-      if (error) { const t = await error.context?.text?.(); throw new Error(t || error.message); }
-      if (data?.code !== 0) {
-        throw new Error(data?.message ?? '移除失败');
-      }
+      const { error } = await supabase
+        .from('team_members')
+        .update({ status: 'removed' })
+        .eq('id', memberId);
+      if (error) throw error;
       setMembers(prev => prev.filter(m => m.id !== memberId));
       toast.success('成员已移除');
     } catch (e) {
@@ -197,19 +217,11 @@ export default function TeamSpacePage() {
 
   const handleChangeRole = async (memberId: string, role: Role) => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        toast.error('请先登录');
-        return;
-      }
-      const { data, error } = await supabase.functions.invoke('phase3-assistant', {
-        body: { action: 'change_member_role', member_id: memberId, role },
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      });
-      if (error) { const t = await error.context?.text?.(); throw new Error(t || error.message); }
-      if (data?.code !== 0) {
-        throw new Error(data?.message ?? '更新失败');
-      }
+      const { error } = await supabase
+        .from('team_members')
+        .update({ role })
+        .eq('id', memberId);
+      if (error) throw error;
       setMembers(prev => prev.map(m => m.id === memberId ? { ...m, role } : m));
       toast.success('角色已更新');
     } catch (e) {

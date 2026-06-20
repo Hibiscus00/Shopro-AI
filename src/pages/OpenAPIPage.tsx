@@ -92,23 +92,41 @@ export default function OpenAPIPage() {
   useEffect(() => { loadKeys(); }, [loadKeys]);
 
   const handleCreate = async () => {
-    if (!keyName.trim()) return;
+    if (!keyName.trim() || !user) return;
     setCreating(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        toast.error('请先登录');
-        return;
-      }
-      const { data, error } = await supabase.functions.invoke('phase3-assistant', {
-        body: { action: 'generate_api_key', name: keyName.trim() },
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      });
-      if (error) { const t = await error.context?.text?.(); throw new Error(t || error.message); }
-      if (data?.code !== 0) {
-        throw new Error(data?.message ?? '创建失败');
-      }
-      setNewKey(data.data.raw_key);
+      // 1. 生成随机的 rawKey: ak_ + 48位十六进制字符
+      const randomBytes = new Uint8Array(24);
+      window.crypto.getRandomValues(randomBytes);
+      const rawKey = 'ak_' + Array.from(randomBytes).map(b => b.toString(16).padStart(2, '0')).join('');
+      const prefix = rawKey.slice(0, 10);
+
+      // 2. 生成 keyHash (SHA-256 hex)
+      const encoder = new TextEncoder();
+      const dataBytes = encoder.encode(rawKey);
+      const hashBuffer = await window.crypto.subtle.digest('SHA-256', dataBytes);
+      const keyHash = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+
+      // 3. 直接插入 api_keys 表
+      const { data: keyRecord, error: keyErr } = await supabase
+        .from('api_keys')
+        .insert({
+          user_id: user.id,
+          name: keyName.trim(),
+          key_hash: keyHash,
+          key_prefix: prefix,
+          scopes: ['video:create', 'script:generate'],
+          rate_limit: 100,
+          is_active: true,
+          total_calls: 0
+        })
+        .select('id, name, key_prefix, scopes, created_at')
+        .maybeSingle();
+
+      if (keyErr) throw keyErr;
+      if (!keyRecord) throw new Error('API Key 创建失败，未返回记录');
+
+      setNewKey(rawKey);
       toast.success('API Key 创建成功，请立即保存！');
       setKeyName('');
       await loadKeys();
@@ -121,19 +139,11 @@ export default function OpenAPIPage() {
 
   const handleRevoke = async (id: string) => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        toast.error('请先登录');
-        return;
-      }
-      const { data, error } = await supabase.functions.invoke('phase3-assistant', {
-        body: { action: 'revoke_api_key', key_id: id },
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      });
-      if (error) { const t = await error.context?.text?.(); throw new Error(t || error.message); }
-      if (data?.code !== 0) {
-        throw new Error(data?.message ?? '撤销失败');
-      }
+      const { error } = await supabase
+        .from('api_keys')
+        .update({ is_active: false })
+        .eq('id', id);
+      if (error) throw error;
       setKeys(prev => prev.map(k => k.id === id ? { ...k, is_active: false } : k));
       toast.success('API Key 已撤销');
     } catch (e) {
