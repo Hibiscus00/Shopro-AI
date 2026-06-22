@@ -1,13 +1,13 @@
-# 🎬 Shopro-电商AIGC带货视频
-![React](https://img.shields.io/badge/React-18.3-20232A?style=for-the-badge&logo=react&logoColor=61DAFB) ![TypeScript](https://img.shields.io/badge/TypeScript-5.5-007ACC?style=for-the-badge&logo=typescript&logoColor=white) ![Vite](https://img.shields.io/badge/Vite-5.4-646CFF?style=for-the-badge&logo=vite&logoColor=FFD62B) ![Supabase](https://img.shields.io/badge/Supabase-2.103-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white) ![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white) ![React Router](https://img.shields.io/badge/React_Router-6.26-CA4245?style=for-the-badge&logo=react-router&logoColor=white) ![Radix UI](https://img.shields.io/badge/Radix_UI-161618?style=for-the-badge&logo=radix-ui&logoColor=white) ![Biome](https://img.shields.io/badge/Biome-2.4-60A5FA?style=for-the-badge&logo=biome&logoColor=white)
+# 🛒 Shopro-电商AIGC带货视频  
+[![React](https://img.shields.io/badge/React-18.3-20232A?style=flat-square&logo=react&logoColor=61DAFB)](https://react.dev) [![TypeScript](https://img.shields.io/badge/TypeScript-5.5-007ACC?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org) [![Vite](https://img.shields.io/badge/Vite-5.4-646CFF?style=flat-square&logo=vite&logoColor=FFD62B)](https://vitejs.dev) [![Supabase](https://img.shields.io/badge/Supabase-2.103-3ECF8E?style=flat-square&logo=supabase&logoColor=white)](https://supabase.com) [![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-3.4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com) [![React Router](https://img.shields.io/badge/React_Router-6.26-CA4245?style=flat-square&logo=react-router&logoColor=white)](https://reactrouter.com) [![Radix UI](https://img.shields.io/badge/Radix_UI-latest-161618?style=flat-square&logo=radix-ui&logoColor=white)](https://www.radix-ui.com) [![Biome](https://img.shields.io/badge/Biome-2.4-60A5FA?style=flat-square&logo=biome&logoColor=white)](https://biomejs.dev)
 
 ---
 
-## 📋 项目简介
+##  💎 项目简介
 
 **Shopro-电商AIGC带货视频** 是一款专门解决抖音/TikTok/快手/小红书电商商家在短视频营销中“痛点”（文案撰写难、数字人外籍演员贵、剪辑成本高、跨平台发布低效）的 SaaS 平台。通过「商品信息输入/URL 卖点提取 ➔ AI 智能脚本生成 ➔ 数字人选择与克隆 ➔ 多语言智能翻译 ➔ 分镜编辑 ➔ 素材混剪 ➔ 视频异步合成 ➔ 多平台一键发布」的完整端到端闭环，帮助商家以极低成本快速产出高转化潜力的带货视频。
 
-### 🌟 核心价值
+### ⚡ 核心价值
 *   **降低制作成本**：无需雇佣专业剪辑师与外籍主播，AI 一键生成数字人带货视频。
 *   **提升生成效率**：从商品 URL 到生成多语种短视频仅需几分钟，完美响应平台热点。
 *   **高转化潜力**：基于爆款风格分析和雷达对比图，优化分镜与文案，提炼核心卖点。
