@@ -1,3 +1,22 @@
+# 🎬 Shopro-抖音电商AIGC带货视频生成系统 核心宣传图提示词
+## 🖼️ 核心宣传图与海报 AI 绘图提示词 (Promotional Key Visuals)
+
+为了方便《Shopro-抖音电商AIGC带货视频生成系统》在商业发布、路演、展会等场景下的推广，以下针对本项目（暗色玻璃态科技美学、橙黄渐变主色调、数字人克隆、可视化剪辑、爆款复刻、数据看板等核心元素）量身定制了**PPT主视觉/封面宣传图**以及**A3竖版宣传海报图**的专业 AI 电商风格绘图提示词。
+
+### 1. PPT 封面宣传图 (PPT Cover / Key Visual)
+*   **设计理念**: 深度契合项目的**暗色玻璃态美学（Dark Glassmorphism）**与**橙黄渐变主色调（#FF6B00 ➔ #FFB347）**。右侧设计为一部悬浮的 3D 半透明玻璃平板，展现高逼真度的 AI 数字人主播与电商热销单品，多轨道视频编辑时间轴和不断上升的 ROI 趋势折线图化作橙黄色的霓虹光流盘旋交织，并有点缀的金色钱币飞舞，渲染强大的带货转化力。左侧采用反射式深邃暗灰背景（#0a0c0f）留出宽敞的排版空间，凸显高端商业新品发布的视觉张力。
+*   **AI 绘图提示词 (Prompt)**:
+    > A premium commercial E-commerce PPT cover background, 16:9 aspect ratio. A high-end dark glassmorphism UI dashboard. On the right, a floating 3D translucent glass tablet displaying a professional AI digital human female host presenting high-end consumer products, surrounded by swirling holographic video editing timelines, orange-yellow gradient glowing light streams (#FF6B00 to #FFB347), and floating golden coins. On the left, elegant empty copy space on deep space black reflective background (#0a0c0f). Abstract rising financial chart lines (ROI trends) in neon cyan and orange. Sleek, premium tech e-commerce marketing style, Blender 3D render, hyper-detailed, corporate product launch aesthetic --ar 16:9 --v 6.0
+*   **提示词译文**: 高端商业电商 PPT 封面背景，16:9 比例。高端暗色玻璃态 UI 仪表盘。右侧悬浮着一个 3D 半透明玻璃平板，屏幕内一位专业的 AI 数字人女主播正在展示高端消费品，周围环绕着盘旋的全息视频编辑时间轴、橙黄渐变的发光光流（#FF6B00 至 #FFB347）和悬浮的金币。左侧在深邃暗灰（#0a0c0f）的反射底色上留出优雅的空白排版空间。背景中带有霓虹青与霓虹橙色的抽象上升 ROI 财务折线图。时尚、奢华的科技电商营销风格，Blender 3D 渲染，极致细节，企业新品发布会美学。
+
+### 2. A3 海报宣传图 (A3 Promotional Poster)
+*   **设计理念**: 紧扣“AIGC 极速合成”与“爆款复制/流量变现”的电商痛点。海报中心为一扇发出耀眼极光的大型智能手机玻璃边框，逼真的 AI 数字人主播从屏幕中跨出，托起正在粒子化、化为橙黄渐变数据流的 3D 商品包裹。四周盘旋着串联了产品视频帧的圆形电影胶片，并悬浮着带有 "+140x Speed", "ROI +61%" 等带货指标的玻璃态数据卡片与金币。背景为深邃暗灰色虚拟演播室，带有摄像机架、环形补光灯和网络网格，彰显 SaaS 系统的专业化与强大的电商带货转化潜能。
+*   **AI 绘图提示词 (Prompt)**:
+    > A striking commercial A3 promotional poster for an AI e-commerce video generator, vertical ratio 3:4. A giant glowing smartphone frame as the center. From the screen emerges a realistic digital host gesturing to showcase floating 3D e-commerce packages (cosmetics, electronics) that dissolve into warm orange-yellow gradient data streams (#FF6B00 to #FFB347). Circular film strips displaying video frames swirl around. Floating translucent glass cards showing UI statistics like "ROI +61%", "+140x Efficiency", and glowing gold coin icons. Cyberpunk studio background with ring lights, camera rigs, and neon grid networks in space black (#0a0c0f) and electric cyan. Ultra-detailed, Unreal Engine 5 render, cinematic lighting, corporate commercial poster design --ar 3:4 --v 6.0
+*   **提示词译文**: 一幅震撼的 AI 电商视频生成系统 A3 商业宣传海报，竖版 3:4 比例。以一个巨大的发光智能手机边框为中心。屏幕中走出一位逼真的数字人主播，手势指向并展示悬浮的 3D 电商包裹（化妆品、数码产品），包裹逐渐溶解成温暖的橙黄渐变数据流（#FF6B00 至 #FFB347）。四周盘旋着展示视频帧的圆形电影胶片。悬浮的半透明玻璃卡片展示着 “ROI +61%”、“效率提升 140 倍” 等 UI 数据指标和发光的金币图标。赛博朋克直播间背景，包含环形补光灯、摄像机架，以及深邃暗灰（#0a0c0f）与发光青色的霓虹网格网络。极致细节，虚幻引擎 5 渲染，电影级光效，企业商业海报设计。
+
+---
+
 # 🎨 Shopro-电商AIGC带货视频 PPT 绘图提示词指南 (16:9)
 
 本指南针对 `ppt1.md` 幻灯片大纲的 15 个页面，设计了专业的 AI 绘图提示词（适用于 Midjourney v6 / DALL-E 3 等模型）。所有提示词统一采用**暗色玻璃态科技美学（Dark Glassmorphism）**与**橙黄渐变（#FF6B00 ➔ #FFB347）**品牌主色调，确保生成图具有极高的一致性、现代感和视觉冲击力。
