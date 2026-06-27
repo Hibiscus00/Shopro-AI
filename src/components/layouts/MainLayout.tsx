@@ -324,9 +324,7 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
       {/* Logo — 点击跳转官网 */}
       <Link to="/landing" onClick={onNavClick} className="block">
         <div className="flex items-center gap-3 px-4 py-5 border-b border-sidebar-border transition-colors hover:bg-sidebar-accent/50">
-          <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center shrink-0">
-            <Sparkles className="w-5 h-5 text-primary-foreground" />
-          </div>
+          <img src="/shopro.png" className="w-9 h-9 object-contain shrink-0" alt="Shopro Logo" />
           <div className="min-w-0">
             <p className="text-sm font-bold text-sidebar-foreground truncate">电商AIGC带货视频</p>
             <p className="text-xs text-sidebar-foreground/50">AI驱动 · 高效带货</p>
@@ -544,9 +542,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
             {/* 移动端 Logo */}
             <Link to="/landing" className="lg:hidden flex items-center gap-2 min-w-0 shrink-0">
-              <div className="w-7 h-7 rounded-md bg-primary flex items-center justify-center shrink-0">
-                <Sparkles className="w-4 h-4 text-primary-foreground" />
-              </div>
+              <img src="/shopro.png" className="w-7 h-7 object-contain shrink-0" alt="Shopro Logo" />
               <span className="font-semibold text-sm truncate">电商AIGC带货视频</span>
             </Link>
 

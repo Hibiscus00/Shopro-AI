@@ -473,10 +473,7 @@ export default function LandingPage() {
       )}>
         <div className="max-w-7xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg, #FF6B00, #FFB347)' }}>
-              <Sparkles className="w-4 h-4 text-white" />
-            </div>
+            <img src="/shopro.png" className="w-8 h-8 object-contain shrink-0" alt="Shopro Logo" />
             <span className="font-bold text-white text-sm md:text-base tracking-tight">
               Shopro-电商AIGC带货视频
             </span>
@@ -554,7 +551,7 @@ export default function LandingPage() {
           <p className="text-lg md:text-xl text-white/55 max-w-2xl mx-auto mb-10 leading-relaxed text-pretty">
             AI 全流程辅助 · 从商品信息到带货短视频
             <br className="hidden md:block" />
-            无需专业剪辑，20 分钟产出高转化内容
+            无需专业剪辑，1分钟产出高转化内容
           </p>
 
           {/* CTA 按钮组 */}
@@ -934,7 +931,7 @@ export default function LandingPage() {
             <span className="landing-gradient-text">AI 驱动带货之路</span>
           </h2>
           <p className="text-lg text-white/50 mb-10 text-pretty">
-            免费注册，5 分钟内生成你的第一条带货视频
+            免费注册，1 分钟内生成你的第一条带货视频
           </p>
           <button
             onClick={goToApp}

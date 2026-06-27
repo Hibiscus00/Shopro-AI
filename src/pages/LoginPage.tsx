@@ -129,9 +129,9 @@ function PhoneSmsPanel() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 sm:space-y-4">
       {/* 手机号输入 */}
-      <div className="space-y-1.5">
+      <div className="space-y-1 sm:space-y-1.5">
         <Label className="text-sm font-semibold text-foreground">手机号</Label>
         <div className="relative">
           <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/70 pointer-events-none" />
@@ -140,7 +140,7 @@ function PhoneSmsPanel() {
             value={phone}
             onChange={e => setPhone(e.target.value)}
             maxLength={11}
-            className="pl-10 h-11 rounded-xl bg-muted/20 border-border/60 focus-visible:ring-primary"
+            className="pl-10 h-10 sm:h-11 rounded-lg sm:rounded-xl bg-muted/20 border-border/60 focus-visible:ring-primary"
             disabled={codeSent}
           />
         </div>
@@ -148,7 +148,7 @@ function PhoneSmsPanel() {
 
       {/* 验证码 */}
       {codeSent && (
-        <div className="space-y-1.5">
+        <div className="space-y-1 sm:space-y-1.5">
           <Label className="text-sm font-semibold text-foreground">验证码</Label>
           <div className="flex gap-2">
             <Input
@@ -156,9 +156,9 @@ function PhoneSmsPanel() {
               value={code}
               onChange={e => setCode(e.target.value)}
               maxLength={6}
-              className="flex-1 h-11 rounded-xl bg-muted/20 border-border/60 focus-visible:ring-primary"
+              className="flex-1 h-10 sm:h-11 rounded-lg sm:rounded-xl bg-muted/20 border-border/60 focus-visible:ring-primary"
             />
-            <Button type="button" variant="outline" disabled={countdown > 0 || sending} onClick={handleSend} className="shrink-0 w-28 h-11 rounded-xl">
+            <Button type="button" variant="outline" disabled={countdown > 0 || sending} onClick={handleSend} className="shrink-0 w-28 h-10 sm:h-11 rounded-lg sm:rounded-xl">
               {countdown > 0 ? `${countdown}s 后重发` : sending ? <Loader2 className="w-4 h-4 animate-spin" /> : '重新发送'}
             </Button>
           </div>
@@ -167,11 +167,11 @@ function PhoneSmsPanel() {
 
       {/* 发送/验证按钮 */}
       {!codeSent ? (
-        <Button type="button" className="w-full h-11 font-semibold rounded-xl bg-gradient-to-r from-orange-500 via-orange-600 to-red-500 hover:from-orange-600 hover:via-orange-700 hover:to-red-600 text-white shadow-orange-500/20 shadow-md border-0" onClick={handleSend} disabled={sending}>
+        <Button type="button" className="w-full h-10 sm:h-11 font-semibold rounded-lg sm:rounded-xl bg-gradient-to-r from-orange-500 via-orange-600 to-red-500 hover:from-orange-600 hover:via-orange-700 hover:to-red-600 text-white shadow-orange-500/20 shadow-md border-0" onClick={handleSend} disabled={sending}>
           {sending ? <span className="flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" />发送中...</span> : '获取验证码'}
         </Button>
       ) : (
-        <Button type="button" className="w-full h-11 font-semibold rounded-xl bg-gradient-to-r from-orange-500 via-orange-600 to-red-500 hover:from-orange-600 hover:via-orange-700 hover:to-red-600 text-white shadow-orange-500/20 shadow-md border-0" onClick={handleVerify} disabled={verifying}>
+        <Button type="button" className="w-full h-10 sm:h-11 font-semibold rounded-lg sm:rounded-xl bg-gradient-to-r from-orange-500 via-orange-600 to-red-500 hover:from-orange-600 hover:via-orange-700 hover:to-red-600 text-white shadow-orange-500/20 shadow-md border-0" onClick={handleVerify} disabled={verifying}>
           {verifying ? <span className="flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" />验证中...</span> : '验证并登录'}
         </Button>
       )}
@@ -247,10 +247,7 @@ function BrandPanel() {
       <div className="max-w-xl w-full flex flex-col justify-between h-full relative z-10">
         {/* Logo */}
         <div className="relative flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg shrink-0"
-            style={{ background: 'linear-gradient(135deg,#FF6B00,#ff9f45)' }}>
-            <Video className="w-6 h-6 text-white" />
-          </div>
+          <img src="/shopro.png" className="w-12 h-12 object-contain shrink-0" alt="Shopro Logo" />
           <div>
             <p className="font-bold text-white text-xl leading-none tracking-wide">Shopro AIGC 带货</p>
             <p className="text-white/50 text-sm mt-1">电商视频生成平台</p>
@@ -462,21 +459,19 @@ export default function LoginPage() {
     <div className="min-h-screen flex bg-muted/10">
       <BrandPanel />
       {/* 右侧表单区 */}
-      <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 py-12 bg-background relative overflow-hidden">
+      <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 py-4 sm:py-12 bg-background relative overflow-hidden">
         {/* 背景装饰 */}
         <div className="absolute top-0 right-0 w-80 h-80 bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-80 h-80 bg-info/5 rounded-full blur-[120px] pointer-events-none" />
 
         {/* 移动端 Logo */}
-        <div className="lg:hidden flex items-center gap-2 mb-8">
-          <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shadow-md">
-            <Video className="w-5 h-5 text-primary-foreground" />
-          </div>
+        <div className="lg:hidden flex items-center gap-2 mb-4 sm:mb-8">
+          <img src="/shopro.png" className="w-9 h-9 object-contain shrink-0" alt="Shopro Logo" />
           <span className="font-bold text-foreground text-lg">Shopro AIGC 带货</span>
         </div>
 
         {/* 登录主体卡片 */}
-        <div className="w-full max-w-md relative bg-card border border-border/60 rounded-3xl p-6 md:p-8 shadow-xl">
+        <div className="w-full max-w-md relative bg-card border border-border/60 rounded-2xl sm:rounded-3xl p-5 sm:p-6 md:p-8 shadow-xl">
           {/* 返回按钮（找回密码/手机号模式） */}
           {(mode === 'forgot' || mode === 'phone') && (
             <button
@@ -511,10 +506,10 @@ export default function LoginPage() {
               </Button>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
               {/* 忘记密码：邮箱输入 */}
               {mode === 'forgot' && (
-                <div className="space-y-1.5">
+                <div className="space-y-1 sm:space-y-1.5">
                   <Label htmlFor="email" className="text-sm font-semibold text-foreground">邮箱地址</Label>
                   <div className="relative">
                     <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/70 pointer-events-none" />
@@ -524,7 +519,7 @@ export default function LoginPage() {
                       placeholder="your@email.com"
                       value={form.email}
                       onChange={e => set('email', e.target.value)}
-                      className={cn('pl-10 h-11 rounded-xl bg-muted/20 border-border/60 focus-visible:ring-primary', errors.email && 'border-destructive focus-visible:ring-destructive')}
+                      className={cn('pl-10 h-10 sm:h-11 rounded-lg sm:rounded-xl bg-muted/20 border-border/60 focus-visible:ring-primary', errors.email && 'border-destructive focus-visible:ring-destructive')}
                     />
                   </div>
                   {errors.email && <p className="text-xs text-destructive flex items-center gap-1">{errors.email}</p>}
@@ -533,7 +528,7 @@ export default function LoginPage() {
 
               {/* 登录/注册：用户名 */}
               {mode !== 'forgot' && (
-                <div className="space-y-1.5">
+                <div className="space-y-1 sm:space-y-1.5">
                   <Label htmlFor="username" className="text-sm font-semibold text-foreground">用户名</Label>
                   <div className="relative">
                     <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/70 pointer-events-none" />
@@ -542,7 +537,7 @@ export default function LoginPage() {
                       placeholder="字母/数字/下划线，3-20位"
                       value={form.username}
                       onChange={e => set('username', e.target.value)}
-                      className={cn('pl-10 h-11 rounded-xl bg-muted/20 border-border/60 focus-visible:ring-primary', errors.username && 'border-destructive focus-visible:ring-destructive')}
+                      className={cn('pl-10 h-10 sm:h-11 rounded-lg sm:rounded-xl bg-muted/20 border-border/60 focus-visible:ring-primary', errors.username && 'border-destructive focus-visible:ring-destructive')}
                     />
                   </div>
                   {errors.username && <p className="text-xs text-destructive">{errors.username}</p>}
@@ -551,7 +546,7 @@ export default function LoginPage() {
 
               {/* 密码 */}
               {mode !== 'forgot' && (
-                <div className="space-y-1.5">
+                <div className="space-y-1 sm:space-y-1.5">
                   <div className="flex items-center justify-between">
                     <Label htmlFor="password" className="text-sm font-semibold text-foreground">密码</Label>
                     {mode === 'login' && (
@@ -572,7 +567,7 @@ export default function LoginPage() {
                       placeholder={mode === 'register' ? '至少 6 位密码' : '请输入密码'}
                       value={form.password}
                       onChange={e => set('password', e.target.value)}
-                      className={cn('pl-10 pr-10 h-11 rounded-xl bg-muted/20 border-border/60 focus-visible:ring-primary', errors.password && 'border-destructive focus-visible:ring-destructive')}
+                      className={cn('pl-10 pr-10 h-10 sm:h-11 rounded-lg sm:rounded-xl bg-muted/20 border-border/60 focus-visible:ring-primary', errors.password && 'border-destructive focus-visible:ring-destructive')}
                     />
                     <button
                       type="button"
@@ -588,7 +583,7 @@ export default function LoginPage() {
 
               {/* 确认密码（注册） */}
               {mode === 'register' && (
-                <div className="space-y-1.5">
+                <div className="space-y-1 sm:space-y-1.5">
                   <Label htmlFor="confirmPassword" className="text-sm font-semibold text-foreground">确认密码</Label>
                   <div className="relative">
                     <KeyRound className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/70 pointer-events-none" />
@@ -598,7 +593,7 @@ export default function LoginPage() {
                       placeholder="再次输入密码"
                       value={form.confirmPassword}
                       onChange={e => set('confirmPassword', e.target.value)}
-                      className={cn('pl-10 h-11 rounded-xl bg-muted/20 border-border/60 focus-visible:ring-primary', errors.confirmPassword && 'border-destructive focus-visible:ring-destructive')}
+                      className={cn('pl-10 h-10 sm:h-11 rounded-lg sm:rounded-xl bg-muted/20 border-border/60 focus-visible:ring-primary', errors.confirmPassword && 'border-destructive focus-visible:ring-destructive')}
                     />
                   </div>
                   {errors.confirmPassword && <p className="text-xs text-destructive">{errors.confirmPassword}</p>}
@@ -627,7 +622,7 @@ export default function LoginPage() {
               )}
 
               {/* 提交按钮 - 橙红色 */}
-              <Button type="submit" className="w-full h-11 font-semibold rounded-xl shadow-md transition-transform hover:-translate-y-0.5 bg-gradient-to-r from-orange-500 via-orange-600 to-red-500 hover:from-orange-600 hover:via-orange-700 hover:to-red-600 text-white shadow-orange-500/20" disabled={loading}>
+              <Button type="submit" className="w-full h-10 sm:h-11 font-semibold rounded-lg sm:rounded-xl shadow-md transition-transform hover:-translate-y-0.5 bg-gradient-to-r from-orange-500 via-orange-600 to-red-500 hover:from-orange-600 hover:via-orange-700 hover:to-red-600 text-white shadow-orange-500/20" disabled={loading}>
                 {loading
                   ? <span className="flex items-center gap-2"><span className="h-4 w-4 rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground animate-spin" />处理中...</span>
                   : mode === 'login' ? '登 录' : mode === 'register' ? '立 即 注 册' : '发送重置链接'
@@ -636,7 +631,7 @@ export default function LoginPage() {
 
               {/* 分隔线 */}
               {mode !== 'forgot' && (
-                <div className="relative my-2">
+                <div className="relative my-1 sm:my-2">
                   <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-border" /></div>
                   <div className="relative flex justify-center"><span className="bg-card px-3 text-xs text-muted-foreground">或</span></div>
                 </div>
@@ -645,7 +640,7 @@ export default function LoginPage() {
               {/* 手机号验证入口 - 蓝色 */}
               {(mode === 'login' || mode === 'register') && (
                 <button type="button" onClick={() => { setMode('phone'); setErrors({}); }}
-                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-blue-200 dark:border-blue-900/50 bg-blue-50/30 dark:bg-blue-950/10 text-sm font-semibold text-blue-600 dark:text-blue-400 hover:bg-blue-50/60 dark:hover:bg-blue-950/20 transition-all shadow-sm">
+                  className="w-full flex items-center justify-center gap-2 py-2 sm:py-3 rounded-lg sm:rounded-xl border border-blue-200 dark:border-blue-900/50 bg-blue-50/30 dark:bg-blue-950/10 text-sm font-semibold text-blue-600 dark:text-blue-400 hover:bg-blue-50/60 dark:hover:bg-blue-950/20 transition-all shadow-sm">
                   <Phone className="w-4 h-4" />
                   手机号验证码登录
                 </button>
@@ -675,11 +670,11 @@ export default function LoginPage() {
 
           {/* Demo 账号提示 - 在登录和注册界面均显示 */}
           {(mode === 'login' || mode === 'register') && !forgotSent && (
-            <div className="mt-6 pt-5 border-t border-border/60">
-              <p className="text-xs font-semibold text-muted-foreground mb-3 flex items-center gap-1.5 justify-center">
+            <div className="mt-4 sm:mt-6 pt-3 sm:pt-5 border-t border-border/60">
+              <p className="text-xs font-semibold text-muted-foreground mb-2 sm:mb-3 flex items-center gap-1.5 justify-center">
                 <Sparkles className="w-3.5 h-3.5 text-indigo-500 animate-pulse" /> 快速免密体验通道
               </p>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2 sm:gap-3">
                 {[{ user: 'demo_user', pwd: 'demo123456', color: 'orange' }, { user: 'test_user', pwd: 'test123456', color: 'emerald' }].map(({ user, pwd, color }) => (
                   <button
                     key={user}
@@ -758,7 +753,7 @@ export default function LoginPage() {
                     }}
                     disabled={loading}
                     className={cn(
-                      "relative overflow-hidden flex flex-col items-center justify-center p-3 rounded-2xl border transition-all duration-300 text-center text-xs group",
+                      "relative overflow-hidden flex flex-col items-center justify-center p-2 sm:p-3 rounded-xl sm:rounded-2xl border transition-all duration-300 text-center text-xs group",
                       color === 'orange'
                         ? "bg-orange-50/40 dark:bg-orange-950/10 border-orange-200 dark:border-orange-900/40 text-orange-600 dark:text-orange-400 hover:bg-orange-50/80 dark:hover:bg-orange-950/20 hover:border-orange-300"
                         : "bg-emerald-50/40 dark:bg-emerald-950/10 border-emerald-200 dark:border-emerald-900/40 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50/80 dark:hover:bg-emerald-950/20 hover:border-emerald-300"
