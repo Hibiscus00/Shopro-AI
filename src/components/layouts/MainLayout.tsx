@@ -560,7 +560,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
               {/* 邀请有礼 + 积分套餐 */}
               <div className="hidden md:flex items-center">
-                <Link to="/credits">
+                <Link to="/credits?tab=invite">
                   <button className="flex items-center gap-1.5 h-8 px-3.5 rounded-full font-bold text-[11px] sm:text-xs text-white bg-gradient-to-r from-[#FFB706] to-[#FF5E03] shadow-md shadow-orange-500/20 hover:brightness-110 active:scale-95 transition-all duration-200">
                     <Gift className="w-3.5 h-3.5 shrink-0 text-white" />
                     <span>邀请有礼 · 积分</span>

@@ -11,6 +11,7 @@ import { Share2, Copy, Gift, Users, Link as LinkIcon, Loader2, Calendar, CheckCi
 import QRCodeDataUrl from '@/components/ui/qrcodedataurl';
 import { format } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
 
 interface Invitation {
   id: string;
@@ -23,7 +24,7 @@ interface Invitation {
   };
 }
 
-export default function InvitePage() {
+export default function InvitePage({ embedded = false }: { embedded?: boolean }) {
   const { user, profile } = useAuth();
   const [loading, setLoading] = useState(true);
   const [invitations, setInvitations] = useState<Invitation[]>([]);
@@ -180,13 +181,15 @@ export default function InvitePage() {
   };
 
   return (
-    <div className="p-4 md:p-6 space-y-6 max-w-5xl mx-auto">
-      <div>
-        <h1 className="text-xl font-bold flex items-center gap-2 text-balance">
-          <Gift className="w-5 h-5 text-primary" />邀请有礼
-        </h1>
-        <p className="text-sm text-muted-foreground mt-0.5">邀请好友注册，双方均可获得丰厚积分奖励</p>
-      </div>
+    <div className={cn("space-y-6 max-w-5xl mx-auto", !embedded && "p-4 md:p-6")}>
+      {!embedded && (
+        <div>
+          <h1 className="text-xl font-bold flex items-center gap-2 text-balance">
+            <Gift className="w-5 h-5 text-primary" />邀请有礼
+          </h1>
+          <p className="text-sm text-muted-foreground mt-0.5">邀请好友注册，双方均可获得丰厚积分奖励</p>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* 左侧：邀请方式 */}

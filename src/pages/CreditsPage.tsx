@@ -17,12 +17,13 @@ import { toast } from 'sonner';
 import {
   CreditCard, Zap, Star, Building2, CheckCircle2, ArrowUpCircle,
   Loader2, TrendingDown, TrendingUp, AlertCircle, Calendar,
-  PackagePlus, Wallet, ClipboardList
+  PackagePlus, Wallet, ClipboardList, Gift
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import QRCodeDataUrl from '@/components/ui/qrcodedataurl';
 import { format } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
+import InvitePage from '@/pages/InvitePage';
 
 // ── 常量 ──────────────────────────────────────────────────────────────────
 const TYPE_LABELS: Record<string, { label: string; cls: string }> = {
@@ -125,9 +126,75 @@ function PlanCard({ plan, isCurrent, onSelect, idx }: {
   );
 }
 
+const MOCK_LOGS: CreditLog[] = [
+  {
+    id: 'mock-1',
+    user_id: 'mock-user',
+    type: 'bonus',
+    amount: 100,
+    credits_after: 100,
+    description: '新用户注册，系统赠送免费版初始积分',
+    created_at: new Date(Date.now() - 2 * 24 * 3600 * 1000).toISOString(),
+  },
+  {
+    id: 'mock-2',
+    user_id: 'mock-user',
+    type: 'material_upload',
+    amount: 10,
+    credits_after: 110,
+    description: '完成首次头像及个人资料完善奖励',
+    created_at: new Date(Date.now() - 1.5 * 24 * 3600 * 1000).toISOString(),
+  },
+  {
+    id: 'mock-3',
+    user_id: 'mock-user',
+    type: 'video_generate',
+    amount: -10,
+    credits_after: 100,
+    description: '生成智能带货视频《智能空气炸锅宣传片V1》',
+    created_at: new Date(Date.now() - 1 * 24 * 3600 * 1000).toISOString(),
+  },
+  {
+    id: 'mock-4',
+    user_id: 'mock-user',
+    type: 'template_download',
+    amount: -5,
+    credits_after: 95,
+    description: '下载《爆款服装带货转场模板》',
+    created_at: new Date(Date.now() - 12 * 3600 * 1000).toISOString(),
+  },
+  {
+    id: 'mock-5',
+    user_id: 'mock-user',
+    type: 'material_upload',
+    amount: 5,
+    credits_after: 100,
+    description: '上传商超果蔬背景空镜素材奖励',
+    created_at: new Date(Date.now() - 2 * 3600 * 1000).toISOString(),
+  }
+];
+
 // ── 主页面 ────────────────────────────────────────────────────────────────
 export default function CreditsPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const query = new URLSearchParams(window.location.search);
+  const initialTab = query.get('tab') || 'plans';
+  const [activeTab, setActiveTab] = useState(initialTab);
+
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search);
+    const t = q.get('tab');
+    if (t && ['plans', 'overview', 'invite', 'logs'].includes(t)) {
+      setActiveTab(t);
+    }
+  }, [window.location.search]);
+
+  const handleTabChange = (val: string) => {
+    setActiveTab(val);
+    navigate(`/credits?tab=${val}`, { replace: true });
+  };
+
   const [userPlan, setUserPlan] = useState<UserPlan | null>(null);
   const [plans, setPlans] = useState<Plan[]>([]);
   const [boosters, setBoosters] = useState<Plan[]>([]);
@@ -137,6 +204,11 @@ export default function CreditsPage() {
   const [logType, setLogType] = useState('all');
   const [page, setPage] = useState(0);
   const PAGE_SIZE = 10;
+
+  const isMockLogs = logs.length === 0;
+  const displayLogs = isMockLogs
+    ? MOCK_LOGS.filter(log => logType === 'all' || log.type === logType)
+    : logs;
 
   // 支付相关
   const [payOpen, setPayOpen] = useState(false);
@@ -192,7 +264,6 @@ export default function CreditsPage() {
   useEffect(() => { loadPlan(); }, [loadPlan]);
   useEffect(() => { loadLogs(); }, [loadLogs]);
 
-  const navigate = useNavigate();
 
   // 轮询订单状态
   useEffect(() => {
@@ -264,8 +335,17 @@ export default function CreditsPage() {
         <p className="text-sm text-muted-foreground mt-0.5">管理您的套餐订阅和积分使用情况</p>
       </div>
 
-      <Tabs defaultValue="plans">
-        <TabsList className="grid grid-cols-3 gap-2 sm:gap-3 w-full max-w-4xl bg-transparent h-auto p-0 mb-6">
+      <Tabs value={activeTab} onValueChange={handleTabChange}>
+        <TabsList className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 w-full max-w-5xl bg-transparent h-auto p-0 mb-6">
+          <TabsTrigger
+            value="invite"
+            className="h-12 rounded-full font-semibold text-xs sm:text-sm md:text-base px-2 sm:px-4 transition-all duration-300 gap-1.5 sm:gap-2 flex items-center justify-center border
+              data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#FFB706] data-[state=active]:to-[#FF5E03] data-[state=active]:text-white data-[state=active]:shadow-md data-[state=active]:shadow-orange-500/20 data-[state=active]:border-transparent
+              data-[state=inactive]:bg-orange-50/40 data-[state=inactive]:text-orange-950/80 data-[state=inactive]:border-orange-100/60 data-[state=inactive]:hover:bg-orange-50"
+          >
+            <Gift className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 text-amber-500 data-[state=active]:text-white" />
+            <span className="truncate">邀请有礼 · 赚取积分</span>
+          </TabsTrigger>
           <TabsTrigger
             value="plans"
             id="tab-plans"
@@ -435,6 +515,11 @@ export default function CreditsPage() {
           )}
         </TabsContent>
 
+        {/* ── 邀请有礼 Tab ── */}
+        <TabsContent value="invite" className="mt-4 animate-in fade-in-50 duration-300">
+          <InvitePage embedded />
+        </TabsContent>
+
         {/* ── 积分记录 Tab ── */}
         <TabsContent value="logs" className="space-y-4 mt-4">
           {/* 筛选 */}
@@ -453,7 +538,7 @@ export default function CreditsPage() {
                 <SelectItem value="deduct">扣除</SelectItem>
               </SelectContent>
             </Select>
-            <p className="text-xs text-muted-foreground">共 {logs.length} 条记录</p>
+            <p className="text-xs text-muted-foreground">共 {isMockLogs ? displayLogs.length : logs.length} 条记录 {isMockLogs && '(演示示例)'}</p>
           </div>
 
           {/* 表格 */}
@@ -490,14 +575,20 @@ export default function CreditsPage() {
                 </Table>
               </div>
             </Card>
-          ) : logs.length === 0 ? (
+          ) : displayLogs.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 gap-3">
               <CreditCard className="w-10 h-10 text-muted-foreground/30" />
               <p className="text-sm text-muted-foreground">暂无积分记录</p>
             </div>
           ) : (
             <>
-              <Card>
+              <Card className="relative overflow-hidden border border-border/60">
+                {isMockLogs && (
+                  <div className="absolute top-2 right-2 bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400 text-[10px] px-2.5 py-1 rounded-full border border-indigo-100 dark:border-indigo-900/30 font-semibold flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
+                    系统初始演示记录
+                  </div>
+                )}
                 <div className="overflow-x-auto w-full max-w-full">
                   <Table className="[&>div]:max-w-full">
                     <TableHeader>
@@ -510,7 +601,7 @@ export default function CreditsPage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {logs.map(log => {
+                      {displayLogs.map(log => {
                         const typeInfo = TYPE_LABELS[log.type] ?? { label: log.type, cls: 'bg-muted text-muted-foreground' };
                         return (
                           <TableRow key={log.id}>
@@ -545,7 +636,7 @@ export default function CreditsPage() {
                   <Button size="sm" variant="outline" className="h-8" disabled={page === 0} onClick={() => setPage(p => p - 1)}>
                     上一页
                   </Button>
-                  <Button size="sm" variant="outline" className="h-8" disabled={logs.length < PAGE_SIZE} onClick={() => setPage(p => p + 1)}>
+                  <Button size="sm" variant="outline" className="h-8" disabled={isMockLogs || logs.length < PAGE_SIZE} onClick={() => setPage(p => p + 1)}>
                     下一页
                   </Button>
                 </div>
