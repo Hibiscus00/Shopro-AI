@@ -53,9 +53,8 @@ const QUICK_TOOLS = [
 
 
 // 模型与对应后端标识
-type ModelId = 'Kling' | 'Sora 2' | 'Wan 2.7';
+type ModelId = 'Sora 2' | 'Wan 2.7';
 const MODELS: { label: string; id: ModelId }[] = [
-  { label: 'Kling 2.1', id: 'Kling' },
   { label: 'Sora 2',    id: 'Sora 2' },
   { label: 'Wan 2.7',   id: 'Wan 2.7' },
 ];
@@ -93,7 +92,7 @@ export default function HomePage() {
   const [mainTab, setMainTab] = useState(projectId ? '分镜编辑' : '视频生成');
   const [inputTab, setInputTab] = useState('参考');
   const [prompt, setPrompt] = useState('');
-  const [model, setModel] = useState<{ label: string; id: ModelId }>({ label: 'Kling 2.1', id: 'Kling' });
+  const [model, setModel] = useState<{ label: string; id: ModelId }>({ label: 'Sora 2', id: 'Sora 2' });
   const [resolution, setResolution] = useState('720P · 9:16 · 5s');
   const [modelOpen, setModelOpen] = useState(false);
   const [resOpen, setResOpen] = useState(false);
@@ -154,29 +153,6 @@ export default function HomePage() {
     }, 400);
   };
 
-  // 轮询可灵任务
-  const pollKling = useCallback((tid: string) => {
-    let attempts = 0;
-    pollRef.current = setInterval(async () => {
-      attempts++;
-      if (attempts > 80) { stopPoll(); setGenerating(false); toast.error('视频生成超时，请重试'); return; }
-      try {
-        const { data, error } = await supabase.functions.invoke('kling-video-query', { body: { task_id: tid } });
-        if (error) { const msg = await error?.context?.text(); console.error('kling-query', msg); return; }
-        const status = data?.data?.task_status;
-        if (status === 'succeed') {
-          stopPoll(); setGenerating(false); setGenProgress(100);
-          const url = data?.data?.task_result?.videos?.[0]?.publicUrl || data?.data?.task_result?.videos?.[0]?.url;
-          if (url) { setResultVideo(url); toast.success('视频生成完成！'); }
-        } else if (status === 'failed') {
-          stopPoll(); setGenerating(false); toast.error('视频生成失败，请重试');
-        } else {
-          setGenProgress(Math.min(90, attempts * 5));
-        }
-      } catch (e) { console.error('poll error', e); }
-    }, 7000);
-  }, [stopPoll]);
-
   // 轮询 Sora 任务
   const pollSora = useCallback((vid: string) => {
     let attempts = 0;
@@ -206,7 +182,6 @@ export default function HomePage() {
 
     try {
       if (model.id === 'Sora 2') {
-        // Sora
         const { data, error } = await supabase.functions.invoke('sora-video-create', {
           body: { prompt, size: resolution.includes('9:16') ? '720x1280' : '1280x720', seconds: 8 },
         });
@@ -215,16 +190,8 @@ export default function HomePage() {
         if (!vid) throw new Error('未获取到任务ID');
         setTaskId(vid); pollSora(vid);
       } else {
-        // Kling（默认）
-        const dur = resolution.includes('5s') ? '5' : resolution.includes('10s') ? '10' : '8';
-        const ar = resolution.includes('9:16') ? '9:16' : resolution.includes('1:1') ? '1:1' : '16:9';
-        const { data, error } = await supabase.functions.invoke('kling-video-create', {
-          body: { prompt, model_name: 'kling-video-o1', mode: 'pro', aspect_ratio: ar, duration: dur },
-        });
-        if (error) { const msg = await error?.context?.text(); throw new Error(msg || error.message); }
-        const tid = data?.data?.task_id;
-        if (!tid) throw new Error('未获取到任务ID');
-        setTaskId(tid); pollKling(tid);
+        toast.error('该视频模型暂未接入生成接口');
+        setGenerating(false); setGenProgress(0);
       }
     } catch (e: unknown) {
       setGenerating(false); setGenProgress(0);
