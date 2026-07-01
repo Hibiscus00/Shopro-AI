@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/db/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDraft } from '@/hooks/useDraft';
@@ -1741,6 +1741,37 @@ export default function VideoCreatePage() {
   const [shots, setShots] = useState<Shot[]>([]);
   const [materials, setMaterials] = useState<MaterialItem[]>([]);
   const [draftRestored, setDraftRestored] = useState(hasDraft);
+
+  // Check for prefill product name from location state (e.g. from Smart Product Selection)
+  useEffect(() => {
+    const prefillName = location.state?.prefillProductName;
+    if (prefillName && user) {
+      const fetchPrefill = async () => {
+        const { data: rows } = await supabase
+          .from('products')
+          .select('*')
+          .eq('name', prefillName)
+          .eq('user_id', user.id)
+          .maybeSingle();
+        
+        if (rows) {
+          const sp = Array.isArray(rows.selling_points) ? rows.selling_points.join('、') : '';
+          const ai_sp = Array.isArray(rows.ai_selling_points) ? rows.ai_selling_points : [];
+          setProductData({
+            product_id: rows.id,
+            name: rows.name,
+            category: rows.category,
+            selling_points: sp,
+            ai_selling_points: ai_sp,
+            target_platform: rows.target_platform ?? 'douyin',
+            target_language: rows.target_language ?? 'zh',
+          });
+          toast.success(`已自动预填导入商品: ${rows.name}`);
+        }
+      };
+      fetchPrefill();
+    }
+  }, [location.state, user]);
 
   // 自动保存草稿
   useEffect(() => {

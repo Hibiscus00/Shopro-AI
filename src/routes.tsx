@@ -13,6 +13,7 @@ import LiveHighlightPage from '@/pages/LiveHighlightPage';
 import InvitePage from '@/pages/InvitePage';
 import ActivitiesPage from '@/pages/ActivitiesPage';
 import BatchCreatePage from '@/pages/BatchCreatePage';
+import ProductSelectionPage from '@/pages/ProductSelectionPage';
 
 const routes: RouteConfig[] = [
   { path: '/login', component: LoginPage, isPublic: true },
@@ -31,6 +32,7 @@ const routes: RouteConfig[] = [
   { path: '/invite', component: InvitePage },
   { path: '/activities', component: ActivitiesPage },
   { path: '/batch-create', component: BatchCreatePage },
+  { path: '/product-selection', component: ProductSelectionPage },
 ];
 
 export default routes;

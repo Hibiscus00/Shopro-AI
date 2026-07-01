@@ -61,6 +61,7 @@ const navGroups = [
     items: [
       { path: '/', label: '工作台', icon: LayoutDashboard },
       { path: '/video/create', label: '生成视频', icon: Video },
+      { path: '/product-selection', label: '智能选品', icon: Sparkles },
       { path: '/products', label: '商品管理', icon: Package },
       { path: '/script', label: 'AI脚本生成', icon: Wand2 },
       { path: '/avatars', label: '数字人库', icon: Users2 },
