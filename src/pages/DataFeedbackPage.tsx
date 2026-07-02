@@ -14,7 +14,7 @@ import {
 import {
   TrendingUp, TrendingDown, BarChart3, RefreshCw, Zap,
   Eye, MousePointerClick, ShoppingCart, DollarSign,
-  Clock, Play, ArrowUpRight, ArrowDownRight,
+  Clock, Play, ArrowUpRight, ArrowDownRight, Plus, X
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -86,6 +86,13 @@ export default function DataFeedbackPage() {
   const [loading, setLoading] = useState(true);
   const [range, setRange] = useState('14d');
   const [platform, setPlatform] = useState('all');
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [platformAuths, setPlatformAuths] = useState<Record<string, 'pending' | 'authorized'>>({
+    tiktok: 'pending',
+    xiaohongshu: 'pending',
+    kuaishou: 'pending',
+    bilibili: 'pending',
+  });
 
   const loadData = useCallback(async () => {
     if (!user) return;
@@ -140,6 +147,13 @@ export default function DataFeedbackPage() {
           <p className="text-sm text-muted-foreground mt-0.5">P3-S02 · 广告投放效果全链路追踪，优化 ROI</p>
         </div>
         <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            onClick={() => setAuthModalOpen(true)}
+            className="h-9 px-3 gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 shrink-0 font-semibold"
+          >
+            <Plus className="w-4 h-4" />添加账号
+          </Button>
           <Select value={platform} onValueChange={setPlatform}>
             <SelectTrigger className="h-9 w-28">
               <SelectValue />
@@ -282,6 +296,102 @@ export default function DataFeedbackPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* 平台授权状态横条 */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-muted/10 border border-border/50 rounded-2xl p-3">
+        {[
+          { key: 'tiktok', label: 'TikTok' },
+          { key: 'xiaohongshu', label: '小红书' },
+          { key: 'kuaishou', label: '快手' },
+          { key: 'bilibili', label: 'B站' },
+        ].map(p => {
+          const auth = platformAuths[p.key] === 'authorized';
+          return (
+            <div key={p.key} className="flex items-center justify-between px-3 py-2 rounded-xl bg-card border border-border/40">
+              <span className="text-xs font-semibold text-muted-foreground">{p.label}</span>
+              <span className={cn(
+                "text-[10px] font-bold px-2 py-0.5 rounded-full border",
+                auth 
+                  ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" 
+                  : "bg-amber-500/10 text-amber-500 border-amber-500/20"
+              )}>
+                {auth ? '已授权' : '待授权'}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* 授权账号弹窗 */}
+      {authModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Backdrop */}
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => setAuthModalOpen(false)} />
+          {/* Card */}
+          <Card className="relative w-full max-w-md bg-card border border-border shadow-2xl z-10 overflow-hidden">
+            <CardHeader className="pb-3 flex flex-row items-center justify-between">
+              <div>
+                <CardTitle className="text-base font-bold">第三方平台账户授权</CardTitle>
+                <p className="text-xs text-muted-foreground mt-1">授权获取各平台的投放数据回流</p>
+              </div>
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" onClick={() => setAuthModalOpen(false)}>
+                <X className="w-4 h-4" />
+              </Button>
+            </CardHeader>
+            <CardContent className="space-y-4 pt-2">
+              {[
+                { key: 'tiktok', label: 'TikTok', color: 'bg-black text-white hover:bg-black/90' },
+                { key: 'xiaohongshu', label: '小红书', color: 'bg-red-600 text-white hover:bg-red-700' },
+                { key: 'kuaishou', label: '快手', color: 'bg-orange-500 text-white hover:bg-orange-600' },
+                { key: 'bilibili', label: 'B站', color: 'bg-sky-400 text-white hover:bg-sky-500' },
+              ].map(p => {
+                const status = platformAuths[p.key];
+                return (
+                  <div key={p.key} className="flex items-center justify-between p-3 rounded-xl border border-border/80 bg-muted/20">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-lg bg-card border border-border/50 flex items-center justify-center font-bold text-xs">
+                        {p.label[0]}
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-foreground">{p.label}</p>
+                        <div className="flex items-center gap-1 mt-0.5">
+                          <span className={cn(
+                            "w-1.5 h-1.5 rounded-full",
+                            status === 'authorized' ? "bg-emerald-500" : "bg-amber-500"
+                          )} />
+                          <span className="text-[11px] text-muted-foreground">
+                            {status === 'authorized' ? '已授权' : '待授权'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <Button
+                      size="sm"
+                      variant={status === 'authorized' ? 'outline' : 'default'}
+                      className={cn("h-8 text-xs font-semibold px-4 rounded-lg", status === 'authorized' ? 'border-destructive/30 text-destructive hover:bg-destructive/5' : p.color)}
+                      onClick={async () => {
+                        if (status === 'pending') {
+                          const id = toast.loading(`正在拉取 ${p.label} 授权页面...`);
+                          setTimeout(() => {
+                            setPlatformAuths(prev => ({ ...prev, [p.key]: 'authorized' }));
+                            toast.success(`成功授权 ${p.label} 账号！`, { id });
+                          }, 1200);
+                        } else {
+                          setPlatformAuths(prev => ({ ...prev, [p.key]: 'pending' }));
+                          toast.info(`已解除与 ${p.label} 的账号授权`);
+                        }
+                      }}
+                    >
+                      {status === 'authorized' ? '解除授权' : '授权'}
+                    </Button>
+                  </div>
+                );
+              })}
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }

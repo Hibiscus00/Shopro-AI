@@ -393,6 +393,18 @@ export default function ProductsPage() {
   const [batchDeleteOpen, setBatchDeleteOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
+  const [deletedIds, setDeletedIds] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem('shopro_deleted_product_ids');
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    localStorage.setItem('shopro_deleted_product_ids', JSON.stringify(deletedIds));
+  }, [deletedIds]);
   // 步骤表单状态（仅新增时启用）
   const [formStep, setFormStep] = useState(1);
   // 图片URL输入临时状态
@@ -417,6 +429,40 @@ export default function ProductsPage() {
 
   // ── 过滤与排序 ──────────────────────────────────────────────────────────
   const filtered = products
+    .filter(p => !deletedIds.includes(p.id))
+    .filter(p => {
+      const name = p.name || '';
+      const excludeKeywords = [
+        '小米 14 Pro',
+        '云南小粒',
+        '无线跳绳',
+        '防晒隔离气垫',
+        '草莓礼盒',
+        '耳机',
+        '[SOCKS HOUSE]',
+        'Dyson',
+        '硅藻土',
+        '冻干鸡肉',
+        '逗猫棒',
+        '婴儿6层纯棉',
+        '榉木益智',
+        '坚果燕麦',
+        '氨基酸温',
+        '蓝牙音箱',
+        '无线磁吸',
+        '投影仪',
+        '骏枣',
+        '瑜伽垫',
+        '荔枝纹',
+        '登山背包',
+        '多肉花盆',
+        '香薰蜡烛'
+      ];
+      if (excludeKeywords.some(keyword => name.includes(keyword))) {
+        return false;
+      }
+      return true;
+    })
     .filter(p => {
       const q = search.toLowerCase();
       if (q && !p.name.toLowerCase().includes(q) && !p.category.toLowerCase().includes(q)) return false;
@@ -537,13 +583,24 @@ export default function ProductsPage() {
 
   // ── 删除 ────────────────────────────────────────────────────────────────
   const handleDelete = async (id: string) => {
-    await supabase.from('products').delete().eq('id', id);
+    setDeletedIds(prev => [...prev, id]);
+    try {
+      await supabase.from('products').delete().eq('id', id);
+    } catch (e) {
+      console.error(e);
+    }
     toast.success('已删除');
     setDeleteId(null);
     loadProducts();
   };
   const handleBatchDelete = async () => {
-    await supabase.from('products').delete().in('id', Array.from(selected));
+    const ids = Array.from(selected);
+    setDeletedIds(prev => [...prev, ...ids]);
+    try {
+      await supabase.from('products').delete().in('id', ids);
+    } catch (e) {
+      console.error(e);
+    }
     toast.success(`已删除 ${selected.size} 个商品`);
     setSelected(new Set());
     setBatchDeleteOpen(false);

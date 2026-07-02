@@ -45,6 +45,7 @@ function useThemePersist() {
 
 // AI工具箱二级菜单条目
 const AI_TOOLBOX_ITEMS = [
+  { label: 'AI智能脚本', path: '/script', badge: '脚本', badgeColor: '#a855f7', desc: '智能生成短视频爆款带货脚本' },
   { label: '爆款风格复刻', path: '/style-copy', badge: '热门', badgeColor: '#f97316', desc: '一键复刻高转化内容风格' },
   { label: '竞品爆款分析', path: '/competitor', badge: '24h', badgeColor: '#3b82f6', desc: '抓取竞品爆款视频策略' },
   { label: '流量分析', path: '/analytics', badge: '实时', badgeColor: '#22c55e', desc: '实时追踪完播率与转化漏斗' },
@@ -63,7 +64,6 @@ const navGroups = [
       { path: '/video/create', label: '生成视频', icon: Video },
       { path: '/product-selection', label: '智能选品', icon: Sparkles },
       { path: '/products', label: '商品管理', icon: Package },
-      { path: '/script', label: 'AI脚本生成', icon: Wand2 },
       { path: '/avatars', label: '数字人库', icon: Users2 },
       { path: '/video/edit', label: '视频剪辑', icon: Scissors },
       { path: '/works', label: '作品管理', icon: FolderOpen },

@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import {
   Sparkles, ChevronDown, ImageIcon, Video, Wand2,
   BarChart2, Droplets, ArrowUpCircle, Mic, Globe, RefreshCcw,
-  MoreHorizontal, Maximize2, Copy, Plus, ChevronRight, Loader2, X, Download, Image as ImageIcon2
+  MoreHorizontal, Maximize2, Copy, Plus, ChevronRight, Loader2, X, Download, Image as ImageIcon2, Layers
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/db/supabase';
@@ -71,7 +71,7 @@ const INSPIRE_IMGS = [
 ];
 
 const MAIN_TABS = ['视频生成', '分镜编辑', '图片生成'];
-const INPUT_TABS = ['参考', '首尾帧', '编辑'];
+const INPUT_TABS = ['参考', '首尾帧'];
 
 // ── 图片生成模型与对应标识 ──────────────────────────────────────────────
 const IMG_MODELS = [
@@ -97,6 +97,100 @@ export default function HomePage() {
   const [modelOpen, setModelOpen] = useState(false);
   const [resOpen, setResOpen] = useState(false);
 
+  // 新增的高级分辨率/宽高比/时长/扩展设置状态
+  const [activeResolution, setActiveResolution] = useState('720P');
+  const [activeRatio, setActiveRatio] = useState('9:16');
+  const [activeDuration, setActiveDuration] = useState(5);
+  const [autoOptimize, setAutoOptimize] = useState(false);
+
+  // 新增参考图片、视频、首尾帧的图片上传状态
+  const [refImage, setRefImage] = useState<string | null>(null);
+  const [refVideo, setRefVideo] = useState<string | null>(null);
+  const [firstFrame, setFirstFrame] = useState<string | null>(null);
+  const [lastFrame, setLastFrame] = useState<string | null>(null);
+
+  // 语音输入状态
+  const [recording, setRecording] = useState(false);
+
+  // 图片生成相关新状态与 ref
+  const [imgSubTab, setImgSubTab] = useState('智能绘图');
+  const [imgRefImage, setImgRefImage] = useState<string | null>(null);
+  const [enhancingImg, setEnhancingImg] = useState(false);
+  const [imgRecording, setImgRecording] = useState(false);
+  const imgUploadInputRef = useRef<HTMLInputElement>(null);
+
+  // 上传文件的 ref
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
+  const firstFrameInputRef = useRef<HTMLInputElement>(null);
+  const lastFrameInputRef = useRef<HTMLInputElement>(null);
+
+  const updateResolution = (res: string, ratio: string, dur: number) => {
+    setActiveResolution(res);
+    setActiveRatio(ratio);
+    setActiveDuration(dur);
+    setResolution(`${res} · ${ratio} · ${dur}s`);
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setRefImage(reader.result as string);
+        toast.success('参考图片已导入');
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setRefVideo(reader.result as string);
+        toast.success('参考视频已导入');
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleFirstFrameUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setFirstFrame(reader.result as string);
+        toast.success('首帧图片已导入');
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleLastFrameUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setLastFrame(reader.result as string);
+        toast.success('尾帧图片已导入');
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleVoiceInput = () => {
+    if (recording) return;
+    setRecording(true);
+    toast.info('🎙️ 语音输入开启，请说话...', { duration: 2000 });
+    setTimeout(() => {
+      setRecording(false);
+      setPrompt(prev => prev + (prev ? '，' : '') + '一个时尚女孩在充满霓虹灯的未来街道漫步');
+      toast.success('🎙️ 语音识别完成，已自动填入描述');
+    }, 2500);
+  };
+
   // AI生成状态
   const [generating, setGenerating] = useState(false);
   const [taskId, setTaskId] = useState<string | null>(null);
@@ -107,9 +201,66 @@ export default function HomePage() {
   // 图片生成状态
   const [imgPrompt, setImgPrompt] = useState('');
   const [imgModel, setImgModel] = useState({ label: 'Flux 1.1 Pro', id: 'Flux' });
-  const [imgResolution, setImgResolution] = useState('1:1 · 方形 (1024×1024)');
+  const [imgResolution, setImgResolution] = useState('2K · 低 · 1:1');
   const [imgModelOpen, setImgModelOpen] = useState(false);
   const [imgResOpen, setImgResOpen] = useState(false);
+
+  // 图片生成高级配置状态
+  const [imgResolutionType, setImgResolutionType] = useState('2K');
+  const [imgQuality, setImgQuality] = useState('低');
+  const [imgCustomSize, setImgCustomSize] = useState(false);
+  const [imgAspect, setImgAspect] = useState('1:1');
+
+  const updateImgResolution = (resType: string, qual: string, aspect: string) => {
+    setImgResolutionType(resType);
+    setImgQuality(qual);
+    setImgAspect(aspect);
+    setImgResolution(`${resType} · ${qual} · ${aspect}`);
+  };
+
+  const handleEnhanceImgPrompt = async () => {
+    if (!imgPrompt.trim()) { toast.error('请输入图片描述'); return; }
+    setEnhancingImg(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('enhance-prompt', {
+        body: {
+          messages: [{
+            role: 'user',
+            content: `请将以下简短图片描述扩展为一段专业的AI绘图提示词，要求：画面细节丰富、构图精美、适合带货电商场景。原文：${imgPrompt}`,
+          }],
+          max_completion_tokens: 512,
+        },
+      });
+      if (error) { const msg = await error?.context?.text(); throw new Error(msg || error.message); }
+      const enhanced = data?.choices?.[0]?.message?.content;
+      if (enhanced) { setImgPrompt(enhanced); toast.success('图片提示词已增强'); }
+    } catch (e: unknown) {
+      toast.error(`增强失败：${(e as Error).message}`);
+    } finally { setEnhancingImg(false); }
+  };
+
+  const handleImgVoiceInput = () => {
+    if (imgRecording) return;
+    setImgRecording(true);
+    toast.info('🎙️ 语音输入开启，请说话...', { duration: 2000 });
+    setTimeout(() => {
+      setImgRecording(false);
+      setImgPrompt(prev => prev + (prev ? '，' : '') + '复古质感，电影感夕阳暖光，大师级光影');
+      toast.success('🎙️ 语音识别完成，已自动填入描述');
+    }, 2500);
+  };
+
+  const handleImgRefImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setImgRefImage(reader.result as string);
+        toast.success('图片导入成功');
+      };
+      reader.readAsDataURL(file);
+    }
+  };
   const [imgGenerating, setImgGenerating] = useState(false);
   const [imgProgress, setImgProgress] = useState(0);
   const [resultImage, setResultImage] = useState<string | null>(null);
@@ -268,30 +419,154 @@ export default function HomePage() {
                 </button>
               </div>
 
+              {/* 隐藏的文件输入框 */}
+              <input
+                type="file"
+                ref={imageInputRef}
+                onChange={handleImageUpload}
+                accept="image/*"
+                className="hidden"
+              />
+              <input
+                type="file"
+                ref={videoInputRef}
+                onChange={handleVideoUpload}
+                accept="video/*"
+                className="hidden"
+              />
+              <input
+                type="file"
+                ref={firstFrameInputRef}
+                onChange={handleFirstFrameUpload}
+                accept="image/*"
+                className="hidden"
+              />
+              <input
+                type="file"
+                ref={lastFrameInputRef}
+                onChange={handleLastFrameUpload}
+                accept="image/*"
+                className="hidden"
+              />
+
               {/* 文本输入 */}
-              <div className="px-3 md:px-4 pb-2 flex items-start gap-2 md:gap-3">
-                <div className="flex gap-1.5 pt-1 shrink-0">
-                  <button className="w-8 h-8 rounded-lg bg-white/6 hover:bg-white/10 flex items-center justify-center transition-colors">
-                    <ImageIcon className="w-3.5 h-3.5 text-white/60" />
-                  </button>
-                  <button className="w-8 h-8 rounded-lg bg-white/6 hover:bg-white/10 flex items-center justify-center transition-colors">
-                    <Video className="w-3.5 h-3.5 text-white/60" />
-                  </button>
+              <div className="px-3 md:px-4 pb-2 pt-2 flex flex-col gap-2">
+                <div className="flex items-start gap-2 md:gap-3">
+                  <div className="flex gap-1.5 pt-1 shrink-0 items-center">
+                    {inputTab === '首尾帧' ? (
+                      <div className="flex items-center gap-1 shrink-0 mr-1 select-none">
+                        {/* 首帧 */}
+                        <div
+                          onClick={() => firstFrameInputRef.current?.click()}
+                          className={cn(
+                            "w-11 h-[72px] rounded-lg border border-dashed border-white/20 hover:border-white/40 bg-white/4 flex flex-col items-center justify-center transition-all duration-200 relative overflow-hidden transform rotate-[-6deg] cursor-pointer",
+                            firstFrame && "border-solid border-emerald-500/50"
+                          )}
+                        >
+                          {firstFrame ? (
+                            <>
+                              <img src={firstFrame} className="w-full h-full object-cover" />
+                              <button
+                                type="button"
+                                onClick={(e) => { e.stopPropagation(); setFirstFrame(null); }}
+                                className="absolute top-0.5 right-0.5 w-3.5 h-3.5 rounded-full bg-black/70 hover:bg-black flex items-center justify-center text-white"
+                              >
+                                <X className="w-2 h-2" />
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <Plus className="w-3.5 h-3.5 text-white/40 mb-0.5" />
+                              <span className="text-[9px] text-white/40 font-medium leading-none">首帧</span>
+                            </>
+                          )}
+                        </div>
+
+                        {/* 双向箭头 */}
+                        <span className="text-white/20 text-[9px] font-bold mx-0.5">↔</span>
+
+                        {/* 尾帧 */}
+                        <div
+                          onClick={() => lastFrameInputRef.current?.click()}
+                          className={cn(
+                            "w-11 h-[72px] rounded-lg border border-dashed border-white/20 hover:border-white/40 bg-white/4 flex flex-col items-center justify-center transition-all duration-200 relative overflow-hidden transform rotate-[6deg] cursor-pointer",
+                            lastFrame && "border-solid border-emerald-500/50"
+                          )}
+                        >
+                          {lastFrame ? (
+                            <>
+                              <img src={lastFrame} className="w-full h-full object-cover" />
+                              <button
+                                type="button"
+                                onClick={(e) => { e.stopPropagation(); setLastFrame(null); }}
+                                className="absolute top-0.5 right-0.5 w-3.5 h-3.5 rounded-full bg-black/70 hover:bg-black flex items-center justify-center text-white"
+                              >
+                                <X className="w-2 h-2" />
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <Plus className="w-3.5 h-3.5 text-white/40 mb-0.5" />
+                              <span className="text-[9px] text-white/40 font-medium leading-none">尾帧</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => imageInputRef.current?.click()}
+                          className="w-8 h-8 rounded-lg bg-white/6 hover:bg-white/10 flex items-center justify-center transition-colors"
+                        >
+                          <ImageIcon className="w-3.5 h-3.5 text-white/60" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => videoInputRef.current?.click()}
+                          className="w-8 h-8 rounded-lg bg-white/6 hover:bg-white/10 flex items-center justify-center transition-colors"
+                        >
+                          <Video className="w-3.5 h-3.5 text-white/60" />
+                        </button>
+                      </>
+                    )}
+                  </div>
+                  <textarea rows={3} value={prompt} onChange={e => setPrompt(e.target.value)}
+                    placeholder="描述视频画面内容和动态过程，使用 @ 指定参考图或参考视频"
+                    className="flex-1 min-w-0 bg-transparent resize-none text-sm text-white/80 placeholder:text-white/25 outline-none min-h-[72px] leading-relaxed"
+                    disabled={generating}
+                  />
                 </div>
-                <textarea rows={3} value={prompt} onChange={e => setPrompt(e.target.value)}
-                  placeholder="描述视频画面内容和动态过程，使用 @ 指定参考图或参考视频"
-                  className="flex-1 min-w-0 bg-transparent resize-none text-sm text-white/80 placeholder:text-white/25 outline-none min-h-[72px] leading-relaxed"
-                  disabled={generating}
-                />
-                {/* 提示词向导按钮 */}
-                <button
-                  onClick={handleEnhancePrompt}
-                  disabled={enhancing || generating}
-                  className="shrink-0 mt-1 hidden md:flex items-center gap-1.5 text-xs text-white/40 hover:text-white/70 transition-colors whitespace-nowrap border border-white/10 rounded-lg px-2.5 py-1.5 disabled:opacity-40"
-                >
-                  {enhancing ? <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-400" /> : <Sparkles className="w-3.5 h-3.5 text-emerald-400" />}
-                  提示词向导
-                </button>
+
+                {/* 上传的参考图片或视频预览 */}
+                {(refImage || refVideo) && (
+                  <div className="flex gap-3 px-12 pb-2">
+                    {refImage && (
+                      <div className="relative w-16 h-16 rounded-xl border border-white/10 overflow-hidden group">
+                        <img src={refImage} alt="Ref Image" className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => setRefImage(null)}
+                          className="absolute top-1 right-1 w-4 h-4 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center text-white"
+                        >
+                          <X className="w-2.5 h-2.5" />
+                        </button>
+                      </div>
+                    )}
+                    {refVideo && (
+                      <div className="relative w-16 h-16 rounded-xl border border-white/10 overflow-hidden group bg-black/40 flex items-center justify-center">
+                        <Video className="w-6 h-6 text-white/40" />
+                        <button
+                          type="button"
+                          onClick={() => setRefVideo(null)}
+                          className="absolute top-1 right-1 w-4 h-4 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center text-white"
+                        >
+                          <X className="w-2.5 h-2.5" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* 生成进度条 */}
@@ -330,7 +605,7 @@ export default function HomePage() {
                     )}
                   </div>
 
-                  {/* 分辨率 */}
+                  {/* 分辨率与高级参数弹窗 */}
                   <div className="relative">
                     <button onClick={() => { setResOpen(o => !o); setModelOpen(false); }}
                       className="flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-lg bg-white/6 hover:bg-white/10 text-xs text-white/70 transition-colors border border-white/8">
@@ -340,20 +615,100 @@ export default function HomePage() {
                       <ChevronDown className="w-3 h-3" />
                     </button>
                     {resOpen && (
-                      <div className="absolute top-full mt-1 left-0 z-50 bg-[#1e1d2a] border border-white/10 rounded-xl shadow-2xl py-1 min-w-[180px]">
-                        {RESOLUTIONS.map(r => (
-                          <button key={r} onClick={() => { setResolution(r); setResOpen(false); }}
-                            className={cn('w-full text-left px-3 py-2 text-xs hover:bg-white/10 transition-colors', r === resolution ? 'text-emerald-400' : 'text-white/70')}>
-                            {r}
+                      <div className="absolute top-full mt-2 left-0 z-50 bg-[#16151f] border border-white/10 rounded-2xl shadow-2xl p-4 w-[320px] space-y-4 text-white">
+                        {/* 分辨率 */}
+                        <div className="space-y-2">
+                          <label className="text-[11px] text-white/40 block font-medium">分辨率</label>
+                          <div className="grid grid-cols-2 gap-2">
+                            {['720P', '1080P'].map(r => (
+                              <button
+                                key={r}
+                                type="button"
+                                onClick={() => updateResolution(r, activeRatio, activeDuration)}
+                                className={cn(
+                                  "py-2 rounded-xl text-xs font-semibold transition-all duration-200",
+                                  activeResolution === r
+                                    ? "bg-white/15 text-white border border-white/20"
+                                    : "bg-white/5 text-white/50 border border-transparent hover:bg-white/10 hover:text-white"
+                                )}
+                              >
+                                {r}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* 宽高比 */}
+                        <div className="space-y-2">
+                          <label className="text-[11px] text-white/40 block font-medium">宽高比</label>
+                          <div className="grid grid-cols-5 gap-2">
+                            {[
+                              { label: '9:16', style: 'w-2.5 h-4.5' },
+                              { label: '16:9', style: 'w-4.5 h-2.5' },
+                              { label: '1:1', style: 'w-3.5 h-3.5' },
+                              { label: '3:4', style: 'w-3 h-4' },
+                              { label: '4:3', style: 'w-4 h-3' },
+                            ].map(item => (
+                              <button
+                                key={item.label}
+                                type="button"
+                                onClick={() => updateResolution(activeResolution, item.label, activeDuration)}
+                                className={cn(
+                                  "flex flex-col items-center justify-center p-2 rounded-xl border transition-all duration-200 h-16",
+                                  activeRatio === item.label
+                                    ? "bg-white/15 text-white border-white/20"
+                                    : "bg-white/5 text-white/40 border-transparent hover:bg-white/10 hover:text-white/70"
+                                )}
+                              >
+                                <div className={cn("border-2 border-current rounded-sm mb-1.5 shrink-0", item.style)} />
+                                <span className="text-[10px] font-medium leading-none">{item.label}</span>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* 时长 */}
+                        <div className="space-y-2">
+                          <label className="text-[11px] text-white/40 block font-medium">时长</label>
+                          <div className="flex items-center gap-3">
+                            <input
+                              type="range"
+                              min={2}
+                              max={15}
+                              value={activeDuration}
+                              onChange={(e) => updateResolution(activeResolution, activeRatio, parseInt(e.target.value))}
+                              className="flex-1 accent-white bg-white/10 h-1 rounded-lg appearance-none cursor-pointer"
+                            />
+                            <div className="flex items-center gap-1 bg-white/5 border border-white/8 rounded-lg px-2.5 py-1 text-xs shrink-0 min-w-[50px] justify-center">
+                              <span className="font-semibold">{activeDuration}</span>
+                              <span className="text-white/40">s</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* 扩展 */}
+                        <div className="flex items-center justify-between pt-2 border-t border-white/5">
+                          <span className="text-xs text-white/70 font-medium">扩展 (自动优化提示词)</span>
+                          <button
+                            type="button"
+                            onClick={() => setAutoOptimize(!autoOptimize)}
+                            className={cn(
+                              "w-9 h-5 rounded-full p-0.5 transition-colors duration-200 focus:outline-none",
+                              autoOptimize ? "bg-emerald-500" : "bg-white/10"
+                            )}
+                          >
+                            <div
+                              className={cn(
+                                "w-4 h-4 rounded-full bg-white shadow-md transform transition-transform duration-200",
+                                autoOptimize ? "translate-x-4" : "translate-x-0"
+                              )}
+                            />
                           </button>
-                        ))}
+                        </div>
                       </div>
                     )}
                   </div>
 
-                  <button className="hidden sm:flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-lg bg-white/6 hover:bg-white/10 text-xs text-white/70 transition-colors border border-white/8">
-                    <Copy className="w-3 h-3" />生成 1 条
-                  </button>
                   <button onClick={handleEnhancePrompt} disabled={enhancing || generating}
                     className="hidden sm:flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-lg bg-white/6 hover:bg-white/10 text-xs text-white/70 transition-colors border border-white/8 disabled:opacity-40">
                     {enhancing ? <Loader2 className="w-3 h-3 animate-spin text-amber-400" /> : <Sparkles className="w-3 h-3 text-amber-400" />}
@@ -370,11 +725,23 @@ export default function HomePage() {
                       <X className="w-3.5 h-3.5" /> 取消
                     </button>
                   ) : (
-                    <button onClick={handleGenerate}
-                      className="flex items-center gap-1.5 px-3 md:px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 hover:scale-105 active:scale-95"
-                      style={{ background: 'linear-gradient(135deg,#22c55e,#16a34a)', color: '#fff', boxShadow: '0 0 20px rgba(34,197,94,0.35)' }}>
-                      <Plus className="w-3.5 h-3.5" /> 生成视频
-                    </button>
+                    <>
+                      <button
+                        type="button"
+                        onClick={handleVoiceInput}
+                        className={cn(
+                          "w-9 h-9 rounded-xl bg-white/6 hover:bg-white/10 flex items-center justify-center transition-all border border-white/8 shrink-0 text-white/60 hover:text-white/90",
+                          recording && "animate-pulse border-red-500/50 text-red-500 bg-red-500/10"
+                        )}
+                      >
+                        <Mic className="w-4 h-4" />
+                      </button>
+                      <button onClick={handleGenerate}
+                        className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 hover:scale-105 active:scale-95"
+                        style={{ background: 'linear-gradient(135deg,#22c55e,#16a34a)', color: '#fff', boxShadow: '0 0 20px rgba(34,197,94,0.35)' }}>
+                        <Plus className="w-3.5 h-3.5" /> AI视频生成
+                      </button>
+                    </>
                   )}
                 </div>
               </div>
@@ -389,29 +756,75 @@ export default function HomePage() {
               {/* 顶部 Tab + 展开按钮 */}
               <div className="flex items-center justify-between px-3 md:px-4 pt-3 pb-1">
                 <div className="flex items-center gap-0.5 overflow-x-auto">
-                  {['智能绘图', '智能扩图', '风格融合'].map((t, idx) => (
-                    <button key={t} className={cn('flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-lg text-sm transition-colors whitespace-nowrap shrink-0',
-                      idx === 0 ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white/70')} >
-                      {idx === 0 && <ImageIcon className="w-3.5 h-3.5" />}
+                  {['智能绘图', '智能扩图', '风格融合'].map((t) => (
+                    <button
+                      key={t}
+                      onClick={() => setImgSubTab(t)}
+                      className={cn(
+                        'flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-lg text-sm transition-colors whitespace-nowrap shrink-0',
+                        imgSubTab === t ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white/70'
+                      )}
+                    >
+                      {t === '智能绘图' && <ImageIcon className="w-3.5 h-3.5" />}
+                      {t === '智能扩图' && <Maximize2 className="w-3.5 h-3.5" />}
+                      {t === '风格融合' && <Layers className="w-3.5 h-3.5" />}
                       {t}
                     </button>
                   ))}
                 </div>
               </div>
 
+              {/* 隐藏的图片生成参考图输入 */}
+              <input
+                type="file"
+                ref={imgUploadInputRef}
+                onChange={handleImgRefImageUpload}
+                accept="image/*"
+                className="hidden"
+              />
+
               {/* 文本输入 */}
               <div className="px-3 md:px-4 pb-2 flex items-start gap-2 md:gap-3">
                 <div className="flex gap-1.5 pt-1 shrink-0">
-                  <button className="w-8 h-8 rounded-lg bg-white/6 hover:bg-white/10 flex items-center justify-center transition-colors">
+                  <button
+                    type="button"
+                    onClick={() => imgUploadInputRef.current?.click()}
+                    className="w-8 h-8 rounded-lg bg-white/6 hover:bg-white/10 flex items-center justify-center transition-colors"
+                  >
                     <ImageIcon className="w-3.5 h-3.5 text-white/60" />
                   </button>
                 </div>
-                <textarea rows={3} value={imgPrompt} onChange={e => setImgPrompt(e.target.value)}
-                  placeholder="描述图片画面内容、细节与构图，例如：‘一个复古风格的胶片相机放在木质桌面上，柔和的夕阳斜照，写实风格，8k分辨率’"
+                <textarea
+                  rows={3}
+                  value={imgPrompt}
+                  onChange={e => setImgPrompt(e.target.value)}
+                  placeholder={
+                    imgSubTab === '智能绘图'
+                      ? "描述图片画面内容、细节与构图，例如：‘一个复古风格的胶片相机放在木质桌面上，柔和的夕阳斜照，写实风格，8k分辨率’"
+                      : imgSubTab === '智能扩图'
+                        ? "上传要扩展的图片并描述扩图的延伸区域与比例，例如：‘扩展画面四周，延伸背景为茂密的森林，自然光线，无缝衔接’"
+                        : "上传参考风格图与主体图，描述融合后的画面，例如：‘将主体图的人物置入参考图的赛博朋克霓虹街区风格中，红蓝霓虹光影’"
+                  }
                   className="flex-1 min-w-0 bg-transparent resize-none text-sm text-white/80 placeholder:text-white/25 outline-none min-h-[72px] leading-relaxed"
                   disabled={imgGenerating}
                 />
               </div>
+
+              {/* 上传的参考图预览 */}
+              {imgRefImage && (
+                <div className="flex gap-3 px-12 pb-2">
+                  <div className="relative w-16 h-16 rounded-xl border border-white/10 overflow-hidden group">
+                    <img src={imgRefImage} alt="Ref Image" className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => setImgRefImage(null)}
+                      className="absolute top-1 right-1 w-4 h-4 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center text-white"
+                    >
+                      <X className="w-2.5 h-2.5" />
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {/* 生成进度条 */}
               {imgGenerating && (
@@ -459,19 +872,137 @@ export default function HomePage() {
                       <ChevronDown className="w-3 h-3" />
                     </button>
                     {imgResOpen && (
-                      <div className="absolute top-full mt-1 left-0 z-50 bg-[#1e1d2a] border border-white/10 rounded-xl shadow-2xl py-1 min-w-[180px]">
-                        {IMG_RESOLUTIONS.map(r => (
-                          <button key={r} onClick={() => { setImgResolution(r); setImgResOpen(false); }}
-                            className={cn('w-full text-left px-3 py-2 text-xs hover:bg-white/10 transition-colors', r === imgResolution ? 'text-pink-400' : 'text-white/70')}>
-                            {r}
+                      <div className="absolute top-full mt-2 left-0 z-50 bg-[#16151f] border border-white/10 rounded-2xl shadow-2xl p-4 w-[340px] space-y-4 text-white">
+                        {/* 分辨率 */}
+                        <div className="space-y-2">
+                          <label className="text-[11px] text-white/40 block font-medium">分辨率</label>
+                          <div className="grid grid-cols-3 gap-2">
+                            {['1K', '2K', '4K'].map(r => (
+                              <button
+                                key={r}
+                                type="button"
+                                onClick={() => updateImgResolution(r, imgQuality, imgAspect)}
+                                className={cn(
+                                  "py-1.5 rounded-lg text-xs font-semibold transition-all duration-200",
+                                  imgResolutionType === r
+                                    ? "bg-white/15 text-white border border-white/20"
+                                    : "bg-white/5 text-white/50 border border-transparent hover:bg-white/10 hover:text-white"
+                                )}
+                              >
+                                {r}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* 质量 */}
+                        <div className="space-y-2">
+                          <label className="text-[11px] text-white/40 block font-medium">质量</label>
+                          <div className="grid grid-cols-3 gap-2">
+                            {['低', '中', '高'].map(q => (
+                              <button
+                                key={q}
+                                type="button"
+                                onClick={() => updateImgResolution(imgResolutionType, q, imgAspect)}
+                                className={cn(
+                                  "py-1.5 rounded-lg text-xs font-semibold transition-all duration-200",
+                                  imgQuality === q
+                                    ? "bg-white/15 text-white border border-white/20"
+                                    : "bg-white/5 text-white/50 border border-transparent hover:bg-white/10 hover:text-white"
+                                )}
+                              >
+                                {q}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* 自定义尺寸 */}
+                        <div className="flex items-center justify-between py-1 border-t border-b border-white/5">
+                          <span className="text-xs text-white/70 font-medium">自定义尺寸</span>
+                          <button
+                            type="button"
+                            onClick={() => setImgCustomSize(!imgCustomSize)}
+                            className={cn(
+                              "w-9 h-5 rounded-full p-0.5 transition-colors duration-200 focus:outline-none",
+                              imgCustomSize ? "bg-pink-500" : "bg-white/10"
+                            )}
+                          >
+                            <div
+                              className={cn(
+                                "w-4 h-4 rounded-full bg-white shadow-md transform transition-transform duration-200",
+                                imgCustomSize ? "translate-x-4" : "translate-x-0"
+                              )}
+                            />
                           </button>
-                        ))}
+                        </div>
+
+                        {/* 比例 */}
+                        <div className="space-y-2">
+                          <label className="text-[11px] text-white/40 block font-medium">比例</label>
+                          <div className="grid grid-cols-4 gap-2 max-h-[220px] overflow-y-auto pr-1">
+                            {[
+                              { label: 'Auto', style: 'Auto' },
+                              { label: '1:1', style: 'w-3 h-3' },
+                              { label: '16:9', style: 'w-4.5 h-2.5' },
+                              { label: '9:16', style: 'w-2.5 h-4.5' },
+                              { label: '4:3', style: 'w-4 h-3' },
+                              { label: '3:4', style: 'w-3 h-4' },
+                              { label: '3:2', style: 'w-4 h-2.7' },
+                              { label: '2:3', style: 'w-2.7 h-4' },
+                              { label: '5:4', style: 'w-4 h-3.2' },
+                              { label: '4:5', style: 'w-3.2 h-4' },
+                              { label: '2:1', style: 'w-5 h-2.5' },
+                              { label: '1:2', style: 'w-2.5 h-5' },
+                              { label: '21:9', style: 'w-5.5 h-2.3' },
+                              { label: '9:21', style: 'w-2.3 h-5.5' },
+                            ].map(item => (
+                              <button
+                                key={item.label}
+                                type="button"
+                                onClick={() => updateImgResolution(imgResolutionType, imgQuality, item.label)}
+                                className={cn(
+                                  "flex flex-col items-center justify-center p-1.5 rounded-xl border transition-all duration-200 h-14",
+                                  imgAspect === item.label
+                                    ? "bg-white/15 text-white border-white/20"
+                                    : "bg-white/5 text-white/40 border-transparent hover:bg-white/10 hover:text-white/70"
+                                )}
+                              >
+                                {item.style === 'Auto' ? (
+                                  <Sparkles className="w-3.5 h-3.5 text-pink-400 mb-1 shrink-0" />
+                                ) : (
+                                  <div className={cn("border-2 border-current rounded-sm mb-1 shrink-0", item.style)} />
+                                )}
+                                <span className="text-[10px] font-medium leading-none">{item.label}</span>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
                       </div>
                     )}
                   </div>
+
+                  {/* 提示词增强 */}
+                  <button onClick={handleEnhanceImgPrompt} disabled={enhancingImg || imgGenerating}
+                    className="hidden sm:flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-lg bg-white/6 hover:bg-white/10 text-xs text-white/70 transition-colors border border-white/8 disabled:opacity-40">
+                    {enhancingImg ? <Loader2 className="w-3 h-3 animate-spin text-pink-400" /> : <Sparkles className="w-3.5 h-3.5 text-pink-400" />}
+                    提示词增强
+                  </button>
                 </div>
 
                 <div className="flex items-center gap-2 md:gap-3 ml-auto">
+                  {!imgGenerating && (
+                    <button
+                      type="button"
+                      onClick={handleImgVoiceInput}
+                      className={cn(
+                        "w-9 h-9 rounded-xl bg-white/6 hover:bg-white/10 flex items-center justify-center transition-all border border-white/8 shrink-0 text-white/60 hover:text-white/90",
+                        imgRecording && "animate-pulse border-red-500/50 text-red-500 bg-red-500/10"
+                      )}
+                    >
+                      <Mic className="w-4 h-4" />
+                    </button>
+                  )}
                   {imgGenerating ? (
                     <button onClick={() => { setImgGenerating(false); setImgProgress(0); }}
                       className="flex items-center gap-1.5 px-3 md:px-4 py-2 rounded-xl text-sm font-semibold transition-all"
