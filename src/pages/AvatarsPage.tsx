@@ -21,6 +21,8 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { sendStepAudioTTS } from '@/lib/sse';
+
 
 // ── CR-06: 情绪时间轴类型 ────────────────────────────────────────────────────
 type EmotionType = 'neutral' | 'happy' | 'concerned' | 'excited' | 'persuasive';
@@ -425,25 +427,27 @@ export default function AvatarsPage() {
     setTtsGenerating(true);
     setTtsAudioUrl(null);
     try {
-      const { data, error } = await supabase.functions.invoke('minimax-tts', {
-        body: {
-          text: ttsText,
-          voice_id: ttsVoice,
-          speed: ttsSpeed,
-          vol: ttsVolume,
-          format: 'mp3',
-        }
+      const voiceMap: Record<string, string> = {
+        'female-shaonv': 'livelybreezy-female',
+        'female-yujie': 'elegantgentle-female',
+        'female-chengshu': 'elegantgentle-female',
+        'male-qingxin': 'zhengpaiqingnian',
+        'male-chunhou': 'shuangkuainansheng',
+        'male-jingying': 'shuangkuainansheng',
+      };
+      const mappedVoice = voiceMap[ttsVoice] || ttsVoice || 'livelybreezy-female';
+      const instruction = `语气表现得自然、饱满，语速为 ${ttsSpeed}x，音量为 ${ttsVolume}`;
+      const audioUrl = await sendStepAudioTTS({
+        input: ttsText,
+        voice: mappedVoice,
+        instruction,
+        response_format: 'mp3',
       });
-      if (error) throw error;
-      if (data?.audio_url) {
-        setTtsAudioUrl(data.audio_url);
-        toast.success('语音合成完成！');
-      } else {
-        // 降级：提示但不阻断流程
-        toast.info('TTS 服务暂时不可用，请配置 MiniMax API Key 后使用');
-      }
-    } catch {
-      toast.info('TTS 服务暂时不可用，请配置 MiniMax API Key 后使用');
+      setTtsAudioUrl(audioUrl);
+      toast.success('语音合成完成！');
+    } catch (err) {
+      console.error('TTS synthesis failed:', err);
+      toast.error(`语音合成失败: ${(err as Error).message}`);
     } finally {
       setTtsGenerating(false);
     }

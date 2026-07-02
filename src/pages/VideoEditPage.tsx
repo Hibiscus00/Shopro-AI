@@ -23,6 +23,9 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
+import { sendStepAudioASR } from '@/lib/sse';
+import { audioRecorder } from '@/lib/audioRecorder';
+
 
 // ── 类型定义 ──────────────────────────────────────────────────────────────
 interface TrackItem {
@@ -713,16 +716,49 @@ function TextSubtitlePanel() {
   const [shadowBlur, setShadowBlur] = useState([8]);
   const [strokeWidth, setStrokeWidth] = useState([0]);
   const [bgOpacity, setBgOpacity] = useState([0]);
+  const [recordingSubtitles, setRecordingSubtitles] = useState(false);
   const [recognizing, setRecognizing] = useState(false);
   const [subtitleText, setSubtitleText] = useState('');
 
   const handleRecognize = async () => {
-    setRecognizing(true);
-    toast.info('语音识别中，请稍候…');
-    await new Promise(r => setTimeout(r, 1800));
-    setRecognizing(false);
-    setSubtitleText('限时特惠，今天下单立减50元！');
-    toast.success('识别完成，已生成字幕文本');
+    if (recordingSubtitles) {
+      setRecordingSubtitles(false);
+      setRecognizing(true);
+      toast.info('🎙️ 录音已结束，正在通过 StepAudio 2.5 ASR 进行识别...');
+      try {
+        const base64Wav = await audioRecorder.stop();
+        let transcript = '';
+        await sendStepAudioASR({
+          audioData: base64Wav,
+          onData: (text) => {
+            transcript += text;
+            setSubtitleText(prev => prev ? prev + ' ' + text : text);
+          },
+          onComplete: () => {
+            setRecognizing(false);
+            toast.success('语音识别完成！');
+          },
+          onError: (err) => {
+            setRecognizing(false);
+            console.error('ASR error:', err);
+            toast.error(`识别失败: ${err.message}`);
+          }
+        });
+      } catch (err) {
+        setRecognizing(false);
+        console.error('Failed to stop recording:', err);
+        toast.error('录音处理失败，请重试');
+      }
+    } else {
+      try {
+        await audioRecorder.start();
+        setRecordingSubtitles(true);
+        toast.info('🎙️ 录音中... 请说话，再次点击该按钮以停止并识别', { duration: 5000 });
+      } catch (err) {
+        console.error('Microphone access failed:', err);
+        toast.error('无法启用麦克风，请检查权限设置');
+      }
+    }
   };
 
   return (
@@ -810,7 +846,13 @@ function TextSubtitlePanel() {
                 onClick={handleRecognize}
                 disabled={recognizing}
               >
-                {recognizing ? <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />识别中…</> : <><Mic className="w-3.5 h-3.5 mr-1.5" />一键识别字幕</>}
+                {recordingSubtitles ? (
+                  <><span className="w-2 h-2 rounded-full bg-red-500 animate-ping mr-2 shrink-0" />停止并识别字幕</>
+                ) : recognizing ? (
+                  <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />识别中…</>
+                ) : (
+                  <><Mic className="w-3.5 h-3.5 mr-1.5" />一键录音识别字幕</>
+                )}
               </Button>
             </div>
             <Button

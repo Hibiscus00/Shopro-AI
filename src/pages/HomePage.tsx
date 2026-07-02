@@ -1,15 +1,19 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   Sparkles, ChevronDown, ImageIcon, Video, Wand2,
   BarChart2, Droplets, ArrowUpCircle, Mic, Globe, RefreshCcw,
-  MoreHorizontal, Maximize2, Copy, Plus, ChevronRight, Loader2, X, Download, Image as ImageIcon2, Layers
+  MoreHorizontal, Maximize2, Copy, Plus, ChevronRight, Loader2, X, Download, Image as ImageIcon2, Layers, Play
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/db/supabase';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import ProductVideoWizard from './VideoCreatePage';
-import { sendDeepSeekStreamRequest } from '@/lib/sse';
+import { sendDeepSeekStreamRequest, sendStepAudioASR, submitSeedanceVideo, querySeedanceVideo } from '@/lib/sse';
+import { audioRecorder } from '@/lib/audioRecorder';
+
+
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
@@ -57,10 +61,9 @@ const QUICK_TOOLS = [
 
 
 // 模型与对应后端标识
-type ModelId = 'Sora 2' | 'Wan 2.7';
+type ModelId = 'Seedance';
 const MODELS: { label: string; id: ModelId }[] = [
-  { label: 'Sora 2',    id: 'Sora 2' },
-  { label: 'Wan 2.7',   id: 'Wan 2.7' },
+  { label: 'Seedance 2.0', id: 'Seedance' },
 ];
 const RESOLUTIONS = ['720P · 9:16 · 5s', '1080P · 16:9 · 10s', '4K · 1:1 · 8s'];
 const INSPIRE_IMGS = [
@@ -93,10 +96,11 @@ const IMG_RESOLUTIONS = [
 export default function HomePage() {
   const { projectId } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [mainTab, setMainTab] = useState(projectId ? '分镜编辑' : '视频生成');
   const [inputTab, setInputTab] = useState('参考');
   const [prompt, setPrompt] = useState('');
-  const [model, setModel] = useState<{ label: string; id: ModelId }>({ label: 'Sora 2', id: 'Sora 2' });
+  const [model, setModel] = useState<{ label: string; id: ModelId }>({ label: 'Seedance 2.0', id: 'Seedance' });
   const [resolution, setResolution] = useState('720P · 9:16 · 5s');
   const [modelOpen, setModelOpen] = useState(false);
   const [resOpen, setResOpen] = useState(false);
@@ -184,15 +188,39 @@ export default function HomePage() {
     }
   };
 
-  const handleVoiceInput = () => {
-    if (recording) return;
-    setRecording(true);
-    toast.info('🎙️ 语音输入开启，请说话...', { duration: 2000 });
-    setTimeout(() => {
+  const handleVoiceInput = async () => {
+    if (recording) {
       setRecording(false);
-      setPrompt(prev => prev + (prev ? '，' : '') + '一个时尚女孩在充满霓虹灯的未来街道漫步');
-      toast.success('🎙️ 语音识别完成，已自动填入描述');
-    }, 2500);
+      toast.info('🎙️ 录音已结束，正在通过 StepAudio 2.5 ASR 进行识别...');
+      try {
+        const base64Wav = await audioRecorder.stop();
+        await sendStepAudioASR({
+          audioData: base64Wav,
+          onData: (text) => {
+            setPrompt(prev => prev + (prev ? '，' : '') + text);
+          },
+          onComplete: () => {
+            toast.success('🎙️ 语音识别完成，已自动填入描述');
+          },
+          onError: (err) => {
+            console.error('ASR error:', err);
+            toast.error(`识别失败: ${err.message}`);
+          }
+        });
+      } catch (err) {
+        console.error('Failed to stop recording:', err);
+        toast.error('录音处理失败，请重试');
+      }
+    } else {
+      try {
+        await audioRecorder.start();
+        setRecording(true);
+        toast.info('🎙️ 录音中... 请说话，再次点击按钮以停止并识别', { duration: 5000 });
+      } catch (err) {
+        console.error('Microphone access failed:', err);
+        toast.error('无法启用麦克风，请检查权限设置');
+      }
+    }
   };
 
   // AI生成状态
@@ -222,6 +250,25 @@ export default function HomePage() {
     setImgResolution(`${resType} · ${qual} · ${aspect}`);
   };
 
+  const [generatedVideos, setGeneratedVideos] = useState<any[]>([]);
+
+  const loadGeneratedVideos = useCallback(async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from('video_projects')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('status', 'completed')
+      .order('created_at', { ascending: false });
+    if (data) {
+      setGeneratedVideos(data);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    loadGeneratedVideos();
+  }, [loadGeneratedVideos]);
+
   const handleEnhanceImgPrompt = async () => {
     if (!imgPrompt.trim()) { toast.error('请输入图片描述'); return; }
     setEnhancingImg(true);
@@ -243,15 +290,39 @@ export default function HomePage() {
     } finally { setEnhancingImg(false); }
   };
 
-  const handleImgVoiceInput = () => {
-    if (imgRecording) return;
-    setImgRecording(true);
-    toast.info('🎙️ 语音输入开启，请说话...', { duration: 2000 });
-    setTimeout(() => {
+  const handleImgVoiceInput = async () => {
+    if (imgRecording) {
       setImgRecording(false);
-      setImgPrompt(prev => prev + (prev ? '，' : '') + '复古质感，电影感夕阳暖光，大师级光影');
-      toast.success('🎙️ 语音识别完成，已自动填入描述');
-    }, 2500);
+      toast.info('🎙️ 录音已结束，正在通过 StepAudio 2.5 ASR 进行识别...');
+      try {
+        const base64Wav = await audioRecorder.stop();
+        await sendStepAudioASR({
+          audioData: base64Wav,
+          onData: (text) => {
+            setImgPrompt(prev => prev + (prev ? '，' : '') + text);
+          },
+          onComplete: () => {
+            toast.success('🎙️ 语音识别完成，已自动填入描述');
+          },
+          onError: (err) => {
+            console.error('ASR error:', err);
+            toast.error(`识别失败: ${err.message}`);
+          }
+        });
+      } catch (err) {
+        console.error('Failed to stop recording:', err);
+        toast.error('录音处理失败，请重试');
+      }
+    } else {
+      try {
+        await audioRecorder.start();
+        setImgRecording(true);
+        toast.info('🎙️ 录音中... 请说话，再次点击按钮以停止并识别', { duration: 5000 });
+      } catch (err) {
+        console.error('Microphone access failed:', err);
+        toast.error('无法启用麦克风，请检查权限设置');
+      }
+    }
   };
 
   const handleImgRefImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -331,20 +402,118 @@ export default function HomePage() {
     }, 8000);
   }, [stopPoll]);
 
+  // 轮询 Seedance 任务
+  const pollSeedance = useCallback((reqId: string, dbProjectId?: string | null) => {
+    let attempts = 0;
+    pollRef.current = setInterval(async () => {
+      attempts++;
+      if (attempts > 120) {
+        stopPoll();
+        setGenerating(false);
+        toast.error('视频生成超时，请重试');
+        if (dbProjectId) {
+          await supabase.from('video_projects').update({ status: 'failed' }).eq('id', dbProjectId);
+        }
+        return;
+      }
+      try {
+        const data = await querySeedanceVideo(reqId);
+        const status = data?.status;
+        if (status === 'success') {
+          stopPoll(); setGenerating(false); setGenProgress(100);
+          const videoUrl = data?.outcome?.video_url || data?.video_url;
+          if (videoUrl) {
+            setResultVideo(videoUrl);
+            toast.success('Seedance 视频生成完成！');
+            if (dbProjectId) {
+              await supabase.from('video_projects').update({
+                status: 'completed',
+                progress: 100,
+                video_url: videoUrl,
+                thumbnail_url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=640&h=360&fit=crop',
+              }).eq('id', dbProjectId);
+              loadGeneratedVideos();
+            }
+          }
+        } else if (status === 'failed' || status === 'cancelled') {
+          stopPoll(); setGenerating(false); toast.error(`视频生成失败: ${data?.error || '模型生成出错'}`);
+          if (dbProjectId) {
+            await supabase.from('video_projects').update({ status: 'failed' }).eq('id', dbProjectId);
+          }
+        } else {
+          const prog = Math.min(95, attempts * 4);
+          setGenProgress(prog);
+          if (dbProjectId) {
+            await supabase.from('video_projects').update({ progress: prog }).eq('id', dbProjectId);
+          }
+        }
+      } catch (e) {
+        console.error('seedance poll error', e);
+      }
+    }, 5000);
+  }, [stopPoll, loadGeneratedVideos]);
+
   // 提交生成
   const handleGenerate = async () => {
     if (!prompt.trim()) { toast.error('请输入视频描述'); return; }
     setGenerating(true); setResultVideo(null); setGenProgress(5); stopPoll();
 
     try {
-      if (model.id === 'Sora 2') {
-        const { data, error } = await supabase.functions.invoke('sora-video-create', {
-          body: { prompt, size: resolution.includes('9:16') ? '720x1280' : '1280x720', seconds: 8 },
-        });
-        if (error) { const msg = await error?.context?.text(); throw new Error(msg || error.message); }
-        const vid = data?.id;
-        if (!vid) throw new Error('未获取到任务ID');
-        setTaskId(vid); pollSora(vid);
+      if (model.id === 'Seedance') {
+        // 先在数据库中创建视频项目
+        let dbProjectId: string | null = null;
+        if (user) {
+          try {
+            const { data: projData, error: projErr } = await supabase.from('video_projects').insert({
+              user_id: user.id,
+              title: `Seedance 视频 - ${new Date().toLocaleDateString('zh-CN')}`,
+              status: 'processing',
+              video_style: 'Seedance 2.0',
+              duration: Number(activeDuration) || 8,
+              prompt_text: prompt,
+              progress: 5,
+            }).select('id').maybeSingle();
+            
+            if (projErr) {
+              console.error("Failed to insert video project:", projErr);
+            } else if (projData) {
+              dbProjectId = projData.id;
+            }
+          } catch (dbErr) {
+            console.error("Database insert error:", dbErr);
+          }
+        }
+
+        const payload: any = {
+          prompt,
+          duration: activeDuration,
+          resolution: '720p',
+          ratio: activeRatio,
+          watermark: false,
+          generate_audio: true,
+        };
+
+        if (firstFrame) payload.first_frame = firstFrame;
+        if (lastFrame) payload.last_frame = lastFrame;
+        
+        const reference_images: string[] = [];
+        if (refImage) reference_images.push(refImage);
+        if (reference_images.length > 0) payload.reference_images = reference_images;
+
+        const reference_videos: string[] = [];
+        if (refVideo) reference_videos.push(refVideo);
+        if (reference_videos.length > 0) payload.reference_videos = reference_videos;
+
+        const res = await submitSeedanceVideo(payload);
+        const reqId = res.request_id;
+        if (!reqId) {
+          if (dbProjectId) {
+            await supabase.from('video_projects').update({ status: 'failed' }).eq('id', dbProjectId);
+          }
+          throw new Error('未获取到 Seedance 任务ID');
+        }
+        setTaskId(reqId);
+        pollSeedance(reqId, dbProjectId);
       } else {
         toast.error('该视频模型暂未接入生成接口');
         setGenerating(false); setGenProgress(0);
@@ -1058,9 +1227,17 @@ export default function HomePage() {
 
         {/* 生成结果视频 */}
         {resultVideo && mainTab === '视频生成' && (
-          <div className="rounded-2xl overflow-hidden border border-white/10 bg-[#13121b]">
+          <div className="rounded-2xl overflow-hidden border border-white/10 bg-[#13121b] mb-6">
             <div className="flex items-center justify-between px-4 py-3 border-b border-white/8">
-              <span className="text-sm font-medium text-white/80">生成结果</span>
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-medium text-white/80">生成结果</span>
+                <button
+                  onClick={() => navigate('/works')}
+                  className="px-2.5 py-1 text-xs font-semibold rounded-md bg-primary/20 hover:bg-primary/30 text-primary transition-colors border border-primary/20 flex items-center gap-1"
+                >
+                  <Video className="w-3 h-3" /> 作品管理
+                </button>
+              </div>
               <button onClick={() => setResultVideo(null)} className="text-white/30 hover:text-white/70 transition-colors"><X className="w-4 h-4" /></button>
             </div>
             <video src={resultVideo} controls autoPlay className="w-full max-h-[60vh] object-contain bg-black" />
@@ -1149,6 +1326,45 @@ export default function HomePage() {
                   🔍 搜索提示词或关键词
                 </button>
               </div>
+
+              {/* 我生成的视频 */}
+              {generatedVideos.length > 0 && (
+                <div className="space-y-3 pt-2">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold text-white/80">我生成的视频</h3>
+                    <span className="text-[10px] text-white/40">已同步保存至作品管理和最近项目</span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {generatedVideos.map(video => (
+                      <div key={video.id} className="rounded-xl overflow-hidden bg-[#181628]/60 border border-white/5 group relative flex flex-col hover:border-primary/30 transition-all duration-300">
+                        <div className="relative aspect-video bg-black overflow-hidden flex items-center justify-center">
+                          {video.thumbnail_url ? (
+                            <img src={video.thumbnail_url} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                          ) : (
+                            <Video className="w-8 h-8 text-white/20" />
+                          )}
+                          <div className="absolute inset-0 bg-black/55 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                            <a href={video.video_url} target="_blank" rel="noreferrer" className="w-9 h-9 rounded-full bg-primary/80 hover:bg-primary flex items-center justify-center shadow-lg transition-all duration-200 transform scale-90 group-hover:scale-100">
+                              <Play className="w-4 h-4 text-white ml-0.5" />
+                            </a>
+                            <button
+                              onClick={() => navigate('/works')}
+                              className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur flex items-center justify-center transition-all duration-200"
+                              title="在作品管理中查看"
+                            >
+                              <Layers className="w-4 h-4 text-white" />
+                            </button>
+                          </div>
+                        </div>
+                        <div className="p-3 flex-1 flex flex-col justify-between bg-black/20">
+                          <p className="text-xs font-semibold text-white/90 truncate" title={video.title}>{video.title}</p>
+                          <span className="text-[10px] text-white/40 mt-1">{new Date(video.created_at).toLocaleDateString()}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* 瀑布流图片 4列 */}
               <div className="columns-2 md:columns-3 lg:columns-4 gap-3 space-y-3">

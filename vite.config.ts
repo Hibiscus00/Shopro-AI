@@ -22,4 +22,14 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    proxy: {
+      '/gmicloud-api': {
+        target: 'https://console.gmicloud.ai',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/gmicloud-api/, ''),
+        secure: false,
+      },
+    },
+  },
 });
