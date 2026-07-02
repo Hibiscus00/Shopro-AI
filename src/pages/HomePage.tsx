@@ -9,6 +9,10 @@ import { cn } from '@/lib/utils';
 import { supabase } from '@/db/supabase';
 import { toast } from 'sonner';
 import ProductVideoWizard from './VideoCreatePage';
+import { sendDeepSeekStreamRequest } from '@/lib/sse';
+
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
 
 // ── 工具卡片数据 ────────────────────────────────────────────────────────
 const QUICK_TOOLS = [
@@ -265,6 +269,7 @@ export default function HomePage() {
   const [imgProgress, setImgProgress] = useState(0);
   const [resultImage, setResultImage] = useState<string | null>(null);
   const imgTimeoutRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   // 提示词增强状态
   const [enhancing, setEnhancing] = useState(false);
@@ -350,26 +355,55 @@ export default function HomePage() {
     }
   };
 
-  // MiniMax 提示词增强
+  // DeepSeek-V4-Pro 提示词增强 (流式打字机效果)
   const handleEnhancePrompt = async () => {
     if (!prompt.trim()) { toast.error('请先输入基础描述'); return; }
     setEnhancing(true);
+
+    const originalPrompt = prompt;
+    setPrompt(''); // 清空并在生成时使用流式打字机效果
+
+    abortRef.current = new AbortController();
+    let fullText = '';
+
     try {
-      const { data, error } = await supabase.functions.invoke('minimax-chat', {
-        body: {
-          messages: [{
-            role: 'user',
-            content: `请将以下简短视频描述扩展为一段专业的AI视频生成提示词，要求：画面细节丰富、镜头语言清晰、氛围感强、适合带货电商场景。原文：${prompt}`,
-          }],
-          max_completion_tokens: 512,
+      await sendDeepSeekStreamRequest({
+        messages: [{
+          role: 'user',
+          content: `请将以下简短视频描述扩展为一段专业的AI视频生成提示词，要求：画面细节丰富、镜头语言清晰、氛围感强、适合带货电商场景。原文：${originalPrompt}`,
+        }],
+        max_tokens: 1000,
+        onData: (data) => {
+          if (data === '[DONE]') return;
+          try {
+            const parsed = JSON.parse(data);
+            const chunk = parsed.choices?.[0]?.delta?.content ?? '';
+            if (chunk) {
+              fullText += chunk;
+              setPrompt(fullText);
+            }
+          } catch { /* skip */ }
         },
+        onComplete: () => {
+          toast.success('提示词已增强');
+          setEnhancing(false);
+        },
+        onError: (err) => {
+          if (!abortRef.current?.signal.aborted) {
+            toast.error(`增强失败：${err.message}`);
+            setPrompt(originalPrompt);
+          }
+          setEnhancing(false);
+        },
+        signal: abortRef.current.signal,
       });
-      if (error) { const msg = await error?.context?.text(); throw new Error(msg || error.message); }
-      const enhanced = data?.choices?.[0]?.message?.content;
-      if (enhanced) { setPrompt(enhanced); toast.success('提示词已增强'); }
     } catch (e: unknown) {
-      toast.error(`增强失败：${(e as Error).message}`);
-    } finally { setEnhancing(false); }
+      if (!abortRef.current?.signal.aborted) {
+        toast.error(`增强失败：${(e as Error).message}`);
+        setPrompt(originalPrompt);
+      }
+      setEnhancing(false);
+    }
   };
 
   return (

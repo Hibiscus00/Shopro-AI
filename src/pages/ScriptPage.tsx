@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-import { sendStreamRequest } from '@/lib/sse';
+import { sendDeepSeekStreamRequest } from '@/lib/sse';
 import type { ScriptScene, Script } from '@/types/types';
 
 // ── 四层Prompt工程配置 ────────────────────────────────────────────────────────
@@ -88,10 +88,9 @@ async function callLLMStream(
   onChunk: (text: string) => void,
   signal: AbortSignal,
 ): Promise<void> {
-  await sendStreamRequest({
-    functionUrl: `${SUPABASE_URL}/functions/v1/wenxin-text-generation`,
-    requestBody: { messages },
-    supabaseAnonKey: SUPABASE_ANON_KEY,
+  await sendDeepSeekStreamRequest({
+    messages,
+    max_tokens: 2000,
     onData: (data) => {
       if (data === '[DONE]') return;
       try {

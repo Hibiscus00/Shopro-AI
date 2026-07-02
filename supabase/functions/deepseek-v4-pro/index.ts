@@ -1,4 +1,4 @@
-// Wenxin proxy Edge Function re-routed to DeepSeek-V4-Pro
+// DeepSeek-V4-Pro SSE proxy Edge Function
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
