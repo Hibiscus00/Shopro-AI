@@ -1,4 +1,4 @@
-# 🛒 Shopro AI - 抖音电商 AIGC 带货视频系统
+# 🛒 Shopro AI - 抖音/TikTok 电商 AIGC 带货视频系统
 
 <p align="center">
   <img alt="React" src="https://img.shields.io/badge/React-18.3.1-61DAFB?logo=react&logoColor=white" />
@@ -7,19 +7,27 @@
   <img alt="TailwindCSS" src="https://img.shields.io/badge/TailwindCSS-3.4.11-06B6D4?logo=tailwindcss&logoColor=white" />
   <img alt="Supabase" src="https://img.shields.io/badge/Supabase-2.103.1-3FCF8E?logo=supabase&logoColor=white" />
   <img alt="Deno" src="https://img.shields.io/badge/Edge_Functions-Deno-000000?logo=deno&logoColor=white" />
-  <img alt="AI" src="https://img.shields.io/badge/AI-AIGC%20Workflow-8B5CF6" />
+  <img alt="AI" src="https://img.shields.io/badge/AI-DeepSeek_v4_Pro-blue" />
+  <img alt="Audio" src="https://img.shields.io/badge/Audio-StepAudio_2.5-orange" />
+  <img alt="Video" src="https://img.shields.io/badge/Video-Seedance_2.0-violet" />
 </p>
 
+---
 
-##  💎 项目简介
+## 💎 项目简介
 
-**Shopro-电商AIGC带货视频** 是一款专门解决抖音/TikTok/快手/小红书电商商家在短视频营销中“痛点”（文案撰写难、数字人外籍演员贵、剪辑成本高、跨平台发布低效）的 SaaS 平台。通过「商品信息输入/URL 卖点提取 ➔ AI 智能脚本生成 ➔ 数字人选择与克隆 ➔ 多语言智能翻译 ➔ 分镜编辑 ➔ 素材混剪 ➔ 视频异步合成 ➔ 多平台一键发布」的完整端到端闭环，帮助商家以极低成本快速产出高转化潜力的带货视频。
+**Shopro-电商AIGC带货视频** 是一款面向跨境与本土兴趣电商商家（如抖音、TikTok、快手、小红书、Amazon 等）的 SaaS 平台。该系统通过深度融合先进的多模态大模型与全链路智能工作流，解决商家在短视频营销中面临的“文案撰写难、数字人外籍演员贵、剪辑成本高、多语言本地化差、跨平台发布繁琐”等痛点。
+
+系统支持从「商品信息输入/URL 卖点提取 ➔ AI 智能脚本生成 ➔ 数字人选择与克隆 ➔ 多语言智能翻译 ➔ 分镜编辑 ➔ 素材混剪 ➔ 视频异步合成 ➔ 多平台一键发布」的完整闭环，将传统的五人工作流压缩为“一人 + 浏览器”，帮助商家以极低成本高速量产高转化的爆款短视频。
 
 ### ⚡ 核心价值
-*   **降低制作成本**：无需雇佣专业剪辑师与外籍主播，AI 一键生成数字人带货视频。
-*   **提升生成效率**：从商品 URL 到生成多语种短视频仅需几分钟，完美响应平台热点。
-*   **高转化潜力**：基于爆款风格分析和雷达对比图，优化分镜与文案，提炼核心卖点。
-*   **全端自适应**：Web 端设计完美适配桌面端与移动端，并支持全系统深色/浅色主题的无缝切换。
+*   **极致降本**：无需聘请外籍主播与剪辑师，单条视频生成成本降至不足 1 元。
+*   **极致增效**：从商品 URL 到生成多语种情感数字人口播视频仅需 3-5 分钟。
+*   **转化导向**：引入营销学“说服框架”，对文案进行 CoT 分层打标签，自动映射数字人情绪。
+*   **数据驱动**：集成 ROI 预测、A/B 分镜测试及投放数据回流闭环，越用越聪明。
+*   **全自适应体验**：高精度的暗色/浅色玻璃态 UI，支持移动端和桌面端无缝响应。
+
+---
 
 ## 🛠️ 技术栈
 
@@ -28,239 +36,216 @@
 | 分类 | 技术/依赖 | 版本/说明 | 用途 |
 |---|---|---:|---|
 | 核心框架 | React | 18.3.1 | 组件化 UI 与状态驱动渲染 |
-| 开发语言 | TypeScript | 5.5.3 | 类型约束与工程可维护性 |
-| 构建工具 | Vite | 5.4.1 | 快速开发构建与资源打包 |
-| 路由 | react-router-dom | 6.26.2 | 页面路由与受保护路由 |
-| 数据请求 | @tanstack/react-query | 5.56.2 | 异步请求、缓存与服务状态管理 |
-| UI 组件 | Radix UI + shadcn/ui 风格组件 | 多组件库 | Dialog、Select、Tabs、Toast 等基础组件 |
-| 样式 | Tailwind CSS / tailwindcss-animate | 3.4.11 | 原子化样式与动画效果 |
-| 动效 | framer-motion | 12.4.10 | 页面与组件动效 |
-| 图表 | recharts | 2.12.7 | 数据看板与趋势图表 |
-| 表格/文件 | xlsx / jspdf / qrcode | 0.18.5 / 4.2.1 / 1.5.4 | Excel、PDF、二维码等导出或生成能力 |
-| 代码质量 | Biome / tsgo | 2.4.5 / 0.0.1 | Lint、类型检查与构建前校验 |
+| 开发语言 | TypeScript | 5.5.3 | 强类型约束，提升工程可维护性 |
+| 构建工具 | Vite | 5.4.1 | 极速热更新，生产资源打包优化 |
+| 路由管理 | react-router-dom | 6.26.2 | 单页路由及受保护路由 |
+| 状态/异步 | @tanstack/react-query | 5.56.2 | 异步数据缓存、乐观更新与生命周期管理 |
+| UI 组件 | Radix UI + shadcn/ui | 基础组件 | Dialog、Select、Tabs、Tooltip、Sheet 等 |
+| 样式系统 | Tailwind CSS / tailwindcss-animate | 3.4.11 | 原子化布局、过渡及高精度动效 |
+| 动画驱动 | framer-motion | 12.4.10 | 页面进入、列表卡片拖拽与过渡动画 |
+| 数据可视化 | recharts | 2.12.7 | 流量数据看板、雷达图、转化漏斗图 |
+| 文件导出 | xlsx / jspdf / qrcode | 最新版 | 支持分镜 Excel 导出、脚本 PDF 以及微信支付二维码 |
+| 代码质量 | Biome / tsgo | 2.4.5 / 0.0.1 | 极速 Lint、格式化及预构建类型检查 |
 
 ### ⚙ 后端与数据服务
 
 | 分类 | 技术/服务 | 说明 | 项目中的作用 |
 |---|---|---|---|
-| BaaS | Supabase | Auth、PostgreSQL、Storage、Edge Functions | 用户认证、数据持久化、函数计算 |
-| 数据库 | PostgreSQL | 由 Supabase 托管 | 存储用户、商品、素材、积分、订单、视频任务等数据 |
-| 认证 | Supabase Auth | 邮箱登录/注册与会话管理 | 登录态维护、受保护路由、用户 ID 获取 |
-| 服务端函数 | Supabase Edge Functions | Deno Runtime | AI 聚合、视频任务、支付订单、支付回调等接口 |
-| 实时/流式 | Server-Sent Events + eventsource-parser | 前端 `src/lib/sse.ts` 封装 | 支持 AI 生成过程中的流式响应解析 |
-| 支付 | 微信支付相关 Edge Functions | create-order、webhook、status query | 积分购买与订单状态同步 |
+| 云服务 BaaS | Supabase | Auth、DB、Storage、Edge Functions | 全栈后端云服务托管 |
+| 数据库 | PostgreSQL | 由 Supabase 托管 | RLS 物理数据隔离，pgvector 向量模糊搜索 |
+| 账户认证 | Supabase Auth | 邮箱/手机登录与会话管理 | JWT 登录态维护、权限路由钩子 |
+| 边缘计算 | Supabase Edge Functions | Deno 运行时 | AI 编排、支付闭环、竞品抓取、团队协作接口 |
+| 实时流式 | SSE + eventsource-parser | 前端 `src/lib/sse.ts` 封装 | 实现打字机流式（SSE）文本响应解析 |
+| 并发安全 | SQL 悲观锁 (`SELECT ... FOR UPDATE`) | 积分扣减存储过程 | 杜绝并发薅算力漏洞，确保计费安全 |
 
-### 🤖 AI 服务与能力
+### 🤖 AI 服务与多模态模型
 
-| 分类 | 服务/模块 | 入口 | 主要能力 |
+| 模块/能力 | 对接模型 | 调用入口 / SDK | 用途与优势 |
 |---|---|---|---|
-| 统一 AI 入口 | `ai-assistant` Edge Function | `/functions/v1/ai-assistant` | 脚本、卖点、封面提示词、OpenAPI 调试等通用 AI 动作 |
-| 通用集成 API | `INTEGRATIONS_API_KEY` | `ai-assistant` | 作为项目默认 AI 请求密钥来源 |
-| 视频生成 | Kling | `kling-video-create` / `kling-video-query` | 创建与查询可灵视频生成任务 |
-| 视频生成 | Sora | `sora-video-create` | 创建 Sora 风格视频生成任务 |
-| 对话模型 | MiniMax | `minimax-chat` | 聊天/文案类 AI 服务调用 |
-| 知识增强 | `knowledge_base` 表 | 前端知识库页面 + AI 函数 | 管理品牌/商品知识，用于生成参考 |
-| 缓存与限流 | `llm_cache` / `rate_limit_windows` | Edge Function + 数据库 | 降低重复生成成本，控制调用频率 |
+| **文本大模型** | **DeepSeek-V4-Pro** | `/functions/v1/deepseek-v4-pro` | 营销文案、多语种翻译、商品特征解析、NLP情感极值标注 |
+| **语音大模型** | **StepAudio 2.5** | `/functions/v1/stepaudio` (asr/tts) | `stepaudio-2.5-tts` 情感化语音合成，`stepaudio-2.5-asr` 录音ITN规范转录 |
+| **视频生成** | **Seedance 2.0** | `/functions/v1/seedance` (submit/query) | `seedance-2-0-fast-260128` 物理级高画质多模态短视频生成与图生视频 |
+| **图像/封面** | **Flux 1.1 Pro** | `ai-assistant` (generate_cover) | 竖版高分辨率带货短视频封面设计及图生图参考 |
+| **备份视频** | Kling / Sora | `/functions/v1/kling-video-create` / `sora` | 备用高端概念短片生成与转场渲染 |
+| **备份对话** | MiniMax-M3 | `/functions/v1/minimax-chat` | 备用聊天模型与目标受众痛点推导 |
+| **向量搜索** | OpenAI Text-Embedding-Ada-002 | RAG 向量知识库 / RPC | 将高分脚本与话术进行 Few-shot 匹配增强 |
 
-## 📁 目录结构
+---
+
+## 📁 目录结构与 42 个核心页面
 
 ```text
 Shopro AI/
 ├── src/
-│   ├── App.tsx                    # 应用根组件，挂载 QueryClient、AuthProvider、Toast 等
-│   ├── routes.tsx                 # 页面路由配置
-│   ├── main.tsx                   # React 应用入口
-│   ├── index.css                  # Tailwind 与全局样式
-│   ├── components/                # 通用业务组件与 UI 组件
-│   │   ├── ui/                    # shadcn/ui 风格基础组件
-│   │   ├── AppLayout.tsx          # 应用主布局
-│   │   ├── ProtectedRoute.tsx     # 登录态保护路由
-│   │   ├── CoverCandidates.tsx    # AI 封面候选组件
+│   ├── App.tsx                    # 应用根组件，挂载 React-Query、AuthProvider、Toaster
+│   ├── routes.tsx                 # 页面路由配置 (受保护路由与公开路由)
+│   ├── main.tsx                   # React 项目打包入口
+│   ├── index.css                  # 全局样式，包含 Tailwind 与玻璃态主题变量
+│   ├── components/                # 业务公共组件
+│   │   ├── layouts/
+│   │   │   └── MainLayout.tsx     # 核心主布局，实现全局搜索、通知 Bell、侧边栏及主题切换
+│   │   ├── ui/                    # shadcn 风格原子级组件 (Button, Dialog, Badge, Input...)
+│   │   ├── CoverCandidates.tsx    # AI 封面多候选展示与下载
 │   │   └── ...
 │   ├── contexts/
-│   │   └── AuthContext.tsx        # 认证上下文与用户会话管理
+│   │   └── AuthContext.tsx        # Supabase Session 及积分变化广播
 │   ├── db/
-│   │   └── supabase.ts            # Supabase Client 初始化
+│   │   └── supabase.ts            # Client 单例初始化
 │   ├── hooks/
-│   │   ├── useCredits.ts          # 用户积分读取与消耗逻辑
-│   │   ├── useDraft.ts            # 页面草稿保存/恢复
-│   │   └── use-mobile.tsx         # 移动端断点判断
+│   │   ├── use-mobile.tsx         # 移动端断点检测
+│   │   ├── use-toast.ts           # Toast 通知
+│   │   ├── useCredits.ts          # 积分查询与实时更新控制
+│   │   └── useDraft.ts            # 页面内容本地缓存恢复
 │   ├── lib/
-│   │   ├── sse.ts                 # SSE 流式响应解析工具
-│   │   └── utils.ts               # 通用工具函数
-│   ├── pages/                     # 业务页面
-│   │   ├── HomePage.tsx           # 首页/生成入口
-│   │   ├── DashboardPage.tsx      # 数据看板
-│   │   ├── ScriptPage.tsx         # AI 脚本工作台
-│   │   ├── MaterialsPage.tsx      # 素材库
-│   │   ├── ProductsPage.tsx       # 商品管理
-│   │   ├── VideoLabPage.tsx       # 视频实验室
-│   │   ├── ABTestPage.tsx         # A/B 测试
-│   │   ├── CreditsPage.tsx        # 积分与充值
-│   │   ├── OpenAPIPage.tsx        # 开放 API 调试/文档页
-│   │   └── ...
+│   │   ├── audioRecorder.ts       # 麦克风录音控制 (配合 StepAudio ASR)
+│   │   ├── sse.ts                 # SSE 流式解析及 StepAudio / Seedance API 轮询
+│   │   └── utils.ts               # CSS 样式合并等辅助函数
+│   ├── pages/                     # 业务页面 (42个核心页面及子页面)
+│   │   ├── LandingPage.tsx        # 品牌官网首页，展示核心卖点、价格与数字人 Demo
+│   │   ├── LoginPage.tsx          # 登录注册页面 (支持验证码与密码双重认证)
+│   │   ├── DashboardPage.tsx      # 工作台主页，展示快捷入口、生成历史和关键指标
+│   │   ├── HomePage.tsx           # 视频生成工作流 (包含四步脚本向导及生成配置)
+│   │   ├── VideoCreatePage.tsx    # 视频生成配置中心
+│   │   ├── VideoEditPage.tsx      # 可视化多轨道分镜编辑器 (字幕轨、人像轨、声轨)
+│   │   ├── WorksPage.tsx          # 作品管理，包含合成进度及视频回放
+│   │   ├── MaterialsPage.tsx      # 素材库管理 (支持分类上传及删除)
+│   │   ├── ProductsPage.tsx       # 商品库，商品新增、URL 自动提取卖点
+│   │   ├── ProductSelectionPage.tsx# 智能选品工坊，分析热门爆款商品
+│   │   ├── AvatarsPage.tsx        # 数字人库，支持上传头像图片及 StepAudio TTS 试听
+│   │   ├── TemplatesPage.tsx      # 视频模板库，一键套用带货模板
+│   │   ├── ScriptPage.tsx         # 脚本管理，可在此独立撰写、导出
+│   │   ├── StyleCopyPage.tsx      # 爆款风格复刻页，输入竞品链接自动抽取节奏
+│   │   ├── KnowledgePage.tsx      # 品牌/商品知识库 (用于 RAG 检索 Few-shot)
+│   │   ├── CompetitorPage.tsx     # 竞品爆款监控分析
+│   │   ├── LiveHighlightPage.tsx  # 直播高光切片提取器
+│   │   ├── AnalyticsPage.tsx      # 流量漏斗、完播率及 ROI 分析图表
+│   │   ├── ProfilePage.tsx        # 个人中心及账号安全设置
+│   │   ├── CreditsPage.tsx        # 积分商城与充值收银台
+│   │   ├── OrderDetailPage.tsx    # 微信支付订单状态页
+│   │   ├── PromptTemplatesPage.tsx# 系统 Prompt 策略管理页
+│   │   ├── ActivitiesPage.tsx     # 操作日志与审计足迹
+│   │   ├── InvitePage.tsx         # 邀请有礼推广页面
+│   │   ├── ABTestPage.tsx         # A/B 测试管理中心 (脚本/封面版本对比)
+│   │   ├── EmotionAnalysisPage.tsx# NLP 情绪分析与时间轴对齐工作区
+│   │   ├── MultiLangPage.tsx      # 多语言翻译控制台
+│   │   ├── TaskQueuePage.tsx      # 视频生成异步任务队列监控
+│   │   ├── ExportFormatsPage.tsx  # 跨平台多格式导出 (Excel/PDF/视频)
+│   │   ├── LLMCachePage.tsx       # AI 缓存命中率监控与管理
+│   │   ├── TeamSpacePage.tsx      # 团队协作空间 (角色权限、协作管理)
+│   │   ├── OpenAPIPage.tsx        # 开放开发平台 (API Key 生成与 API 调试)
+│   │   ├── DataFeedbackPage.tsx   # 广告回流与自学习面板
+│   │   ├── TrendingPatternsPage.tsx# 千万级热门爆款视频模式分析
+│   │   ├── PersonalizePage.tsx    # 账号私有风格模型定制微调
+│   │   ├── BatchCreatePage.tsx    # 批量生成管理器
+│   │   ├── AiToolboxPage.tsx      # 营销 AI 工具箱 (关键词提取、字幕打点等)
+│   │   ├── NotificationsPage.tsx  # 系统通知中心
+│   │   └── NotFound.tsx           # 404 兜底页
 │   └── types/
-│       └── route.ts               # 路由类型定义
+│       ├── types.ts               # 数据模型 (Product, Material, Team, Job...)
+│       └── route.ts               # 路由定义
 ├── supabase/
-│   ├── functions/                 # Supabase Edge Functions
-│   │   ├── ai-assistant/
-│   │   ├── create-payment-order/
-│   │   ├── wechat-payment-webhook/
-│   │   ├── query-payment-status/
-│   │   ├── kling-video-create/
-│   │   ├── kling-video-query/
-│   │   ├── minimax-chat/
-│   │   ├── sora-video-create/
-│   │   └── ...
-│   └── migrations/                # 数据库迁移脚本
-├── public/                        # 静态资源
-├── package.json                   # 项目依赖与脚本
-├── vite.config.ts                 # Vite 配置与路径别名
-├── tailwind.config.ts             # Tailwind 主题配置
-├── tsconfig*.json                 # TypeScript 配置
-└── README.md                      # 项目说明文档
+│   ├── functions/                 # Deno 边缘函数微服务
+│   │   ├── ai-assistant/          # 统一 AI 网关，内置 llm 动作控制
+│   │   ├── deepseek-v4-pro/       # DeepSeek V4 文本生成代理 (带 API Fallback)
+│   │   ├── stepaudio/             # StepAudio 2.5 ASR 和 TTS 物理代理
+│   │   ├── seedance/              # Seedance 2.0 异步视频生成/状态查询
+│   │   ├── phase3-assistant/      # 竞品抓取、直播分析、团队、APIKey、发布管理
+│   │   ├── create-payment-order/  # 创建微信支付订单及二维码生成
+│   │   ├── wechat-payment-webhook/# 微信支付成功回调验签及充值入账
+│   │   ├── query-payment-status/  # 支付轮询查询接口
+│   │   ├── kling-video-create/    # 可灵视频任务创建
+│   │   ├── kling-video-query/     # 可灵视频任务查询
+│   │   ├── minimax-chat/          # MiniMax 接口代理
+│   │   ├── sora-video-create/     # Sora 视频任务创建
+│   │   ├── sora-video-query/      # Sora 视频任务查询
+│   │   ├── send-sms-code/         # 验证码发送 (短信服务集成)
+│   │   ├── verify-sms-code/       # 验证码登录验证
+│   │   └── setup-demo/            # 演示数据初始化种子数据
+│   └── migrations/                # 19 个 PostgreSQL 数据库迁移文件 (含 RLS 及防薅 RPC 锁)
 ```
 
-## ⚡ 核心功能模块和工作流程
+---
 
-### 1. 🧠 AI 脚本生成工作台
+## ⚡ 核心功能模块与工作流
 
-**对应页面**：`ScriptPage.tsx`、`HomePage.tsx`  
-**核心能力**：根据商品信息、卖点、场景和风格生成带货视频脚本，并支持草稿恢复、分镜编辑与封面候选。
+### 1. 🧠 AI 脚本生成工作台 (`HomePage.tsx`, `ScriptPage.tsx`)
+*   **入口**：用户在工作台点击“生成视频”或进入“AI智能脚本”。
+*   **动作**：
+    1. 输入商品详情 URL，后端通过 `extract_url_selling_points` 抓取并利用 **DeepSeek-V4-Pro** 提炼卖点。
+    2. 基于 CoT（思维链）四层营销架构，流式（SSE）生成分镜脚本：钩子（Hook）➔ 痛点（Pain Point）➔ 产品介绍（Product）➔ 行动召唤（CTA）。
+    3. 用户可在时间轴中调整或微调文本，并自动通过 Embedding 写入向量缓存，供下一次 Few-shot 参考进化。
 
-**工作流程**：
+### 2. 👥 数字人情感合成与多轨剪辑 (`AvatarsPage.tsx`, `VideoEditPage.tsx`)
+*   **情绪对齐**：系统利用 NLP 分析台词的情感极值，在分镜时间轴上自动映射数字人的面部表情（平和、喜悦、担忧、激动、说服）与语气。
+*   **多模态配音**：利用 `stepaudio-2.5-tts` 根据情感标记生成自然拟真的小语种配音。
+*   **多轨道编辑器**：在网页端提供多轨道可视化 Canvas 剪辑面板，直观拖拽分镜卡片、配音音轨、字幕，实现免学习拼积木式合成。
 
-1. 用户登录后进入生成入口或脚本工作台。
-2. 选择/录入商品信息、目标人群、卖点和视频风格。
-3. 前端调用 `ai-assistant` Edge Function，按 action 分发到对应 AI 生成逻辑。
-4. Edge Function 进行鉴权、限流、缓存查询与 AI 请求。
-5. 前端接收普通响应或 SSE 流式响应，更新脚本草稿、分镜内容和候选结果。
-6. 用户可继续编辑、保存素材或进入视频生成流程。
+### 3. 💡 流量追踪、A/B测试与广告回流 (`ABTestPage.tsx`, `AnalyticsPage.tsx`, `DataFeedbackPage.tsx`)
+*   **漏斗分析**：展示不同视频版本的转化漏斗图（播放量-完播率-点击率-成交金额），直接计算 ROI。
+*   **A/B测试**：同一商品配置多组脚本/封面，在线追踪测试，智能淘汰低效版本。
+*   **自适应优化**：将真实投放转化差的文案数据回流，自动反馈给 AI 训练，对低分脚本进行“一键调优”重写。
 
-### 2. 🎬 视频实验室
+### 4. 🔗 团队协作与 OpenAPI 开放平台 (`TeamSpacePage.tsx`, `OpenAPIPage.tsx`)
+*   **团队协作**：支持主账号创建团队空间，通过邮箱发送邀请凭证，配置管理员或协作者角色，共享素材库与作品集。
+*   **OpenAPI 调试**：面向大商户或 ERP 系统，提供 `ak_...` 自定义 API 密钥生成、Revoke 控制，并附带在线交互式 API 沙箱调试器。
 
-**对应页面**：`VideoLabPage.tsx`  
-**核心能力**：管理 AI 视频生成任务，支持 Kling、Sora 等视频服务创建与查询任务。
-
-**工作流程**：
-
-1. 用户选择脚本、商品素材或封面图作为输入。
-2. 前端创建视频任务并调用对应 Edge Function。
-3. Edge Function 请求第三方视频生成服务，写入 `video_jobs` / `video_projects`。
-4. 前端定时或手动查询任务状态，展示生成进度与结果。
-
-### 3. 🧾 商品与素材管理
-
-**对应页面**：`ProductsPage.tsx`、`MaterialsPage.tsx`  
-**核心能力**：维护商品、素材、卖点、图片和品牌资料，为 AI 生成提供结构化上下文。
-
-**数据表**：`products`、`materials`、`cover_candidates`、`knowledge_base`
-
-### 4. 🧪 A/B 测试与效果分析
-
-**对应页面**：`ABTestPage.tsx`、`DashboardPage.tsx`  
-**核心能力**：管理多版本脚本/封面/素材，跟踪不同版本表现，辅助内容迭代。
-
-**数据表**：`ab_test_variants`、`audit_logs`
-
-### 5. 💳 积分与支付闭环
-
-**对应页面**：`CreditsPage.tsx`  
-**核心能力**：展示积分余额、消耗规则、充值套餐和订单状态。
-
-**工作流程**：
-
-1. 前端读取 `profiles` 和 `credit_costs` 展示积分与消耗规则。
-2. 用户选择套餐后调用 `create-payment-order`。
-3. 支付成功后微信回调进入 `wechat-payment-webhook`。
-4. 系统更新 `orders` 与用户积分余额。
-5. 前端通过 `query-payment-status` 查询订单状态并刷新积分。
-
-### 6. 🔌 开放 API 与调试
-
-**对应页面**：`OpenAPIPage.tsx`  
-**核心能力**：面向外部系统或开发者展示可调用能力，辅助调试 AI 生成接口、视频任务接口和支付接口。
+---
 
 ## ⚙️ 部署指南
 
 ### 环境要求
+*   **Node.js**: 18.0 或更高版本
+*   **包管理器**: npm / pnpm
+*   **Supabase CLI**: 最新稳定版 (本地 Deno 测试及数据库迁移推送)
 
-| 工具 | 建议版本 | 说明 |
-|---|---:|---|
-| Node.js | 18+ | 前端构建与依赖安装 |
-| npm / pnpm / yarn | npm 9+ 或等价版本 | 包管理器 |
-| Supabase CLI | 最新稳定版 | 本地迁移、函数部署、密钥配置 |
-| Supabase Project | 云端项目 | Auth、Database、Functions、Storage |
-
-### 1. 安装依赖
-
+### 1. 克隆与安装依赖
 ```bash
 cd "Shopro AI"
 npm install
 ```
 
 ### 2. 配置前端环境变量
-
 在项目根目录创建 `.env` 文件：
-
-```bash
+```env
 VITE_SUPABASE_URL="https://<your-project-ref>.supabase.co"
 VITE_SUPABASE_ANON_KEY="<your-supabase-anon-key>"
+VITE_DEEPSEEK_API_KEY="<your-deepseek-key>" # 备用本地 Fallback 调用
+VITE_STEP_API_KEY="<your-step-key>" # 备用本地 Fallback 调用
+VITE_SEEDANCE_API_KEY="<your-seedance-key>" # 备用本地 Fallback 调用
 ```
 
-> 注意：`VITE_` 前缀变量会被注入前端，请勿放置服务端私钥。
-
-### 3. 初始化数据库
-
-将 `supabase/migrations/` 下的迁移应用到 Supabase 项目：
-
+### 3. 部署数据库迁移
+连接你的 Supabase 项目并应用迁移：
 ```bash
 supabase link --project-ref <your-project-ref>
 supabase db push
 ```
 
-核心数据表包括：
-
-| 表名 | 说明 |
-|---|---|
-| `profiles` | 用户资料、积分余额等扩展信息 |
-| `products` | 商品信息与基础卖点 |
-| `materials` | 图片、视频、素材等资源数据 |
-| `cover_candidates` | AI 封面候选结果 |
-| `video_projects` / `video_jobs` | 视频项目与生成任务 |
-| `knowledge_base` | 品牌/商品知识库 |
-| `credit_costs` | 各类 AI 能力积分消耗规则 |
-| `orders` | 支付订单与充值记录 |
-| `ab_test_variants` | A/B 测试版本数据 |
-| `llm_cache` | AI 生成缓存 |
-| `rate_limit_windows` | AI 调用限流窗口 |
-| `audit_logs` | 操作审计日志 |
-
-### 4. 配置 Edge Function Secret
-
-根据实际启用能力配置 Supabase Functions Secrets：
-
+### 4. 配置服务端 Secret
+在 Supabase 控制台或使用 CLI 设置 Secrets：
 ```bash
 supabase secrets set \
-  SUPABASE_URL="https://<your-project-ref>.supabase.co" \
-  SUPABASE_SERVICE_ROLE_KEY="<service-role-key>" \
-  INTEGRATIONS_API_KEY="<default-ai-api-key>" \
+  INTEGRATIONS_API_KEY="<default-ai-gateway-key>" \
+  DEEPSEEK_API_KEY="<deepseek-api-key>" \
+  STEP_API_KEY="<step-api-key>" \
+  SEEDANCE_API_KEY="<seedance-api-key>" \
   WECHAT_PAY_APPID="<wechat-app-id>" \
   WECHAT_PAY_MCHID="<wechat-merchant-id>" \
   WECHAT_PAY_PRIVATE_KEY="<wechat-private-key>" \
   WECHAT_PAY_CERT_SERIAL_NO="<wechat-cert-serial-no>" \
-  KLING_API_KEY="<kling-api-key>" \
-  KLING_API_SECRET="<kling-api-secret>" \
-  MINIMAX_API_KEY="<minimax-api-key>" \
-  SORA_API_KEY="<sora-api-key>"
+  KLING_API_KEY="<kling-key>" \
+  KLING_API_SECRET="<kling-secret>" \
+  MINIMAX_API_KEY="<minimax-key>" \
+  SORA_API_KEY="<sora-key>"
 ```
 
-> 不同函数所需密钥不同，未启用的第三方能力可暂不配置。
-
-### 5. 部署 Edge Functions
-
+### 5. 部署边缘函数
 ```bash
 supabase functions deploy ai-assistant
+supabase functions deploy deepseek-v4-pro
+supabase functions deploy stepaudio
+supabase functions deploy seedance
+supabase functions deploy phase3-assistant
 supabase functions deploy create-payment-order
 supabase functions deploy wechat-payment-webhook
 supabase functions deploy query-payment-status
@@ -268,103 +253,45 @@ supabase functions deploy kling-video-create
 supabase functions deploy kling-video-query
 supabase functions deploy minimax-chat
 supabase functions deploy sora-video-create
+supabase functions deploy sora-video-query
+supabase functions deploy send-sms-code
+supabase functions deploy verify-sms-code
+supabase functions deploy setup-demo
 ```
 
-### 6. 本地开发与生产构建
-
+### 6. 代码质检与预构建
 ```bash
-# 代码质量检查
+# 执行类型检查、Biome 格式化、Tailwind 语法校验及测试构建
 npm run lint
 
-# 生产构建
+# 生成生产包
 npm run build
 ```
 
-> 当前 `package.json` 中 `dev` 脚本被设置为提示命令：`Do not use this command, only use lint to check`。如需本地预览开发，可按团队规范补充 `vite --host 0.0.0.0` 等开发脚本。
+---
 
-## 📦 API 接口
+## 🔐 安全性与并发设计
 
-### Supabase Edge Functions
+1.  **RLS 行级安全**：所有 PostgreSQL 数据表默认开启 `ROW LEVEL SECURITY`。商户的商品、视频任务、充值订单、团队资源等均绑定到 `auth.uid()`，通过外键约束在物理数据库层隔离。
+2.  **防薅积分锁 (Optimistic Lock & DB Transaction)**：对于调用外部 API 需计费的动作（如 Seedance 视频合成），系统在下发 API 动作前，会执行一个高并发安全的存储过程。通过 `SELECT ... FOR UPDATE` 加上排他锁，余额校验无误后才执行扣减，防止并发溢出薅免费算力。
+3.  **敏感密钥零泄漏**：前端仅暴露 Supabase 公钥 `VITE_SUPABASE_ANON_KEY`。所有的 API 密钥如 `STEP_API_KEY`、`SEEDANCE_API_KEY` 等均安全隔离在 Supabase 服务端 Vault Secrets 中。
 
-| 接口/函数 | 方法 | 入参概览 | 返回概览 | 说明 |
-|---|---|---|---|---|
-| `/functions/v1/ai-assistant` | POST | `action`、业务 payload、用户上下文 | AI 文案、脚本、封面提示词或结构化结果 | 统一 AI 能力入口，内置缓存、限流、鉴权逻辑 |
-| `/functions/v1/create-payment-order` | POST | 套餐/金额、用户 ID、订单信息 | 订单号、支付参数、二维码/支付信息 | 创建微信支付订单并写入 `orders` |
-| `/functions/v1/wechat-payment-webhook` | POST | 微信支付回调报文 | 回调处理结果 | 验签、更新订单状态、发放积分 |
-| `/functions/v1/query-payment-status` | POST/GET | 订单号或订单 ID | 支付状态、订单详情 | 查询订单支付状态，供前端轮询刷新 |
-| `/functions/v1/kling-video-create` | POST | prompt、图片/素材、视频参数 | 任务 ID、初始状态 | 创建 Kling 视频生成任务 |
-| `/functions/v1/kling-video-query` | POST/GET | Kling 任务 ID | 任务状态、视频结果 | 查询 Kling 视频生成进度 |
-| `/functions/v1/minimax-chat` | POST | messages、模型参数 | 对话生成结果 | 调用 MiniMax 对话模型 |
-| `/functions/v1/sora-video-create` | POST | prompt、视频参数 | 任务 ID、状态 | 创建 Sora 视频任务 |
-| `/functions/v1/test-wenxin` | POST | 测试 prompt/参数 | 测试响应 | 文心相关能力测试函数 |
-| `/functions/v1/test-kling` | POST | 测试 prompt/参数 | 测试响应 | Kling 相关能力测试函数 |
+---
 
-### 前端直接访问的数据表
+## 🧪 常见问题解答 (FAQ)
 
-| 数据表 | 主要操作 | 使用场景 |
-|---|---|---|
-| `profiles` | 查询/更新 | 用户资料、积分余额展示 |
-| `products` | 增删改查 | 商品管理、脚本生成输入 |
-| `materials` | 增删改查 | 素材库管理 |
-| `cover_candidates` | 查询/插入/删除 | AI 封面候选生成与管理 |
-| `video_projects` / `video_jobs` | 查询/更新 | 视频实验室任务管理 |
-| `knowledge_base` | 查询/维护 | 品牌知识、商品知识补充 |
-| `credit_costs` | 查询 | AI 能力积分消耗规则 |
-| `orders` | 查询/更新 | 订单状态、充值记录 |
-| `ab_test_variants` | 查询/维护 | A/B 测试版本管理 |
-| `audit_logs` | 插入/查询 | 关键操作审计 |
+### 1. 为什么 `npm run dev` 报错/无法启动本地服务？
+为保证大促演示期间的系统稳定性，默认 package.json 禁用了 dev 本地暴露，开发测试时请确保先跑通 `npm run lint` 校验。若需启动本地预览，可与团队开发确认后修改为 `"dev": "vite --host 0.0.0.0"`，并通过控制台接入。
 
-## 🔐 权限与安全设计
+### 2. 视频异步合成显示“等待中”卡住如何排查？
+*   确认 Supabase Service Role Key 部署正确，以确保 Edge Function 能够安全回写 `video_jobs` 的 `status` 状态。
+*   检查 Seedance 任务日志，确定是否因为账户欠费或首尾帧图的分辨率比例不符（推荐使用 9:16 标准比例）导致接口拦截。
 
-- **前端仅使用 `VITE_SUPABASE_ANON_KEY`**：敏感密钥必须存放在 Supabase Function Secrets。
-- **用户会话统一由 `AuthContext` 管理**：受保护页面通过 `ProtectedRoute` 控制访问。
-- **AI 调用集中在 Edge Function**：便于统一限流、缓存、审计和密钥隔离。
-- **支付回调服务端处理**：避免前端直接决定充值结果。
-- **数据库建议开启 RLS**：根据用户 ID 限制商品、素材、订单等数据访问范围。
+### 3. 如何配置多用户共享团队额度？
+进入 `团队协作空间 (TeamSpacePage)` 创设团队后，添加成员邮箱。成员确认后，其扣费存储过程会自动向上追溯团队所有者 (Owner) 的积分余额包。
 
-## 🧪 质量检查
-
-项目提供统一 lint 脚本：
-
-```bash
-npm run lint
-```
-
-该脚本包含：
-
-1. TypeScript 类型检查：`tsgo -p tsconfig.check.json`
-2. Biome Lint：`npx biome lint`
-3. 自定义规则检查：`.rules/check.sh`
-4. Tailwind CSS 语法检查
-5. 构建校验：`.rules/testBuild.sh`
-
-## 💡 常见问题
-
-### 1. 为什么 `npm run dev` 不能启动本地服务？
-
-当前 `package.json` 中 `dev` 被设置为提示命令，说明团队希望优先运行 lint/构建检查。如需本地开发，可与团队确认后改为：
-
-```json
-{
-  "scripts": {
-    "dev": "vite --host 0.0.0.0"
-  }
-}
-```
-
-### 2. AI 生成失败通常该检查什么？
-
-优先检查：
-
-- Supabase Edge Function 是否已部署。
-- `INTEGRATIONS_API_KEY` 或对应第三方模型密钥是否已配置。
-- 当前用户是否登录、积分是否充足。
-- `llm_cache`、`rate_limit_windows`、函数日志中是否存在限流或调用异常。
-
-### 3. 支付成功但积分未到账怎么办？
-
-检查 `orders` 表订单状态、`wechat-payment-webhook` 函数日志和微信支付回调配置；如果回调未触发，可通过 `query-payment-status` 主动查询订单状态并补偿刷新。
+---
 
 ## 📌 总结
 
-Shopro AI 是一个以 **AIGC 电商视频生产** 为核心的全链路工作台：前端负责交互与生产流程编排，Supabase 提供认证、数据和 Edge Functions，AI/视频/支付等外部服务通过服务端函数统一接入。项目结构清晰，适合继续扩展为多租户电商内容 SaaS、AI 视频批量生产平台或品牌内容增长工具。
+Shopro AI 是一套面向 **带货短视频量产** 领域的一站式 SaaS 系统。项目融合了 DeepSeek-V4-Pro、StepAudio 2.5、Seedance 2.0 等前沿多模态大模型，以极高的工程化完成度打通了“文案-配音-画面-数据回流-团队协作-支付”的商业化完整闭环。具有极高的商业化落地价值和出海想象空间。
