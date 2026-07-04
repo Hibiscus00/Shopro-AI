@@ -10,6 +10,7 @@ import { supabase } from '@/db/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import ProductVideoWizard from './VideoCreatePage';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { sendDeepSeekStreamRequest, sendStepAudioASR, submitSeedanceVideo, querySeedanceVideo } from '@/lib/sse';
 import { audioRecorder } from '@/lib/audioRecorder';
 
@@ -61,20 +62,115 @@ const QUICK_TOOLS = [
 
 
 // 模型与对应后端标识
-type ModelId = 'Seedance';
+type ModelId = 'Seedance' | 'Kling' | 'Krea' | 'Luma' | 'pixverse';
 const MODELS: { label: string; id: ModelId }[] = [
   { label: 'Seedance 2.0', id: 'Seedance' },
+  { label: 'Kling', id: 'Kling' },
+  { label: 'Krea', id: 'Krea' },
+  { label: 'Luma', id: 'Luma' },
+  { label: 'pixverse', id: 'pixverse' },
 ];
 const RESOLUTIONS = ['720P · 9:16 · 5s', '1080P · 16:9 · 10s', '4K · 1:1 · 8s'];
-const INSPIRE_IMGS = [
-  'https://images.unsplash.com/photo-1590608897129-79da98d15969?w=400&h=500&fit=crop',
-  'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=400&h=350&fit=crop',
-  'https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?w=400&h=450&fit=crop',
-  'https://images.unsplash.com/photo-1558002038-1055907df827?w=400&h=400&fit=crop',
-  'https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=400&h=550&fit=crop',
-  'https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?w=400&h=300&fit=crop',
-  'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=400&h=420&fit=crop',
-  'https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=400&h=380&fit=crop',
+const INSPIRE_VIDEOS = [
+  {
+    url: '/Video/CreatOK_2.mp4',
+    prompt: '时尚秋季外套女款展示，微风吹拂，高级质感，落叶背景',
+    model: 'Seedance 2.0',
+    ratio: '9:16',
+    refImage: '有参考图',
+    firstLast: '无首尾帧',
+    category: '服装',
+    language: '中文'
+  },
+  {
+    url: '/Video/CreatOK_4.mp4',
+    prompt: 'Makeup foundation application, close up on skin smooth blending, soft natural lighting',
+    model: 'Kling',
+    ratio: '16:9',
+    refImage: '无参考图',
+    firstLast: '有首尾帧',
+    category: '美妆',
+    language: '英文'
+  },
+  {
+    url: '/Video/CreatOK_5.mp4',
+    prompt: 'Smart watch rotate view, carbon fiber strap, holographic display neon accent',
+    model: 'Luma',
+    ratio: '1:1',
+    refImage: '有参考图',
+    firstLast: '有首尾帧',
+    category: '数码',
+    language: '英文'
+  },
+  {
+    url: '/Video/CreatOK_6.mp4',
+    prompt: '美味草莓芝士蛋糕切片，淋上红莓果酱，慢动作，诱人甜点',
+    model: 'Krea',
+    ratio: '9:16',
+    refImage: '无参考图',
+    firstLast: '无首尾帧',
+    category: '食品',
+    language: '中文'
+  },
+  {
+    url: '/Video/CreatOK_7.mp4',
+    prompt: 'Nordic style living room, cozy sofa, plant leaf shadow, warm aesthetic room tour',
+    model: 'pixverse',
+    ratio: '16:9',
+    refImage: '有参考图',
+    firstLast: '无首尾帧',
+    category: '家居',
+    language: '德文'
+  },
+  {
+    url: '/Video/CreatOK_8.mp4',
+    prompt: '运动女鞋减震底测试，慢镜头起跳落地，水花四溅效果',
+    model: 'Seedance 2.0',
+    ratio: '9:16',
+    refImage: '无参考图',
+    firstLast: '有首尾帧',
+    category: '服装',
+    language: '中文'
+  },
+  {
+    url: '/Video/CreatOK_9.mp4',
+    prompt: 'Organic lipstick swatch on hand, gloss reflection, flowers around, cosmetic brand ad',
+    model: 'Kling',
+    ratio: '9:16',
+    refImage: '有参考图',
+    firstLast: '有首尾帧',
+    category: '美妆',
+    language: '英文'
+  },
+  {
+    url: '/Video/CreatOK_10.mp4',
+    prompt: 'Wireless earbuds falling into water, high speed splash capture, blue ambient lighting',
+    model: 'Luma',
+    ratio: '3:4',
+    refImage: '无参考图',
+    firstLast: '无首尾帧',
+    category: '数码',
+    language: '日文'
+  },
+  {
+    url: '/Video/CreatOK_11.mp4',
+    prompt: '咖啡拿铁拉花艺术过程，心形图案，温暖日光，精致陶瓷杯',
+    model: 'Krea',
+    ratio: '9:16',
+    refImage: '有参考图',
+    firstLast: '无首尾帧',
+    category: '食品',
+    language: '中文'
+  }
+];
+
+const FILTER_CONFIG = [
+  { key: 'model', label: '模型', options: ['全部', 'Seedance 2.0', 'Kling', 'Krea', 'Luma', 'pixverse'] },
+  { key: 'ratio', label: '比例', options: ['全部', '9:16', '16:9', '1:1', '3:4'] },
+  { key: 'refImage', label: '参考图', options: ['全部', '有参考图', '无参考图'] },
+  { key: 'firstLast', label: '首尾帧', options: ['全部', '有首尾帧', '无首尾帧'] },
+  { key: 'category', label: '商品分类', options: ['全部', '服装', '美妆', '数码', '食品', '家居'] },
+  { key: 'language', label: '语言·2', options: ['全部', '中文', '英文', '日文', '德文'] },
 ];
 
 const MAIN_TABS = ['视频生成', '分镜编辑', '图片生成'];
@@ -104,6 +200,33 @@ export default function HomePage() {
   const [resolution, setResolution] = useState('720P · 9:16 · 5s');
   const [modelOpen, setModelOpen] = useState(false);
   const [resOpen, setResOpen] = useState(false);
+
+  // 灵感广场筛选状态
+  const [filterModel, setFilterModel] = useState('全部');
+  const [filterRatio, setFilterRatio] = useState('全部');
+  const [filterRefImage, setFilterRefImage] = useState('全部');
+  const [filterFirstLast, setFilterFirstLast] = useState('全部');
+  const [filterCategory, setFilterCategory] = useState('全部');
+  const [filterLanguage, setFilterLanguage] = useState('全部');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+
+  const filteredInspireVideos = INSPIRE_VIDEOS.filter(video => {
+    if (filterModel !== '全部' && video.model !== filterModel) return false;
+    if (filterRatio !== '全部' && video.ratio !== filterRatio) return false;
+    if (filterRefImage !== '全部' && video.refImage !== filterRefImage) return false;
+    if (filterFirstLast !== '全部' && video.firstLast !== filterFirstLast) return false;
+    if (filterCategory !== '全部' && video.category !== filterCategory) return false;
+    if (filterLanguage !== '全部' && video.language !== filterLanguage) return false;
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      const matchPrompt = video.prompt.toLowerCase().includes(q);
+      const matchModel = video.model.toLowerCase().includes(q);
+      const matchCategory = video.category.toLowerCase().includes(q);
+      return matchPrompt || matchModel || matchCategory;
+    }
+    return true;
+  });
 
   // 新增的高级分辨率/宽高比/时长/扩展设置状态
   const [activeResolution, setActiveResolution] = useState('720P');
@@ -251,6 +374,7 @@ export default function HomePage() {
   };
 
   const [generatedVideos, setGeneratedVideos] = useState<any[]>([]);
+  const [activePlayVideo, setActivePlayVideo] = useState<any>(null);
 
   const loadGeneratedVideos = useCallback(async () => {
     if (!user) return;
@@ -453,6 +577,61 @@ export default function HomePage() {
     }, 5000);
   }, [stopPoll, loadGeneratedVideos]);
 
+  // 轮询 Kling 任务
+  const pollKling = useCallback((taskId: string, dbProjectId?: string | null) => {
+    let attempts = 0;
+    pollRef.current = setInterval(async () => {
+      attempts++;
+      if (attempts > 120) {
+        stopPoll();
+        setGenerating(false);
+        toast.error('视频生成超时，请重试');
+        if (dbProjectId) {
+          await supabase.from('video_projects').update({ status: 'failed' }).eq('id', dbProjectId);
+        }
+        return;
+      }
+      try {
+        const { data, error } = await supabase.functions.invoke('kling-video-query', { body: { task_id: taskId } });
+        if (error) {
+          console.error('kling-query error', error);
+          return;
+        }
+        const status = data?.status; // 'SUCCESS' or 'processing' or 'FAILED'
+        if (status === 'SUCCESS') {
+          stopPoll(); setGenerating(false); setGenProgress(100);
+          const videoUrl = data?.video_url || data?.outcome?.video_url;
+          if (videoUrl) {
+            setResultVideo(videoUrl);
+            toast.success('Kling 视频生成完成！');
+            if (dbProjectId) {
+              await supabase.from('video_projects').update({
+                status: 'completed',
+                progress: 100,
+                video_url: videoUrl,
+                thumbnail_url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=640&h=360&fit=crop',
+              }).eq('id', dbProjectId);
+              loadGeneratedVideos();
+            }
+          }
+        } else if (status === 'FAILED' || status === 'CANCELLED') {
+          stopPoll(); setGenerating(false); toast.error(`视频生成失败: ${data?.error || '模型生成出错'}`);
+          if (dbProjectId) {
+            await supabase.from('video_projects').update({ status: 'failed' }).eq('id', dbProjectId);
+          }
+        } else {
+          const prog = Math.min(95, attempts * 4);
+          setGenProgress(prog);
+          if (dbProjectId) {
+            await supabase.from('video_projects').update({ progress: prog }).eq('id', dbProjectId);
+          }
+        }
+      } catch (e) {
+        console.error('kling poll error', e);
+      }
+    }, 5000);
+  }, [stopPoll, loadGeneratedVideos]);
+
   // 提交生成
   const handleGenerate = async () => {
     if (!prompt.trim()) { toast.error('请输入视频描述'); return; }
@@ -466,9 +645,9 @@ export default function HomePage() {
           try {
             const { data: projData, error: projErr } = await supabase.from('video_projects').insert({
               user_id: user.id,
-              title: `Seedance 视频 - ${new Date().toLocaleDateString('zh-CN')}`,
+              title: `${model.label} 视频 - ${new Date().toLocaleDateString('zh-CN')}`,
               status: 'processing',
-              video_style: 'Seedance 2.0',
+              video_style: model.label,
               duration: Number(activeDuration) || 8,
               prompt_text: prompt,
               progress: 5,
@@ -514,6 +693,119 @@ export default function HomePage() {
         }
         setTaskId(reqId);
         pollSeedance(reqId, dbProjectId);
+      } else if (model.id === 'Kling') {
+        // 先在数据库中创建视频项目
+        let dbProjectId: string | null = null;
+        if (user) {
+          try {
+            const { data: projData, error: projErr } = await supabase.from('video_projects').insert({
+              user_id: user.id,
+              title: `${model.label} 视频 - ${new Date().toLocaleDateString('zh-CN')}`,
+              status: 'processing',
+              video_style: model.label,
+              duration: Number(activeDuration) || 8,
+              prompt_text: prompt,
+              progress: 5,
+            }).select('id').maybeSingle();
+            
+            if (projErr) {
+              console.error("Failed to insert video project:", projErr);
+            } else if (projData) {
+              dbProjectId = projData.id;
+            }
+          } catch (dbErr) {
+            console.error("Database insert error:", dbErr);
+          }
+        }
+
+        const payload: any = {
+          prompt,
+          duration: activeDuration,
+        };
+        
+        if (refImage) {
+          payload.image_list = [refImage];
+        } else if (firstFrame) {
+          payload.image_list = [firstFrame];
+        }
+
+        const { data, error } = await supabase.functions.invoke('kling-video-create', { body: payload });
+        if (error) {
+          const msg = await error?.context?.text();
+          throw new Error(msg || error.message);
+        }
+        
+        const task_id = data?.task_id;
+        if (!task_id) {
+          if (dbProjectId) {
+            await supabase.from('video_projects').update({ status: 'failed' }).eq('id', dbProjectId);
+          }
+          throw new Error('未获取到 Kling 任务ID');
+        }
+        setTaskId(task_id);
+        pollKling(task_id, dbProjectId);
+      } else if (['Krea', 'Luma', 'pixverse'].includes(model.id)) {
+        // 模拟生成过程，展示高保真原型
+        let dbProjectId: string | null = null;
+        if (user) {
+          try {
+            const { data: projData, error: projErr } = await supabase.from('video_projects').insert({
+              user_id: user.id,
+              title: `${model.label} 视频 - ${new Date().toLocaleDateString('zh-CN')}`,
+              status: 'processing',
+              video_style: model.label,
+              duration: Number(activeDuration) || 8,
+              prompt_text: prompt,
+              progress: 5,
+            }).select('id').maybeSingle();
+            
+            if (projErr) {
+              console.error("Failed to insert video project:", projErr);
+            } else if (projData) {
+              dbProjectId = projData.id;
+            }
+          } catch (dbErr) {
+            console.error("Database insert error:", dbErr);
+          }
+        }
+
+        const simulatedTaskId = `sim_${Math.random().toString(36).substring(2, 11)}`;
+        setTaskId(simulatedTaskId);
+
+        let currentProgress = 5;
+        pollRef.current = setInterval(async () => {
+          currentProgress += Math.floor(Math.random() * 15) + 10;
+          if (currentProgress >= 100) {
+            stopPoll();
+            setGenerating(false);
+            setGenProgress(100);
+            
+            const mockVideos = [
+              'https://assets.mixkit.co/videos/preview/mixkit-girl-in-neon-sign-illuminated-city-street-40019-large.mp4',
+              'https://assets.mixkit.co/videos/preview/mixkit-hands-holding-smartphone-with-a-vertical-video-of-a-woman-41865-large.mp4',
+              'https://assets.mixkit.co/videos/preview/mixkit-coffee-pour-in-slow-motion-42289-large.mp4',
+              'https://assets.mixkit.co/videos/preview/mixkit-woman-shopping-online-on-smartphone-41867-large.mp4'
+            ];
+            const randomVideo = mockVideos[Math.floor(Math.random() * mockVideos.length)];
+            setResultVideo(randomVideo);
+            toast.success(`${model.label} 视频生成完成！`);
+
+            if (dbProjectId) {
+              await supabase.from('video_projects').update({
+                status: 'completed',
+                progress: 100,
+                video_url: randomVideo,
+                thumbnail_url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=640&h=360&fit=crop',
+              }).eq('id', dbProjectId);
+              loadGeneratedVideos();
+            }
+          } else {
+            setGenProgress(currentProgress);
+            if (dbProjectId) {
+              await supabase.from('video_projects').update({ progress: currentProgress }).eq('id', dbProjectId);
+            }
+          }
+        }, 1500);
       } else {
         toast.error('该视频模型暂未接入生成接口');
         setGenerating(false); setGenProgress(0);
@@ -1235,7 +1527,7 @@ export default function HomePage() {
                   onClick={() => navigate('/works')}
                   className="px-2.5 py-1 text-xs font-semibold rounded-md bg-primary/20 hover:bg-primary/30 text-primary transition-colors border border-primary/20 flex items-center gap-1"
                 >
-                  <Video className="w-3 h-3" /> 作品管理
+                  <Video className="w-3 h-3" /> 作品素材
                 </button>
               </div>
               <button onClick={() => setResultVideo(null)} className="text-white/30 hover:text-white/70 transition-colors"><X className="w-4 h-4" /></button>
@@ -1265,25 +1557,25 @@ export default function HomePage() {
           <>
             {/* ── 功能区 ────────────────────────────────────────────────── */}
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-              {/* 左侧大卡：图片生成 */}
+              {/* 左侧大卡：作品素材 */}
               <div className="lg:col-span-2 rounded-2xl p-6 flex flex-col justify-between min-h-[220px] relative overflow-hidden cursor-pointer group"
                 style={{ background: 'linear-gradient(135deg,#1a1230 0%,#251840 100%)', border: '1px solid rgba(139,92,246,0.25)' }}
-                onClick={() => setMainTab('图片生成')}>
-                <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=280&fit=crop" alt="图片生成"
+                onClick={() => navigate('/works')}>
+                <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=280&fit=crop" alt="作品素材"
                   className="absolute right-0 top-0 w-36 h-full object-cover opacity-30 group-hover:opacity-40 transition-opacity" />
                 <div className="relative z-10 space-y-2">
-                  <h3 className="text-xl font-bold">图片生成</h3>
-                  <p className="text-sm text-white/50">AI 文生图 / 图生图</p>
+                  <h3 className="text-xl font-bold">作品素材</h3>
+                  <p className="text-sm text-white/50">管理已生成的视频与上传的素材库</p>
                   <div className="flex flex-wrap gap-1.5 pt-1">
-                    {['GPT Image 2', 'Nano Banana 2/Pro', 'Seedream 5'].map(m => (
+                    {['视频作品', '素材管理', '智能剪辑'].map(m => (
                       <span key={m} className="text-[11px] px-2.5 py-0.5 rounded-full bg-white/8 text-white/60 border border-white/10">{m}</span>
                     ))}
                   </div>
                 </div>
                 <button className="relative z-10 w-fit mt-4 px-5 py-2 rounded-full text-sm font-semibold text-white transition-all hover:scale-105"
                   style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.2)' }}
-                  onClick={e => { e.stopPropagation(); setMainTab('图片生成'); }}>
-                  立即创作 →
+                  onClick={e => { e.stopPropagation(); navigate('/works'); }}>
+                  进入管理 →
                 </button>
               </div>
 
@@ -1316,80 +1608,154 @@ export default function HomePage() {
               </div>
 
               {/* 筛选栏 */}
-              <div className="flex items-center gap-2 flex-wrap">
-                {['模型', '比例', '参考图', '首尾帧', '商品分类', '语言·2'].map(f => (
-                  <button key={f} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs text-white/60 hover:text-white/90 hover:bg-white/8 transition-colors border border-white/8">
-                    {f} <ChevronDown className="w-3 h-3" />
-                  </button>
+              <div className="flex items-center gap-2 flex-wrap relative">
+                {activeDropdown && (
+                  <div className="fixed inset-0 z-40" onClick={() => setActiveDropdown(null)} />
+                )}
+                {FILTER_CONFIG.map(f => (
+                  <div key={f.key} className="relative z-50">
+                    <button
+                      onClick={() => setActiveDropdown(activeDropdown === f.key ? null : f.key)}
+                      className={cn(
+                        "flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs transition-colors border",
+                        (f.key === 'model' && filterModel !== '全部') ||
+                        (f.key === 'ratio' && filterRatio !== '全部') ||
+                        (f.key === 'refImage' && filterRefImage !== '全部') ||
+                        (f.key === 'firstLast' && filterFirstLast !== '全部') ||
+                        (f.key === 'category' && filterCategory !== '全部') ||
+                        (f.key === 'language' && filterLanguage !== '全部')
+                          ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400 font-medium"
+                          : "text-white/60 hover:text-white/90 hover:bg-white/8 border-white/8"
+                      )}
+                    >
+                      {f.label}：{
+                        f.key === 'model' ? filterModel :
+                        f.key === 'ratio' ? filterRatio :
+                        f.key === 'refImage' ? filterRefImage :
+                        f.key === 'firstLast' ? filterFirstLast :
+                        f.key === 'category' ? filterCategory :
+                        filterLanguage
+                      }
+                      <ChevronDown className="w-3 h-3" />
+                    </button>
+                    {activeDropdown === f.key && (
+                      <div className="absolute top-full mt-1.5 left-0 z-50 bg-[#1e1d2a] border border-white/10 rounded-xl shadow-2xl py-1 min-w-[120px] max-h-60 overflow-y-auto">
+                        {f.options.map(opt => (
+                          <button
+                            key={opt}
+                            onClick={() => {
+                              if (f.key === 'model') setFilterModel(opt);
+                              else if (f.key === 'ratio') setFilterRatio(opt);
+                              else if (f.key === 'refImage') setFilterRefImage(opt);
+                              else if (f.key === 'firstLast') setFilterFirstLast(opt);
+                              else if (f.key === 'category') setFilterCategory(opt);
+                              else if (f.key === 'language') setFilterLanguage(opt);
+                              setActiveDropdown(null);
+                            }}
+                            className={cn(
+                              'w-full text-left px-3 py-1.5 text-xs hover:bg-white/10 transition-colors',
+                              (f.key === 'model' && filterModel === opt) ||
+                              (f.key === 'ratio' && filterRatio === opt) ||
+                              (f.key === 'refImage' && filterRefImage === opt) ||
+                              (f.key === 'firstLast' && filterFirstLast === opt) ||
+                              (f.key === 'category' && filterCategory === opt) ||
+                              (f.key === 'language' && filterLanguage === opt)
+                                ? 'text-emerald-400 font-medium'
+                                : 'text-white/70'
+                            )}
+                          >
+                            {opt}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 ))}
-                <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-white/40 hover:text-white/70 transition-colors border border-white/6 bg-white/4 ml-auto">
-                  🔍 搜索提示词或关键词
-                </button>
+
+                {/* 🔍 搜索提示词或关键词 */}
+                <div className="relative ml-auto flex items-center bg-white/4 border border-white/6 rounded-lg px-2.5 py-1 text-xs text-white/70 focus-within:border-white/20 z-50">
+                  <span className="mr-1">🔍</span>
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="搜索提示词或关键词"
+                    className="bg-transparent border-none outline-none text-white text-xs placeholder:text-white/20 w-44"
+                  />
+                  {searchQuery && (
+                    <button onClick={() => setSearchQuery('')} className="ml-1 text-white/30 hover:text-white/60">
+                      <X className="w-3 h-3" />
+                    </button>
+                  )}
+                </div>
               </div>
 
-              {/* 我生成的视频 */}
-              {generatedVideos.length > 0 && (
-                <div className="space-y-3 pt-2">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-semibold text-white/80">我生成的视频</h3>
-                    <span className="text-[10px] text-white/40">已同步保存至作品管理和最近项目</span>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {generatedVideos.map(video => (
-                      <div key={video.id} className="rounded-xl overflow-hidden bg-[#181628]/60 border border-white/5 group relative flex flex-col hover:border-primary/30 transition-all duration-300">
-                        <div className="relative aspect-video bg-black overflow-hidden flex items-center justify-center">
-                          {video.thumbnail_url ? (
-                            <img src={video.thumbnail_url} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                          ) : (
-                            <Video className="w-8 h-8 text-white/20" />
-                          )}
-                          <div className="absolute inset-0 bg-black/55 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                            <a href={video.video_url} target="_blank" rel="noreferrer" className="w-9 h-9 rounded-full bg-primary/80 hover:bg-primary flex items-center justify-center shadow-lg transition-all duration-200 transform scale-90 group-hover:scale-100">
-                              <Play className="w-4 h-4 text-white ml-0.5" />
-                            </a>
-                            <button
-                              onClick={() => navigate('/works')}
-                              className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur flex items-center justify-center transition-all duration-200"
-                              title="在作品管理中查看"
-                            >
-                              <Layers className="w-4 h-4 text-white" />
+              {/* 瀑布流视频 4列 */}
+              <div className="columns-2 md:columns-3 lg:columns-4 gap-3 space-y-3">
+                {filteredInspireVideos.map((video, i) => (
+                  <div key={i} 
+                    className="break-inside-avoid rounded-xl overflow-hidden group cursor-pointer relative bg-black/20"
+                    style={{ border: '1px solid rgba(255,255,255,0.07)' }}
+                    onMouseEnter={(e) => {
+                      const v = e.currentTarget.querySelector('video');
+                      if (v) v.play().catch(err => console.log('Autoplay blocked:', err));
+                    }}
+                    onMouseLeave={(e) => {
+                      const v = e.currentTarget.querySelector('video');
+                      if (v) {
+                        v.pause();
+                        v.currentTime = 0;
+                      }
+                    }}
+                    onClick={() => setActivePlayVideo(video)}
+                  >
+                    <video
+                      src={video.url}
+                      muted
+                      loop
+                      playsInline
+                      preload="metadata"
+                      className="w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                    <div className="absolute top-2 right-2 opacity-100 group-hover:opacity-0 transition-opacity">
+                      <span className="text-[10px] px-2 py-0.5 rounded-md bg-black/60 text-white/80 backdrop-blur">{video.model}</span>
+                    </div>
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-3">
+                      <div className="flex justify-between items-start">
+                        <span className="text-[10px] px-2 py-0.5 rounded-md bg-black/60 text-white/80 backdrop-blur">{video.model}</span>
+                        <span className="text-[10px] px-2 py-0.5 rounded-md bg-black/60 text-white/80 backdrop-blur">{video.ratio}</span>
+                      </div>
+                      <div className="space-y-2">
+                        <p className="text-[11px] text-white/90 line-clamp-2 leading-relaxed">{video.prompt}</p>
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] text-white/40">{video.category} · {video.language}</span>
+                          <div className="flex gap-1.5">
+                            <button className="w-7 h-7 rounded-full bg-white/20 backdrop-blur flex items-center justify-center hover:bg-white/30 transition-colors"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (mainTab === '视频生成') {
+                                  setPrompt(video.prompt);
+                                  toast.success('已应用该视频的提示词');
+                                } else if (mainTab === '图片生成') {
+                                  setImgPrompt(video.prompt);
+                                  toast.success('已应用该视频的提示词');
+                                }
+                              }}
+                              title="应用此提示词">
+                              <Copy className="w-3.5 h-3.5 text-white" />
                             </button>
                           </div>
                         </div>
-                        <div className="p-3 flex-1 flex flex-col justify-between bg-black/20">
-                          <p className="text-xs font-semibold text-white/90 truncate" title={video.title}>{video.title}</p>
-                          <span className="text-[10px] text-white/40 mt-1">{new Date(video.created_at).toLocaleDateString()}</span>
-                        </div>
                       </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* 瀑布流图片 4列 */}
-              <div className="columns-2 md:columns-3 lg:columns-4 gap-3 space-y-3">
-                {INSPIRE_IMGS.map((src, i) => (
-                  <div key={i} className="break-inside-avoid rounded-xl overflow-hidden group cursor-pointer relative"
-                    style={{ border: '1px solid rgba(255,255,255,0.07)' }}>
-                    <img src={src} alt="" className="w-full object-cover transition-transform duration-300 group-hover:scale-105" />
-                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <span className="text-[10px] px-2 py-0.5 rounded-md bg-black/60 text-white/80 backdrop-blur">Veo 3.1 Fast</span>
-                    </div>
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                      <button className="w-8 h-8 rounded-full bg-white/20 backdrop-blur flex items-center justify-center hover:bg-white/30 transition-colors"
-                        onClick={() => {
-                          if (mainTab === '视频生成') setPrompt(src);
-                          else if (mainTab === '图片生成') setImgPrompt(src);
-                        }}>
-                        <Copy className="w-3.5 h-3.5 text-white" />
-                      </button>
-                      <button className="w-8 h-8 rounded-full bg-white/20 backdrop-blur flex items-center justify-center hover:bg-white/30 transition-colors">
-                        <MoreHorizontal className="w-3.5 h-3.5 text-white" />
-                      </button>
                     </div>
                   </div>
                 ))}
               </div>
+              {filteredInspireVideos.length === 0 && (
+                <div className="text-center py-10 text-white/30 text-sm">
+                  没有找到符合筛选条件的灵感视频
+                </div>
+              )}
             </div>
           </>
         )}
@@ -1400,6 +1766,38 @@ export default function HomePage() {
             <ProductVideoWizard />
           </div>
         )}
+
+        {/* 灵感广场视频带声音弹窗播放 */}
+        {activePlayVideo && (() => {
+          const isVertical = activePlayVideo.ratio === '9:16' || activePlayVideo.ratio === '3:4';
+          const isSquare = activePlayVideo.ratio === '1:1';
+          const aspectClass = activePlayVideo.ratio === '9:16' ? 'aspect-[9/16]' :
+                              activePlayVideo.ratio === '3:4' ? 'aspect-[3/4]' :
+                              activePlayVideo.ratio === '1:1' ? 'aspect-square' :
+                              'aspect-video';
+          return (
+            <Dialog open={!!activePlayVideo} onOpenChange={() => setActivePlayVideo(null)}>
+              <DialogContent className={cn(
+                "bg-zinc-950 border-zinc-800 text-zinc-200 p-0 overflow-hidden",
+                isVertical ? "max-w-[380px]" : isSquare ? "max-w-md" : "max-w-2xl"
+              )}>
+                <DialogHeader className="p-4 border-b border-zinc-800/80 flex flex-row items-center justify-between">
+                  <DialogTitle className="text-sm font-semibold truncate pr-4 text-zinc-100">
+                    {activePlayVideo.prompt}
+                  </DialogTitle>
+                </DialogHeader>
+                <div className={cn("w-full bg-black relative flex items-center justify-center", aspectClass)}>
+                  <video
+                    src={activePlayVideo.url}
+                    controls
+                    autoPlay
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+              </DialogContent>
+            </Dialog>
+          );
+        })()}
 
       </div>
     </div>

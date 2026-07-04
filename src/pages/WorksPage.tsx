@@ -94,12 +94,18 @@ function WorkCard({
     }
   };
 
+  const [aspect, setAspect] = useState(() => {
+    if (project.video_style === '服装') return 'aspect-[9/16]';
+    return 'aspect-video';
+  });
+
   return (
     <div className="rounded-2xl overflow-hidden flex flex-col bg-[hsl(var(--card))] border border-border/60 shadow-sm transition-all hover:shadow-lg hover:-translate-y-1 group relative">
       {/* ── 预览区（点击封面弹窗预览） ── */}
       <div
         className={cn(
-          'relative aspect-video bg-muted overflow-hidden cursor-pointer',
+          'relative bg-muted overflow-hidden cursor-pointer max-h-[220px]',
+          aspect
         )}
         onClick={() => canPlay && onPreview(project)}
       >
@@ -108,6 +114,14 @@ function WorkCard({
             src={project.thumbnail_url}
             alt={project.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            onLoad={(e) => {
+              const img = e.currentTarget;
+              const ratio = img.naturalWidth / img.naturalHeight;
+              if (ratio < 0.65) setAspect('aspect-[9/16]');
+              else if (ratio < 0.8) setAspect('aspect-[3/4]');
+              else if (ratio < 1.2) setAspect('aspect-square');
+              else setAspect('aspect-video');
+            }}
           />
         ) : project.video_url ? (
           <video
@@ -116,6 +130,14 @@ function WorkCard({
             preload="metadata"
             muted
             playsInline
+            onLoadedMetadata={(e) => {
+              const vid = e.currentTarget;
+              const ratio = vid.videoWidth / vid.videoHeight;
+              if (ratio < 0.65) setAspect('aspect-[9/16]');
+              else if (ratio < 0.8) setAspect('aspect-[3/4]');
+              else if (ratio < 1.2) setAspect('aspect-square');
+              else setAspect('aspect-video');
+            }}
           />
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-muted">
@@ -347,24 +369,43 @@ function MaterialCard({
   onDelete:   (id: string) => void;
 }) {
   const isImage = material.type === 'image';
+  const [aspect, setAspect] = useState('aspect-[4/3]');
+
   return (
     <div className="rounded-2xl overflow-hidden flex flex-col bg-card border border-border/60 shadow-sm hover:shadow-md transition-shadow duration-200">
       <div
-        className="relative cursor-pointer group bg-muted overflow-hidden"
-        style={{ aspectRatio: '4/3' }}
+        className={cn("relative cursor-pointer group bg-muted overflow-hidden max-h-[220px]", aspect)}
         onClick={() => onPreview(material)}
       >
         {isImage ? (
           <img src={material.url} alt={material.name}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-            onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+            onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+            onLoad={(e) => {
+              const img = e.currentTarget;
+              const ratio = img.naturalWidth / img.naturalHeight;
+              if (ratio < 0.65) setAspect('aspect-[9/16]');
+              else if (ratio < 0.8) setAspect('aspect-[3/4]');
+              else if (ratio < 1.2) setAspect('aspect-square');
+              else setAspect('aspect-video');
+            }}
+          />
         ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center gap-3 bg-muted">
-            <div className="w-14 h-14 rounded-2xl bg-muted-foreground/10 flex items-center justify-center">
-              <FileVideo className="w-7 h-7 text-muted-foreground/50" />
-            </div>
-            <span className="text-xs text-muted-foreground">点击预览视频</span>
-          </div>
+          <video
+            src={`${material.url}#t=0.01`}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            preload="metadata"
+            muted
+            playsInline
+            onLoadedMetadata={(e) => {
+              const vid = e.currentTarget;
+              const ratio = vid.videoWidth / vid.videoHeight;
+              if (ratio < 0.65) setAspect('aspect-[9/16]');
+              else if (ratio < 0.8) setAspect('aspect-[3/4]');
+              else if (ratio < 1.2) setAspect('aspect-square');
+              else setAspect('aspect-video');
+            }}
+          />
         )}
         <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
           <div className="w-10 h-10 rounded-full bg-white/20 border border-white/40 flex items-center justify-center">
@@ -428,6 +469,21 @@ export default function WorksPage() {
   // P2-N03 智能封面生成（使用 CoverCandidates 组件）
   const [coverProject, setCoverProject] = useState<VideoProject | null>(null);
 
+  const [previewAspect, setPreviewAspect] = useState('aspect-video');
+  const [matPreviewAspect, setMatPreviewAspect] = useState('aspect-video');
+
+  useEffect(() => {
+    if (previewProject) {
+      setPreviewAspect('aspect-video');
+    }
+  }, [previewProject]);
+
+  useEffect(() => {
+    if (matPreview) {
+      setMatPreviewAspect('aspect-video');
+    }
+  }, [matPreview]);
+
   // P2-N05 A/B 测试面板
   const [abProject, setAbProject] = useState<VideoProject | null>(null);
   const [abVariants, setAbVariants] = useState<ABVariant[]>([]);
@@ -454,8 +510,88 @@ export default function WorksPage() {
     if (abTickRef.current) { clearInterval(abTickRef.current); abTickRef.current = null; }
   }, []);
 
+async function seedTestUserVideos(userId: string) {
+  const testVideos = [
+    {
+      title: '时尚秋季外套女款展示',
+      video_url: '/Video/CreatOK_2.mp4',
+      thumbnail_url: null,
+      duration: 5,
+      video_style: '服装',
+    },
+    {
+      title: '智能手表旋转展示',
+      video_url: '/Video/CreatOK_5.mp4',
+      thumbnail_url: null,
+      duration: 10,
+      video_style: '数码',
+    },
+    {
+      title: '运动女鞋减震底测试',
+      video_url: '/Video/CreatOK_8.mp4',
+      thumbnail_url: null,
+      duration: 5,
+      video_style: '服装',
+    },
+    {
+      title: '无线耳机落水测试',
+      video_url: '/Video/CreatOK_10.mp4',
+      thumbnail_url: null,
+      duration: 8,
+      video_style: '数码',
+    },
+    {
+      title: '咖啡拿铁拉花艺术过程',
+      video_url: '/Video/CreatOK_11.mp4',
+      thumbnail_url: null,
+      duration: 6,
+      video_style: '食品',
+    }
+  ];
+
+  for (const v of testVideos) {
+    const { data: existingProj } = await supabase
+      .from('video_projects')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('video_url', v.video_url)
+      .maybeSingle();
+
+    if (!existingProj) {
+      const { data: insertedProj } = await supabase
+        .from('video_projects')
+        .insert({
+          user_id: userId,
+          title: v.title,
+          video_url: v.video_url,
+          thumbnail_url: v.thumbnail_url,
+          duration: v.duration,
+          video_style: v.video_style,
+          status: 'completed',
+          progress: 100,
+        })
+        .select()
+        .single();
+
+      if (insertedProj) {
+        // Also insert to materials table so it's visible in Materials library
+        await supabase.from('materials').insert({
+          user_id: userId,
+          name: v.title,
+          url: v.video_url,
+          type: 'video',
+          size: 1024 * 1024 * 5,
+        });
+      }
+    }
+  }
+}
+
   const loadProjects = async () => {
     setLoading(true);
+    if (user?.email === 'test_user@example.com') {
+      await seedTestUserVideos(user.id);
+    }
     const { data } = await supabase.from('video_projects').select('*').order('created_at', { ascending: false });
     setProjects((data ?? []) as VideoProject[]);
     setLoading(false);
@@ -466,11 +602,14 @@ export default function WorksPage() {
   // ── 素材库加载（切到素材Tab时懒加载）──
   const loadMaterials = useCallback(async () => {
     setMatLoading(true);
+    if (user?.email === 'test_user@example.com') {
+      await seedTestUserVideos(user.id);
+    }
     const { data } = await supabase.from('materials').select('*').order('created_at', { ascending: false });
     setMaterials((data ?? []) as Material[]);
     setMatLoading(false);
     setMatLoaded(true);
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     if (mainTab === 'materials' && !matLoaded) { loadMaterials(); }
@@ -617,7 +756,7 @@ export default function WorksPage() {
       {/* ── 页头 ── */}
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="min-w-0">
-          <h1 className="text-xl font-bold text-balance">作品管理</h1>
+          <h1 className="text-xl font-bold text-balance">作品素材</h1>
           <p className="text-sm text-muted-foreground mt-0.5">
             {mainTab === 'works'
               ? <>共 {stats.total} 个作品 · {stats.completed} 个已完成{stats.processing > 0 && <span className="text-warning ml-1">· {stats.processing} 个生成中</span>}</>
@@ -822,31 +961,63 @@ export default function WorksPage() {
 
           {/* 素材预览弹窗 */}
           <Dialog open={!!matPreview} onOpenChange={v => !v && setMatPreview(null)}>
-            <DialogContent className="max-w-[calc(100%-2rem)] md:max-w-3xl max-h-[90dvh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle className="truncate text-balance pr-6">{matPreview?.name}</DialogTitle>
-              </DialogHeader>
-              <div className="rounded-xl overflow-hidden bg-black/80">
-                {matPreview?.type === 'image' ? (
-                  <img src={matPreview.url} alt={matPreview.name} className="w-full max-h-[65vh] object-contain" />
-                ) : matPreview ? (
-                  <video src={matPreview.url} controls autoPlay className="w-full max-h-[65vh]" />
-                ) : null}
-              </div>
-              {matPreview && (
-                <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
-                  <span className={cn('text-xs font-medium px-2 py-0.5 rounded',
-                    matPreview.type === 'image' ? 'bg-info/15 text-info' : 'bg-primary/15 text-primary')}>
-                    {matPreview.type === 'image' ? '图片' : '视频'}
-                  </span>
-                  {matPreview.size && <span>大小：{formatSize(matPreview.size)}</span>}
-                  <span className="ml-auto">{formatDateShort(matPreview.created_at)}</span>
-                  <Button size="sm" variant="outline" className="h-8" onClick={() => handleMatDownload(matPreview)}>
-                    <Download className="w-3.5 h-3.5 mr-1.5" />下载
-                  </Button>
-                </div>
-              )}
-            </DialogContent>
+            {matPreview && (() => {
+              const isVertical = matPreviewAspect === 'aspect-[9/16]' || matPreviewAspect === 'aspect-[3/4]';
+              const isSquare = matPreviewAspect === 'aspect-square';
+              return (
+                <DialogContent className={cn(
+                  "max-w-[calc(100%-2rem)]",
+                  isVertical ? "md:max-w-[380px]" : isSquare ? "md:max-w-md" : "md:max-w-3xl"
+                )}>
+                  <DialogHeader>
+                    <DialogTitle className="truncate text-balance pr-6">{matPreview.name}</DialogTitle>
+                  </DialogHeader>
+                  <div className={cn("rounded-xl overflow-hidden bg-black relative flex items-center justify-center", matPreviewAspect)}>
+                    {matPreview.type === 'image' ? (
+                      <img
+                        src={matPreview.url}
+                        alt={matPreview.name}
+                        className="w-full h-full object-contain"
+                        onLoad={(e) => {
+                          const img = e.currentTarget;
+                          const ratio = img.naturalWidth / img.naturalHeight;
+                          if (ratio < 0.65) setMatPreviewAspect('aspect-[9/16]');
+                          else if (ratio < 0.8) setMatPreviewAspect('aspect-[3/4]');
+                          else if (ratio < 1.2) setMatPreviewAspect('aspect-square');
+                          else setMatPreviewAspect('aspect-video');
+                        }}
+                      />
+                    ) : (
+                      <video
+                        src={matPreview.url}
+                        controls
+                        autoPlay
+                        className="w-full h-full object-contain"
+                        onLoadedMetadata={(e) => {
+                          const vid = e.currentTarget;
+                          const ratio = vid.videoWidth / vid.videoHeight;
+                          if (ratio < 0.65) setMatPreviewAspect('aspect-[9/16]');
+                          else if (ratio < 0.8) setMatPreviewAspect('aspect-[3/4]');
+                          else if (ratio < 1.2) setMatPreviewAspect('aspect-square');
+                          else setMatPreviewAspect('aspect-video');
+                        }}
+                      />
+                    )}
+                  </div>
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
+                    <span className={cn('text-xs font-medium px-2 py-0.5 rounded',
+                      matPreview.type === 'image' ? 'bg-info/15 text-info' : 'bg-primary/15 text-primary')}>
+                      {matPreview.type === 'image' ? '图片' : '视频'}
+                    </span>
+                    {matPreview.size && <span>大小：{formatSize(matPreview.size)}</span>}
+                    <span className="ml-auto">{formatDateShort(matPreview.created_at)}</span>
+                    <Button size="sm" variant="outline" className="h-8" onClick={() => handleMatDownload(matPreview)}>
+                      <Download className="w-3.5 h-3.5 mr-1.5" />下载
+                    </Button>
+                  </div>
+                </DialogContent>
+              );
+            })()}
           </Dialog>
 
           {/* 素材删除确认 */}
@@ -870,29 +1041,61 @@ export default function WorksPage() {
 
       {/* ── 预览弹窗（作品）── */}
       <Dialog open={!!previewProject} onOpenChange={v => !v && setPreviewProject(null)}>
-        <DialogContent className="max-w-[calc(100%-2rem)] md:max-w-3xl">
-          <DialogHeader>
-            <DialogTitle className="truncate text-balance pr-6">{previewProject?.title}</DialogTitle>
-          </DialogHeader>
-          <div className="rounded-xl overflow-hidden bg-black aspect-video">
-            {(previewProject?.video_url || previewProject?.status === 'completed') ? (
-              <video src={previewProject.video_url || 'https://www.w3schools.com/html/mov_bbb.mp4'} controls autoPlay className="w-full h-full" />
-            ) : previewProject?.thumbnail_url ? (
-              <img src={previewProject.thumbnail_url} alt={previewProject.title} className="w-full h-full object-contain" />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <Video className="w-12 h-12 text-white/20" />
+        {previewProject && (() => {
+          const isVertical = previewAspect === 'aspect-[9/16]' || previewAspect === 'aspect-[3/4]';
+          const isSquare = previewAspect === 'aspect-square';
+          return (
+            <DialogContent className={cn(
+              "max-w-[calc(100%-2rem)]",
+              isVertical ? "md:max-w-[380px]" : isSquare ? "md:max-w-md" : "md:max-w-3xl"
+            )}>
+              <DialogHeader>
+                <DialogTitle className="truncate text-balance pr-6">{previewProject.title}</DialogTitle>
+              </DialogHeader>
+              <div className={cn("rounded-xl overflow-hidden bg-black relative flex items-center justify-center", previewAspect)}>
+                {(previewProject.video_url || previewProject.status === 'completed') ? (
+                  <video
+                    src={previewProject.video_url || 'https://www.w3schools.com/html/mov_bbb.mp4'}
+                    controls
+                    autoPlay
+                    className="w-full h-full object-contain"
+                    onLoadedMetadata={(e) => {
+                      const vid = e.currentTarget;
+                      const ratio = vid.videoWidth / vid.videoHeight;
+                      if (ratio < 0.65) setPreviewAspect('aspect-[9/16]');
+                      else if (ratio < 0.8) setPreviewAspect('aspect-[3/4]');
+                      else if (ratio < 1.2) setPreviewAspect('aspect-square');
+                      else setPreviewAspect('aspect-video');
+                    }}
+                  />
+                ) : previewProject.thumbnail_url ? (
+                  <img
+                    src={previewProject.thumbnail_url}
+                    alt={previewProject.title}
+                    className="w-full h-full object-contain"
+                    onLoad={(e) => {
+                      const img = e.currentTarget;
+                      const ratio = img.naturalWidth / img.naturalHeight;
+                      if (ratio < 0.65) setPreviewAspect('aspect-[9/16]');
+                      else if (ratio < 0.8) setPreviewAspect('aspect-[3/4]');
+                      else if (ratio < 1.2) setPreviewAspect('aspect-square');
+                      else setPreviewAspect('aspect-video');
+                    }}
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <Video className="w-12 h-12 text-white/20" />
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-          {previewProject && (
-            <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-              {previewProject.video_style && <span>风格：{previewProject.video_style}</span>}
-              {previewProject.duration > 0 && <span>时长：{previewProject.duration}s</span>}
-              <span className="ml-auto">{new Date(previewProject.created_at).toLocaleDateString('zh-CN')}</span>
-            </div>
-          )}
-        </DialogContent>
+              <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+                {previewProject.video_style && <span>风格：{previewProject.video_style}</span>}
+                {previewProject.duration > 0 && <span>时长：{previewProject.duration}s</span>}
+                <span className="ml-auto">{new Date(previewProject.created_at).toLocaleDateString('zh-CN')}</span>
+              </div>
+            </DialogContent>
+          );
+        })()}
       </Dialog>
 
       {/* ── 删除确认（作品）── */}

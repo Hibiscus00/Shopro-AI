@@ -516,7 +516,7 @@ export default function ProfilePage() {
             <Card className="rounded-3xl border-border/60">
               <CardContent className="p-2">
                 <p className="text-xs font-semibold text-muted-foreground px-4 pt-3 pb-1">快速入口</p>
-                <MenuRow icon={FolderOpen} label="作品管理" desc="查看我的视频作品和素材" onClick={() => navigate('/works')} />
+                <MenuRow icon={FolderOpen} label="作品素材" desc="查看我的视频作品和素材" onClick={() => navigate('/works')} />
                 <MenuRow icon={Zap} label="积分与套餐" desc={userPlan ? `剩余 ${creditsLeft} 积分` : '查看用量和充值'} onClick={() => navigate('/credits')} badge={creditsLeft < 50 ? '不足' : undefined} />
                 <MenuRow icon={Globe} label="跨平台导出" desc="多格式导出和一键分发" onClick={() => navigate('/export-formats')} />
                 <MenuRow icon={TrendingUp} label="投放数据回流" desc="查看广告投放效果" onClick={() => navigate('/data-feedback')} />

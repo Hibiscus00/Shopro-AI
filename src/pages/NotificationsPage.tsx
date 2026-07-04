@@ -30,7 +30,7 @@ const INITIAL_NOTIFS: Notification[] = [
   {
     id: 'n1', category: 'video', level: 'success', read: false,
     title: '视频生成完成',
-    body: '「烟酰胺精华28天变白挑战」已生成完毕，可前往作品管理查看和下载。',
+    body: '「烟酰胺精华28天变白挑战」已生成完毕，可前往作品素材查看和下载。',
     time: '2分钟前',
     actionLabel: '查看作品', actionPath: '/works',
   },

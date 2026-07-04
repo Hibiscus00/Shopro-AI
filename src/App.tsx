@@ -134,7 +134,7 @@ function AppRoutes() {
               <Suspense fallback={<PageLoader />}>
                 <Routes>
                   <Route path="/home" element={<Navigate to="/video/create" replace />} />
-                  <Route path="/" element={<DashboardPage />} />
+                  <Route path="/" element={<Navigate to="/video/create" replace />} />
                   <Route path="/video/create" element={<HomePage />} />
                   <Route path="/video/create/:projectId" element={<HomePage />} />
                   <Route path="/works" element={<WorksPage />} />

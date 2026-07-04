@@ -60,13 +60,12 @@ const navGroups = [
   {
     label: '主要功能',
     items: [
-      { path: '/', label: '工作台', icon: LayoutDashboard },
-      { path: '/video/create', label: '生成视频', icon: Video },
+      { path: '/video/create', label: '工作台', icon: Video },
       { path: '/product-selection', label: '智能选品', icon: Sparkles },
       { path: '/products', label: '商品管理', icon: Package },
       { path: '/avatars', label: '数字人库', icon: Users2 },
       { path: '/video/edit', label: '视频剪辑', icon: Scissors },
-      { path: '/works', label: '作品管理', icon: FolderOpen },
+      { path: '/works', label: '作品素材', icon: FolderOpen },
       // AI工具箱通过 AIToolboxNavItem 单独渲染
       { path: '/export-formats', label: '跨平台导出', icon: Layers },
       { path: '/data-feedback', label: '投放数据回流', icon: Share2 },

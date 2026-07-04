@@ -273,6 +273,70 @@ function SearchBar({ placeholder, onSearch }: { placeholder: string; onSearch?: 
   );
 }
 
+// ── 素材卡片（媒体库面板项） ──
+function MaterialItemCard({ m, onAdd, onDelete }: {
+  m: { id: string; name: string; url: string; type: string };
+  onAdd: (m: any) => void;
+  onDelete: (id: string) => void;
+}) {
+  const [aspect, setAspect] = useState('aspect-video');
+  return (
+    <div className={`bg-zinc-800 rounded border border-zinc-700 relative group overflow-hidden hover:border-zinc-500 transition-all hover:-translate-y-0.5 cursor-pointer ${aspect}`}>
+      {m.url ? (
+        m.type === 'audio' ? (
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-800/90 text-zinc-400 gap-1.5 p-2">
+            <Music className="w-5 h-5 text-indigo-400" />
+            <span className="text-[9px] truncate w-full text-center">{m.name}</span>
+          </div>
+        ) : m.type === 'video' ? (
+          <video
+            src={`${m.url}#t=0.01`}
+            preload="metadata"
+            muted
+            playsInline
+            className="w-full h-full object-cover"
+            onLoadedMetadata={(e) => {
+              const vid = e.currentTarget;
+              const ratio = vid.videoWidth / vid.videoHeight;
+              if (ratio < 0.65) setAspect('aspect-[9/16]');
+              else if (ratio < 0.8) setAspect('aspect-[3/4]');
+              else if (ratio < 1.2) setAspect('aspect-square');
+              else setAspect('aspect-video');
+            }}
+          />
+        ) : (
+          <img
+            src={m.url}
+            alt={m.name}
+            className="w-full h-full object-cover"
+            onLoad={(e) => {
+              const img = e.currentTarget;
+              const ratio = img.naturalWidth / img.naturalHeight;
+              if (ratio < 0.65) setAspect('aspect-[9/16]');
+              else if (ratio < 0.8) setAspect('aspect-[3/4]');
+              else if (ratio < 1.2) setAspect('aspect-square');
+              else setAspect('aspect-video');
+            }}
+          />
+        )
+      ) : (
+        <div className="absolute inset-0 flex items-center justify-center">
+          {m.type === 'audio' ? <Music className="w-5 h-5 text-zinc-600" /> : <ImageIcon className="w-5 h-5 text-zinc-600" />}
+        </div>
+      )}
+      {m.type !== 'audio' && <div className="absolute bottom-0 left-0 right-0 bg-black/60 px-1.5 py-0.5 text-[10px] truncate text-zinc-300">{m.name}</div>}
+      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-3 transition-opacity">
+        <Button size="icon" variant="ghost" className="w-8 h-8 rounded-full bg-indigo-600/80 text-white hover:bg-indigo-600" onClick={(e) => { e.stopPropagation(); onAdd(m); }}>
+          <Plus className="w-4 h-4" />
+        </Button>
+        <Button size="icon" variant="ghost" className="w-8 h-8 rounded-full bg-red-600/80 text-white hover:bg-red-500" onClick={(e) => { e.stopPropagation(); onDelete(m.id); }}>
+          <Trash2 className="w-4 h-4" />
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 // ── 面板1：媒体库 ────────────────────────────────────────────────────────
 function MediaLibraryPanel({ materials, onAdd, importedVideos, onImportVideo, onUpload, onDelete }: {
   materials: { id: string; name: string; url: string; type: string }[];
@@ -371,9 +435,11 @@ function MediaLibraryPanel({ materials, onAdd, importedVideos, onImportVideo, on
                         onClick={() => { onImportVideo(v); setPickerOpen(false); }}
                       >
                         <div className="w-14 h-8 rounded overflow-hidden bg-zinc-800 shrink-0">
-                          {v.thumbnail_url
-                            ? <img src={v.thumbnail_url} alt={v.title} className="w-full h-full object-cover" />
-                            : <div className="w-full h-full flex items-center justify-center"><Film className="w-3.5 h-3.5 text-zinc-700" /></div>}
+                          {v.thumbnail_url ? (
+                            <img src={v.thumbnail_url} alt={v.title} className="w-full h-full object-cover" />
+                          ) : (
+                            <video src={`${v.video_url}#t=0.01`} preload="metadata" muted playsInline className="w-full h-full object-cover" />
+                          )}
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-[10px] text-zinc-300 truncate font-medium">{v.title}</p>
@@ -399,43 +465,7 @@ function MediaLibraryPanel({ materials, onAdd, importedVideos, onImportVideo, on
       <ScrollArea className="flex-1">
         <div className="px-3 py-2 grid grid-cols-2 gap-2">
           {filtered.map(m => (
-            <div key={m.id} className="aspect-video bg-zinc-800 rounded border border-zinc-700 relative group overflow-hidden hover:border-zinc-500 transition-all hover:-translate-y-0.5 cursor-pointer">
-              {m.url ? (
-                m.type === 'audio' ? (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-800/90 text-zinc-400 gap-1.5 p-2">
-                    <Music className="w-5 h-5 text-indigo-400" />
-                    <span className="text-[9px] truncate w-full text-center">{m.name}</span>
-                  </div>
-                ) : (
-                  <img
-                    src={m.url && (m.url.startsWith('http://') || m.url.startsWith('https://') || m.url.startsWith('data:')) ? m.url : 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop'}
-                    alt={m.name}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      const name = m.name.toLowerCase();
-                      if (name.includes('小米') || name.includes('phone') || name.includes('手机')) {
-                        e.currentTarget.src = 'https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=400&h=300&fit=crop';
-                      } else {
-                        e.currentTarget.src = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop';
-                      }
-                    }}
-                  />
-                )
-              ) : (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  {m.type === 'audio' ? <Music className="w-5 h-5 text-zinc-600" /> : <ImageIcon className="w-5 h-5 text-zinc-600" />}
-                </div>
-              )}
-              {m.type !== 'audio' && <div className="absolute bottom-0 left-0 right-0 bg-black/60 px-1.5 py-0.5 text-[10px] truncate text-zinc-300">{m.name}</div>}
-              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-3 transition-opacity">
-                <Button size="icon" variant="ghost" className="w-8 h-8 rounded-full bg-indigo-600/80 text-white hover:bg-indigo-600" onClick={(e) => { e.stopPropagation(); onAdd(m); }}>
-                  <Plus className="w-4 h-4" />
-                </Button>
-                <Button size="icon" variant="ghost" className="w-8 h-8 rounded-full bg-red-600/80 text-white hover:bg-red-500" onClick={(e) => { e.stopPropagation(); onDelete(m.id); }}>
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
+            <MaterialItemCard key={m.id} m={m} onAdd={onAdd} onDelete={onDelete} />
           ))}
           {filtered.length === 0 && (
             <div className="col-span-2 py-8 text-center text-[11px] text-zinc-600">
@@ -1954,11 +1984,11 @@ const DEFAULT_TRACKS: TrackItem[] = [
   {
     id: 'v1',
     trackId: 'video',
-    name: '片段 1.mp4',
+    name: '咖啡拿铁拉花艺术过程',
     start: 0,
-    duration: 21,
+    duration: 6,
     type: 'video',
-    url: 'https://www.w3schools.com/html/mov_bbb.mp4'
+    url: '/Video/CreatOK_11.mp4'
   },
   {
     id: 'a1',
@@ -2007,6 +2037,7 @@ export default function VideoEditPage() {
   const [scale, setScale] = useState([100]);
   const [opacity, setOpacity] = useState([100]);
   const [volume, setVolume] = useState([100]);
+  const [editorAspect, setEditorAspect] = useState('aspect-video');
 
   const [dragInfo, setDragInfo] = useState<{
     id: string;
@@ -2132,15 +2163,157 @@ export default function VideoEditPage() {
   // Selected track item object
   const selectedTrackObj = tracks.find(t => t.id === selectedTrackItem);
 
+  const [speed, setSpeed] = useState(1);
+
   // Sync state with selected item attributes
   useEffect(() => {
     if (selectedTrackObj) {
-      if (selectedTrackObj.type === 'video' || selectedTrackObj.type === 'image') {
-        setScale([100]);
-        setOpacity([100]);
-      }
+      setScale([selectedTrackObj.scale ?? 100]);
+      setOpacity([selectedTrackObj.opacity ?? 100]);
+      setVolume([selectedTrackObj.volume ?? 100]);
+      setSpeed(selectedTrackObj.speed ?? 1);
     }
+  }, [selectedTrackItem, selectedTrackObj]);
+
+  const handleScaleChange = (val: number[]) => {
+    setScale(val);
+    if (selectedTrackItem) {
+      setTracks(prev => prev.map(t => t.id === selectedTrackItem ? { ...t, scale: val[0] } : t));
+    }
+  };
+
+  const handleOpacityChange = (val: number[]) => {
+    setOpacity(val);
+    if (selectedTrackItem) {
+      setTracks(prev => prev.map(t => t.id === selectedTrackItem ? { ...t, opacity: val[0] } : t));
+    }
+  };
+
+  const handleVolumeChange = (val: number[]) => {
+    setVolume(val);
+    if (selectedTrackItem) {
+      setTracks(prev => prev.map(t => t.id === selectedTrackItem ? { ...t, volume: val[0] } : t));
+    }
+  };
+
+  const handleSpeedChange = (val: number) => {
+    setSpeed(val);
+    if (selectedTrackItem) {
+      setTracks(prev => prev.map(t => t.id === selectedTrackItem ? { ...t, speed: val } : t));
+    }
+  };
+
+  const handleSplit = useCallback(() => {
+    if (!selectedTrackItem) {
+      toast.error('请先选择一个轨道片段');
+      return;
+    }
+    const item = tracks.find(t => t.id === selectedTrackItem);
+    if (!item) return;
+
+    const relativePlayhead = currentTime - item.start;
+    if (relativePlayhead <= 0.1 || relativePlayhead >= item.duration - 0.1) {
+      toast.warning('当前播放指针不在选中片段范围内，或距离边缘太近');
+      return;
+    }
+
+    const firstHalfDuration = relativePlayhead;
+    const secondHalfDuration = item.duration - relativePlayhead;
+
+    const firstHalf = {
+      ...item,
+      duration: Number(firstHalfDuration.toFixed(2)),
+    };
+
+    const secondHalf = {
+      ...item,
+      id: `${item.id}_split_${Date.now()}`,
+      name: `${item.name} (后半段)`,
+      start: Number(currentTime.toFixed(2)),
+      duration: Number(secondHalfDuration.toFixed(2)),
+    };
+
+    setTracks(prev => {
+      const filtered = prev.filter(t => t.id !== selectedTrackItem);
+      return [...filtered, firstHalf, secondHalf].sort((a, b) => a.start - b.start);
+    });
+
+    setSelectedTrackItem(firstHalf.id);
+    toast.success('片段已成功分割');
+  }, [selectedTrackItem, tracks, currentTime]);
+
+  const handleCopy = useCallback(() => {
+    if (!selectedTrackItem) {
+      toast.error('请先选择一个轨道片段');
+      return;
+    }
+    const item = tracks.find(t => t.id === selectedTrackItem);
+    if (!item) return;
+
+    const copyItem = {
+      ...item,
+      id: `${item.id}_copy_${Date.now()}`,
+      name: `${item.name} (副本)`,
+      start: Number((item.start + item.duration).toFixed(2)),
+    };
+
+    setTracks(prev => [...prev, copyItem]);
+    setSelectedTrackItem(copyItem.id);
+    toast.success('已复制片段并放置在原片段后方');
+  }, [selectedTrackItem, tracks]);
+
+  const handleDeleteSelected = useCallback(() => {
+    if (!selectedTrackItem) {
+      toast.error('请先选择一个轨道片段');
+      return;
+    }
+    setTracks(prev => prev.filter(t => t.id !== selectedTrackItem));
+    setSelectedTrackItem(null);
+    toast.success('片段已成功删除');
   }, [selectedTrackItem]);
+
+  // Sync volume and speed of the video element
+  useEffect(() => {
+    if (videoRef.current) {
+      const activeVol = activeVideoClip?.volume ?? 100;
+      videoRef.current.volume = Math.max(0, Math.min(1, activeVol / 100));
+    }
+  }, [activeVideoClip?.volume]);
+
+  useEffect(() => {
+    if (videoRef.current) {
+      const activeSpeed = activeVideoClip?.speed ?? 1;
+      videoRef.current.playbackRate = activeSpeed;
+    }
+  }, [activeVideoClip?.speed]);
+
+  // Global keydown listeners
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (
+        document.activeElement?.tagName === 'INPUT' ||
+        document.activeElement?.tagName === 'TEXTAREA' ||
+        (document.activeElement as HTMLElement)?.isContentEditable
+      ) {
+        return;
+      }
+
+      if (e.code === 'Space') {
+        e.preventDefault();
+        setIsPlaying(prev => !prev);
+      } else if (e.code === 'Backspace' || e.code === 'Delete') {
+        if (selectedTrackItem) {
+          e.preventDefault();
+          handleDeleteSelected();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [selectedTrackItem, handleDeleteSelected]);
 
   // 示例项目选择器
   const [sampleProjects, setSampleProjects] = useState<{id: string; title: string; thumbnail_url: string | null; status: string}[]>([]);
@@ -2157,9 +2330,88 @@ export default function VideoEditPage() {
     }
   }, [importId]);
 
+async function seedTestUserVideos(userId: string) {
+  const testVideos = [
+    {
+      title: '时尚秋季外套女款展示',
+      video_url: '/Video/CreatOK_2.mp4',
+      thumbnail_url: null,
+      duration: 5,
+      video_style: '服装',
+    },
+    {
+      title: '智能手表旋转展示',
+      video_url: '/Video/CreatOK_5.mp4',
+      thumbnail_url: null,
+      duration: 10,
+      video_style: '数码',
+    },
+    {
+      title: '运动女鞋减震底测试',
+      video_url: '/Video/CreatOK_8.mp4',
+      thumbnail_url: null,
+      duration: 5,
+      video_style: '服装',
+    },
+    {
+      title: '无线耳机落水测试',
+      video_url: '/Video/CreatOK_10.mp4',
+      thumbnail_url: null,
+      duration: 8,
+      video_style: '数码',
+    },
+    {
+      title: '咖啡拿铁拉花艺术过程',
+      video_url: '/Video/CreatOK_11.mp4',
+      thumbnail_url: null,
+      duration: 6,
+      video_style: '食品',
+    }
+  ];
+
+  for (const v of testVideos) {
+    const { data: existingProj } = await supabase
+      .from('video_projects')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('video_url', v.video_url)
+      .maybeSingle();
+
+    if (!existingProj) {
+      const { data: insertedProj } = await supabase
+        .from('video_projects')
+        .insert({
+          user_id: userId,
+          title: v.title,
+          video_url: v.video_url,
+          thumbnail_url: v.thumbnail_url,
+          duration: v.duration,
+          video_style: v.video_style,
+          status: 'completed',
+          progress: 100,
+        })
+        .select()
+        .single();
+
+      if (insertedProj) {
+        await supabase.from('materials').insert({
+          user_id: userId,
+          name: v.title,
+          url: v.video_url,
+          type: 'video',
+          size: 1024 * 1024 * 5,
+        });
+      }
+    }
+  }
+}
+
   // 加载已生成完成的视频（供一键导入）
   const loadImportedVideos = useCallback(async () => {
     if (!user) return;
+    if (user.email === 'test_user@example.com') {
+      await seedTestUserVideos(user.id);
+    }
     const { data } = await supabase
       .from('video_projects')
       .select('id,title,video_url,thumbnail_url')
@@ -2179,6 +2431,9 @@ export default function VideoEditPage() {
   const DEMO_UID = '7d58d08f-8aa3-43f5-a30f-b7495d59d147';
   const loadMaterials = useCallback(async () => {
     if (!user) return;
+    if (user.email === 'test_user@example.com') {
+      await seedTestUserVideos(user.id);
+    }
     const { data } = await supabase
       .from('materials')
       .select('id,name,url,type')
@@ -2432,7 +2687,7 @@ export default function VideoEditPage() {
         body: { action: 'generate_video', project_id: importId || undefined }
       });
       if (error) throw error;
-      toast.success('导出任务已提交，可在作品管理查看进度');
+      toast.success('导出任务已提交，可在作品素材查看进度');
     } catch (e: any) {
       toast.error('导出失败：' + (e.message || '请稍后重试'));
     }
@@ -2489,7 +2744,12 @@ export default function VideoEditPage() {
         {/* 中央预览区 */}
         <div className="flex-1 flex flex-col bg-black relative min-w-0">
           <div className="flex-1 flex items-center justify-center p-4 min-h-0">
-            <div className="aspect-video w-full max-w-3xl bg-zinc-900 border border-zinc-800 shadow-2xl relative overflow-hidden flex items-center justify-center">
+            <div className={`w-full bg-zinc-900 border border-zinc-800 shadow-2xl relative overflow-hidden flex items-center justify-center transition-all duration-300 ${
+              editorAspect === 'aspect-[9/16]' ? 'aspect-[9/16] max-w-[280px] md:max-w-[340px]' :
+              editorAspect === 'aspect-[3/4]' ? 'aspect-[3/4] max-w-[380px]' :
+              editorAspect === 'aspect-square' ? 'aspect-square max-w-md' :
+              'aspect-video max-w-3xl'
+            }`}>
 
               {/* 无项目时 — 示例项目入口已移除，方便直接播放/预览 */}
 
@@ -2532,18 +2792,40 @@ export default function VideoEditPage() {
                 <img
                   src={activeImageClip.url}
                   alt={activeImageClip.name}
-                  className="w-full h-full object-contain"
+                  className="w-full h-full object-contain transition-all"
+                  style={{
+                    transform: `scale(${(selectedTrackObj?.scale ?? 100) / 100})`,
+                    opacity: (selectedTrackObj?.opacity ?? 100) / 100,
+                  }}
+                  onLoad={(e) => {
+                    const img = e.currentTarget;
+                    const ratio = img.naturalWidth / img.naturalHeight;
+                    if (ratio < 0.65) setEditorAspect('aspect-[9/16]');
+                    else if (ratio < 0.8) setEditorAspect('aspect-[3/4]');
+                    else if (ratio < 1.2) setEditorAspect('aspect-square');
+                    else setEditorAspect('aspect-video');
+                  }}
                 />
               ) : currentVideoSrc ? (
                 <video
                   ref={videoRef}
                   src={currentVideoSrc}
-                  className="w-full h-full object-contain"
+                  className="w-full h-full object-contain transition-all"
+                  style={{
+                    transform: `scale(${(selectedTrackObj?.scale ?? 100) / 100})`,
+                    opacity: (selectedTrackObj?.opacity ?? 100) / 100,
+                  }}
                   onTimeUpdate={handleTimeUpdate}
-                  onLoadedMetadata={() => {
+                  onLoadedMetadata={(e) => {
                     if (!activeVideoClip && videoRef.current) {
                       setDuration(videoRef.current.duration || 30);
                     }
+                    const vid = e.currentTarget;
+                    const ratio = vid.videoWidth / vid.videoHeight;
+                    if (ratio < 0.65) setEditorAspect('aspect-[9/16]');
+                    else if (ratio < 0.8) setEditorAspect('aspect-[3/4]');
+                    else if (ratio < 1.2) setEditorAspect('aspect-square');
+                    else setEditorAspect('aspect-video');
                   }}
                   onEnded={() => setIsPlaying(false)}
                   playsInline
@@ -2600,14 +2882,14 @@ export default function VideoEditPage() {
                         <span className="text-[11px] text-zinc-400">缩放</span>
                         <span className="text-[10px] text-zinc-500">{scale[0]}%</span>
                       </div>
-                      <Slider value={scale} onValueChange={setScale} min={10} max={300} className="[&_[role=slider]]:h-3 [&_[role=slider]]:w-3" />
+                      <Slider value={scale} onValueChange={handleScaleChange} min={10} max={300} className="[&_[role=slider]]:h-3 [&_[role=slider]]:w-3" />
                     </div>
                     <div>
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-[11px] text-zinc-400">不透明度</span>
                         <span className="text-[10px] text-zinc-500">{opacity[0]}%</span>
                       </div>
-                      <Slider value={opacity} onValueChange={setOpacity} max={100} className="[&_[role=slider]]:h-3 [&_[role=slider]]:w-3" />
+                      <Slider value={opacity} onValueChange={handleOpacityChange} max={100} className="[&_[role=slider]]:h-3 [&_[role=slider]]:w-3" />
                     </div>
                   </div>
                 </div>
@@ -2618,29 +2900,39 @@ export default function VideoEditPage() {
                       <span className="text-[11px] text-zinc-400">音量</span>
                       <span className="text-[10px] text-zinc-500">{volume[0]}%</span>
                     </div>
-                    <Slider value={volume} onValueChange={setVolume} max={200} className="[&_[role=slider]]:h-3 [&_[role=slider]]:w-3" />
+                    <Slider value={volume} onValueChange={handleVolumeChange} max={200} className="[&_[role=slider]]:h-3 [&_[role=slider]]:w-3" />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <p className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">变速</p>
                   <div className="grid grid-cols-4 gap-1">
-                    {['0.5x', '1x', '1.5x', '2x'].map(speed => (
-                      <Button key={speed} variant="outline" size="sm" className="h-7 text-[10px] bg-zinc-800 border-zinc-700 hover:bg-zinc-700 hover:text-white" onClick={() => toast.success(`速度：${speed}`)}>
-                        {speed}
-                      </Button>
-                    ))}
+                    {['0.5x', '1x', '1.5x', '2x'].map(s => {
+                      const numSpeed = parseFloat(s);
+                      const isSelected = speed === numSpeed;
+                      return (
+                        <Button
+                          key={s}
+                          variant={isSelected ? "default" : "outline"}
+                          size="sm"
+                          className={`h-7 text-[10px] ${isSelected ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-zinc-800 border-zinc-700 hover:bg-zinc-700 hover:text-white'}`}
+                          onClick={() => handleSpeedChange(numSpeed)}
+                        >
+                          {s}
+                        </Button>
+                      );
+                    })}
                   </div>
                 </div>
                 <div className="space-y-2">
                   <p className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">操作</p>
                   <div className="grid grid-cols-3 gap-1.5">
-                    <Button size="sm" variant="ghost" className="h-8 text-zinc-400 hover:text-white border border-zinc-700 text-[10px]" onClick={() => toast.success('已分割')}>
+                    <Button size="sm" variant="ghost" className="h-8 text-zinc-400 hover:text-white border border-zinc-700 text-[10px]" onClick={handleSplit}>
                       <ScissorsIcon className="w-3 h-3 mr-1" />分割
                     </Button>
-                    <Button size="sm" variant="ghost" className="h-8 text-zinc-400 hover:text-white border border-zinc-700 text-[10px]" onClick={() => toast.success('已复制')}>
+                    <Button size="sm" variant="ghost" className="h-8 text-zinc-400 hover:text-white border border-zinc-700 text-[10px]" onClick={handleCopy}>
                       <Copy className="w-3 h-3 mr-1" />复制
                     </Button>
-                    <Button size="sm" variant="ghost" className="h-8 text-zinc-400 hover:text-red-400 border border-zinc-700 text-[10px]" onClick={() => { setSelectedTrackItem(null); toast.success('已删除'); }}>
+                    <Button size="sm" variant="ghost" className="h-8 text-zinc-400 hover:text-red-400 border border-zinc-700 text-[10px]" onClick={handleDeleteSelected}>
                       <Trash2 className="w-3 h-3 mr-1" />删除
                     </Button>
                   </div>
@@ -2660,13 +2952,13 @@ export default function VideoEditPage() {
       <div className="h-64 border-t border-zinc-800 bg-zinc-950 flex flex-col shrink-0">
         <div className="h-10 border-b border-zinc-800 flex items-center justify-between px-4 bg-zinc-900/50 shrink-0">
           <div className="flex items-center gap-1">
-            <Button variant="ghost" size="icon" className="w-8 h-8 text-zinc-400 hover:text-white hover:bg-zinc-800" title="分割 S" onClick={() => toast.success('已分割')}>
+            <Button variant="ghost" size="icon" className="w-8 h-8 text-zinc-400 hover:text-white hover:bg-zinc-800" title="分割 S" onClick={handleSplit}>
               <Scissors className="w-4 h-4" />
             </Button>
-            <Button variant="ghost" size="icon" className="w-8 h-8 text-zinc-400 hover:text-white hover:bg-zinc-800" title="复制" onClick={() => toast.success('已复制')}>
+            <Button variant="ghost" size="icon" className="w-8 h-8 text-zinc-400 hover:text-white hover:bg-zinc-800" title="复制" onClick={handleCopy}>
               <Copy className="w-4 h-4" />
             </Button>
-            <Button variant="ghost" size="icon" className="w-8 h-8 text-zinc-400 hover:text-red-400 hover:bg-zinc-800" title="删除 Del" onClick={() => toast.success('已删除')}>
+            <Button variant="ghost" size="icon" className="w-8 h-8 text-zinc-400 hover:text-red-400 hover:bg-zinc-800" title="删除 Del" onClick={handleDeleteSelected}>
               <Trash2 className="w-4 h-4" />
             </Button>
             <div className="w-px h-4 bg-zinc-700 mx-1" />
