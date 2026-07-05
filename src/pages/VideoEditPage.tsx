@@ -15,7 +15,7 @@ import {
   Grid3x3, List, X, Check, ChevronUp, ShoppingCart,
   CreditCard, Package, Truck, BadgeCheck, Flame, TrendingUp,
   RefreshCw, SlidersHorizontal, BarChart2, ToggleLeft, ToggleRight,
-  EyeOff, Lock
+  EyeOff, Lock, Minimize
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -159,7 +159,7 @@ function EffectCard({ name, gradient, applied, onClick, onFavorite, cover }: {
 }) {
   const [hovered, setHovered] = useState(false);
   const [favored, setFavored] = useState(false);
-  const [ctxMenu, setCtxMenu] = useState<{x:number;y:number} | null>(null);
+  const [ctxMenu, setCtxMenu] = useState<{ x: number; y: number } | null>(null);
 
   const handleCtx = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -404,11 +404,11 @@ function MediaLibraryPanel({ materials, onAdd, importedVideos, onImportVideo, on
                   accept="video/*,image/*,audio/*"
                   className="hidden"
                   onChange={async (e) => {
-                     const file = e.target.files?.[0];
-                     if (file) {
-                       setPickerOpen(false);
-                       await onUpload(file);
-                     }
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      setPickerOpen(false);
+                      await onUpload(file);
+                    }
                   }}
                 />
                 <Upload className="w-5 h-5 text-zinc-500" />
@@ -478,7 +478,7 @@ function MediaLibraryPanel({ materials, onAdd, importedVideos, onImportVideo, on
   );
 }
 
-// ── 面板2：素材效果 ──────────────────────────────────────────────────────
+// ── 面板2：效果 ──────────────────────────────────────────────────────
 function EffectsPanel() {
   const [activeTab, setActiveTab] = useState<'transition' | 'filter' | 'sticker' | 'audio'>('transition');
   const [transCategory, setTransCategory] = useState('全部');
@@ -1110,10 +1110,10 @@ function AudioEditPanel() {
           <div className="px-3 pt-1 space-y-3">
             {[
               { label: '音量', Icon: Volume2, value: volume, set: setVolume, min: 0, max: 200, display: `${volume[0]}%` },
-              { label: '淡入时长', Icon: Music, value: fadeIn, set: setFadeIn, min: 0, max: 50, display: `${(fadeIn[0]/10).toFixed(1)}s` },
-              { label: '淡出时长', Icon: Music, value: fadeOut, set: setFadeOut, min: 0, max: 50, display: `${(fadeOut[0]/10).toFixed(1)}s` },
+              { label: '淡入时长', Icon: Music, value: fadeIn, set: setFadeIn, min: 0, max: 50, display: `${(fadeIn[0] / 10).toFixed(1)}s` },
+              { label: '淡出时长', Icon: Music, value: fadeOut, set: setFadeOut, min: 0, max: 50, display: `${(fadeOut[0] / 10).toFixed(1)}s` },
               { label: '音调偏移', Icon: BarChart2, value: pitch, set: setPitch, min: -12, max: 12, display: `${pitch[0] > 0 ? '+' : ''}${pitch[0]}` },
-              { label: '变速', Icon: RefreshCw, value: speed, set: setSpeed, min: 25, max: 400, display: `${(speed[0]/100).toFixed(2)}x` },
+              { label: '变速', Icon: RefreshCw, value: speed, set: setSpeed, min: 25, max: 400, display: `${(speed[0] / 100).toFixed(2)}x` },
             ].map(({ label, Icon, value, set, min, max, display }) => (
               <div key={label} className="space-y-1">
                 <div className="flex justify-between">
@@ -1883,14 +1883,14 @@ function ShopPanel() {
 
 // ── 左侧边栏主组件 ────────────────────────────────────────────────────────
 const PANEL_ITEMS: { id: PanelId; icon: React.ElementType; label: string; shortcut: string }[] = [
-  { id: 'media',    icon: Film,         label: '媒体库',   shortcut: 'M' },
-  { id: 'effects',  icon: Sparkles,     label: '素材效果', shortcut: 'E' },
-  { id: 'text',     icon: Type,         label: '文本字幕', shortcut: 'T' },
-  { id: 'pip',      icon: Layers,       label: '画中画',   shortcut: 'P' },
-  { id: 'audio',    icon: Music2,       label: '音频编辑', shortcut: 'A' },
-  { id: 'keyframe', icon: Waypoints,    label: '关键帧',   shortcut: 'K' },
-  { id: 'ai',       icon: Wand2,        label: 'AI工具',   shortcut: 'I' },
-  { id: 'shop',     icon: ShoppingBag,  label: '资源商城', shortcut: 'S' },
+  { id: 'media', icon: Film, label: '媒体库', shortcut: 'M' },
+  { id: 'effects', icon: Sparkles, label: '效果', shortcut: 'E' },
+  { id: 'text', icon: Type, label: '字幕', shortcut: 'T' },
+  { id: 'pip', icon: Layers, label: '画中画', shortcut: 'P' },
+  { id: 'audio', icon: Music2, label: '音频编辑', shortcut: 'A' },
+  { id: 'keyframe', icon: Waypoints, label: '关键帧', shortcut: 'K' },
+  { id: 'ai', icon: Wand2, label: 'AI工具', shortcut: 'I' },
+  { id: 'shop', icon: ShoppingBag, label: '资源商城', shortcut: 'S' },
 ];
 
 function LeftSidebar({ materials, onAdd, importedVideos, onImportVideo, onUpload, onDelete }: {
@@ -1915,25 +1915,24 @@ function LeftSidebar({ materials, onAdd, importedVideos, onImportVideo, onUpload
   }, []);
 
   return (
-    <div className={`flex shrink-0 border-r border-zinc-800 transition-all duration-300 ${collapsed ? 'w-12' : 'w-72 md:w-80'}`}>
+    <div className={`flex shrink-0 border-r border-zinc-800 transition-all duration-300 ${collapsed ? 'w-14' : 'w-72 md:w-80'}`}>
       {/* 垂直图标导航栏 */}
-      <div className="w-12 shrink-0 bg-zinc-950 border-r border-zinc-800 flex flex-col py-2 gap-0.5">
+      <div className="w-14 shrink-0 bg-zinc-950 border-r border-zinc-800 flex flex-col py-2 gap-0.5">
         {PANEL_ITEMS.map(item => (
           <button
             key={item.id}
             title={`${item.label}  (${item.shortcut})`}
-            className={`relative mx-1 w-10 h-10 rounded flex flex-col items-center justify-center gap-0.5 transition-all group ${
-              activePanel === item.id && !collapsed
-                ? 'bg-indigo-600/20 text-indigo-400 ring-1 ring-inset ring-indigo-600/40'
-                : 'text-zinc-500 hover:bg-zinc-800 hover:text-zinc-300'
-            }`}
+            className={`relative mx-1 w-12 h-12 rounded flex flex-col items-center justify-center gap-0.5 transition-all group ${activePanel === item.id && !collapsed
+              ? 'bg-indigo-600/20 text-indigo-400 ring-1 ring-inset ring-indigo-600/40'
+              : 'text-zinc-500 hover:bg-zinc-800 hover:text-zinc-300'
+              }`}
             onClick={() => {
               if (activePanel === item.id) { setCollapsed(!collapsed); }
               else { setActivePanel(item.id); setCollapsed(false); }
             }}
           >
-            <item.icon className="w-4 h-4" />
-            <span className="text-[8px] leading-none">{item.label.slice(0, 2)}</span>
+            <item.icon className="w-5 h-5" />
+            <span className="text-[10px] leading-none mt-0.5">{item.label.slice(0, 3)}</span>
             {/* 激活指示条 */}
             {activePanel === item.id && !collapsed && (
               <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-indigo-400 rounded-r" />
@@ -1947,7 +1946,7 @@ function LeftSidebar({ materials, onAdd, importedVideos, onImportVideo, onUpload
         {/* 折叠按钮 */}
         <div className="flex-1" />
         <button
-          className="mx-1 w-10 h-10 rounded flex items-center justify-center text-zinc-600 hover:text-zinc-400 hover:bg-zinc-800 transition-colors"
+          className="mx-1 w-12 h-10 rounded flex items-center justify-center text-zinc-600 hover:text-zinc-400 hover:bg-zinc-800 transition-colors"
           onClick={() => setCollapsed(!collapsed)}
           title={collapsed ? '展开面板' : '收起面板'}
         >
@@ -1964,14 +1963,14 @@ function LeftSidebar({ materials, onAdd, importedVideos, onImportVideo, onUpload
           </div>
           {/* 面板内容 */}
           <div className="flex-1 min-h-0 overflow-hidden">
-            {activePanel === 'media'    && <MediaLibraryPanel materials={materials} onAdd={onAdd} importedVideos={importedVideos} onImportVideo={onImportVideo} onUpload={onUpload} onDelete={onDelete} />}
-            {activePanel === 'effects'  && <EffectsPanel />}
-            {activePanel === 'text'     && <TextSubtitlePanel />}
-            {activePanel === 'pip'      && <PipPanel />}
-            {activePanel === 'audio'    && <AudioEditPanel />}
+            {activePanel === 'media' && <MediaLibraryPanel materials={materials} onAdd={onAdd} importedVideos={importedVideos} onImportVideo={onImportVideo} onUpload={onUpload} onDelete={onDelete} />}
+            {activePanel === 'effects' && <EffectsPanel />}
+            {activePanel === 'text' && <TextSubtitlePanel />}
+            {activePanel === 'pip' && <PipPanel />}
+            {activePanel === 'audio' && <AudioEditPanel />}
             {activePanel === 'keyframe' && <KeyframePanel />}
-            {activePanel === 'ai'       && <AiToolsPanel />}
-            {activePanel === 'shop'     && <ShopPanel />}
+            {activePanel === 'ai' && <AiToolsPanel />}
+            {activePanel === 'shop' && <ShopPanel />}
           </div>
         </div>
       )}
@@ -2027,17 +2026,58 @@ export default function VideoEditPage() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(30);
-  const [zoom, setZoom] = useState(50);
+  const [zoom, setZoom] = useState(0);
   const [selectedTrackItem, setSelectedTrackItem] = useState<string | null>(null);
   const [projectTitle, setProjectTitle] = useState('未命名项目');
   const [saving, setSaving] = useState(false);
-  const [materials, setMaterials] = useState<{id: string; name: string; url: string; type: string}[]>([]);
+  const [materials, setMaterials] = useState<{ id: string; name: string; url: string; type: string }[]>([]);
   const [tracks, setTracks] = useState<TrackItem[]>(DEFAULT_TRACKS);
+  const [tracksHistory, setTracksHistory] = useState<TrackItem[][]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
+  const isHistoryAction = useRef(false);
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [scale, setScale] = useState([100]);
   const [opacity, setOpacity] = useState([100]);
   const [volume, setVolume] = useState([100]);
   const [editorAspect, setEditorAspect] = useState('aspect-video');
+  const [timelineScrollOffset, setTimelineScrollOffset] = useState(0);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const previewContainerRef = useRef<HTMLDivElement>(null);
+
+  // Sync ruler scroll offset with timeline scroll container
+  useEffect(() => {
+    const el = timelineScrollRef.current;
+    if (!el) return;
+    const onScroll = () => setTimelineScrollOffset(el.scrollLeft);
+    el.addEventListener('scroll', onScroll, { passive: true });
+    return () => el.removeEventListener('scroll', onScroll);
+  }, []);
+
+  // Ensure project duration is at least 30 seconds and fits all tracks
+  useEffect(() => {
+    const maxEndTime = tracks.reduce((max, item) => Math.max(max, item.start + item.duration), 0);
+    const minNeeded = Math.max(30, Math.ceil(maxEndTime));
+    if (duration < minNeeded) {
+      setDuration(minNeeded);
+    }
+  }, [tracks, duration]);
+
+  // Fullscreen handler
+  const handleFullscreen = () => {
+    const el = previewContainerRef.current;
+    if (!el) return;
+    if (!document.fullscreenElement) {
+      el.requestFullscreen().then(() => setIsFullscreen(true)).catch(() => toast.error('全屏失败'));
+    } else {
+      document.exitFullscreen().then(() => setIsFullscreen(false));
+    }
+  };
+
+  useEffect(() => {
+    const onFSChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener('fullscreenchange', onFSChange);
+    return () => document.removeEventListener('fullscreenchange', onFSChange);
+  }, []);
 
   const [dragInfo, setDragInfo] = useState<{
     id: string;
@@ -2082,13 +2122,15 @@ export default function VideoEditPage() {
         const trackContainer = rulerRef.current;
         let finalStart = item.start;
         if (trackContainer) {
-          const rect = trackContainer.getBoundingClientRect();
-          const leftOffset = 80;
-          const scrollableWidth = rect.width - leftOffset - 8;
-          if (scrollableWidth > 0) {
-            const secondsPerPixel = duration / scrollableWidth;
-            const dt = dx * secondsPerPixel;
-            finalStart = Math.max(0, Math.min(duration - item.duration, dragInfo.initialStart + dt));
+          const ticksContainer = trackContainer.querySelector('.flex-1');
+          if (ticksContainer) {
+            const rect = ticksContainer.getBoundingClientRect();
+            const scrollableWidth = rect.width;
+            if (scrollableWidth > 0) {
+              const secondsPerPixel = duration / scrollableWidth;
+              const dt = dx * secondsPerPixel;
+              finalStart = Math.max(0, Math.min(duration - item.duration, dragInfo.initialStart + dt));
+            }
           }
         }
 
@@ -2111,7 +2153,7 @@ export default function VideoEditPage() {
           }
           return t;
         }));
-        
+
         if (newType !== item.type) {
           toast.success(`已将片段拖动至新轨道`, { description: `新位置: ${newType === 'video' ? '主视频' : newType === 'audio' ? '音频' : newType === 'text' ? '字幕' : '特效'}` });
         }
@@ -2142,23 +2184,55 @@ export default function VideoEditPage() {
   };
 
   // 生成视频列表（用于一键导入）& 预览 URL
-  const [importedVideos, setImportedVideos] = useState<{id: string; title: string; video_url: string; thumbnail_url: string | null}[]>([]);
+  const [importedVideos, setImportedVideos] = useState<{ id: string; title: string; video_url: string; thumbnail_url: string | null }[]>([]);
   const [previewVideoUrl, setPreviewVideoUrl] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const rulerRef = useRef<HTMLDivElement>(null);
+  const timelineScrollRef = useRef<HTMLDivElement>(null);
 
-  // Find active video/image clip under the playhead
-  const activeVideoClip = tracks.find(track => {
-    const end = track.start + track.duration;
-    return currentTime >= track.start && currentTime <= end && track.type === 'video';
-  });
+  // Timeline layout constants — px-per-second based
+  const TRACK_LABEL_W = 60; // width of the track icon label column in px
+  const BASE_PX_PER_SEC = 20; // at zoom=0 each second = 20px
+  const pxPerSec = BASE_PX_PER_SEC * (1 + zoom * 0.08); // zoom 0→100 scales 20→180px/s
+  const timelinePxWidth = TRACK_LABEL_W + 6 + duration * pxPerSec; // +6 for padding
+  const timelineMinWidth = 600; // minimum scrollable width
 
-  const activeImageClip = tracks.find(track => {
-    const end = track.start + track.duration;
-    return currentTime >= track.start && currentTime <= end && track.type === 'image';
-  });
 
-  const currentVideoSrc = activeVideoClip?.url || previewVideoUrl;
+  // Find active video/image clip under the playhead (prioritize selected and newest clips)
+  const activeVideoClip = (() => {
+    const selectedClip = tracks.find(t => t.id === selectedTrackItem && t.type === 'video');
+    if (selectedClip) {
+      const end = selectedClip.start + selectedClip.duration;
+      if (currentTime >= selectedClip.start && currentTime <= end) {
+        return selectedClip;
+      }
+    }
+    return tracks.slice().reverse().find(track => {
+      const end = track.start + track.duration;
+      return currentTime >= track.start && currentTime <= end && track.type === 'video';
+    });
+  })();
+
+  const activeImageClip = (() => {
+    const selectedClip = tracks.find(t => t.id === selectedTrackItem && t.type === 'image' && t.trackId === 'image');
+    if (selectedClip) {
+      const end = selectedClip.start + selectedClip.duration;
+      if (currentTime >= selectedClip.start && currentTime <= end) {
+        return selectedClip;
+      }
+    }
+    return tracks.slice().reverse().find(track => {
+      const end = track.start + track.duration;
+      return currentTime >= track.start && currentTime <= end && track.type === 'image' && track.trackId === 'image';
+    });
+  })();
+
+  const hasVideoClips = tracks.some(t => t.type === 'video');
+  const currentVideoSrc = activeVideoClip?.url
+    ? activeVideoClip.url
+    : hasVideoClips
+      ? undefined
+      : (previewVideoUrl || undefined);
 
   // Selected track item object
   const selectedTrackObj = tracks.find(t => t.id === selectedTrackItem);
@@ -2277,8 +2351,10 @@ export default function VideoEditPage() {
     if (videoRef.current) {
       const activeVol = activeVideoClip?.volume ?? 100;
       videoRef.current.volume = Math.max(0, Math.min(1, activeVol / 100));
+      videoRef.current.muted = false;
+      videoRef.current.removeAttribute('muted');
     }
-  }, [activeVideoClip?.volume]);
+  }, [activeVideoClip, activeVideoClip?.volume, previewVideoUrl]);
 
   useEffect(() => {
     if (videoRef.current) {
@@ -2287,9 +2363,66 @@ export default function VideoEditPage() {
     }
   }, [activeVideoClip?.speed]);
 
+  // Initialize history with initial tracks once loaded
+  useEffect(() => {
+    if (tracks.length > 0 && tracksHistory.length === 0) {
+      setTracksHistory([tracks]);
+      setHistoryIndex(0);
+    }
+  }, [tracks, tracksHistory.length]);
+
+  // Monitor tracks changes and push to history
+  useEffect(() => {
+    if (isHistoryAction.current) {
+      isHistoryAction.current = false;
+      return;
+    }
+    // Do not record history when dragging is in progress
+    if (dragInfo !== null) {
+      return;
+    }
+
+    if (tracksHistory.length > 0 && historyIndex >= 0) {
+      const currentHistoricalState = tracksHistory[historyIndex];
+      if (JSON.stringify(currentHistoricalState) === JSON.stringify(tracks)) {
+        return;
+      }
+
+      const newHistory = tracksHistory.slice(0, historyIndex + 1);
+      newHistory.push(tracks);
+      setTracksHistory(newHistory);
+      setHistoryIndex(newHistory.length - 1);
+    }
+  }, [tracks, dragInfo, tracksHistory, historyIndex]);
+
+  const handleUndo = useCallback(() => {
+    if (historyIndex > 0) {
+      isHistoryAction.current = true;
+      const prevIndex = historyIndex - 1;
+      setHistoryIndex(prevIndex);
+      setTracks(tracksHistory[prevIndex]);
+      toast.success('撤销成功');
+    } else {
+      toast.info('没有可以撤销的操作');
+    }
+  }, [historyIndex, tracksHistory]);
+
+  const handleRedo = useCallback(() => {
+    if (historyIndex < tracksHistory.length - 1) {
+      isHistoryAction.current = true;
+      const nextIndex = historyIndex + 1;
+      setHistoryIndex(nextIndex);
+      setTracks(tracksHistory[nextIndex]);
+      toast.success('重做成功');
+    } else {
+      toast.info('没有可以重做的操作');
+    }
+  }, [historyIndex, tracksHistory]);
+
   // Global keydown listeners
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Check if user is typing in inputs/textareas
       if (
         document.activeElement?.tagName === 'INPUT' ||
         document.activeElement?.tagName === 'TEXTAREA' ||
@@ -2298,10 +2431,23 @@ export default function VideoEditPage() {
         return;
       }
 
-      if (e.code === 'Space') {
+      // Ctrl + Z (Undo)
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+        e.preventDefault();
+        handleUndo();
+      }
+      // Ctrl + Y (Redo)
+      else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
+        e.preventDefault();
+        handleRedo();
+      }
+      // Space (Play/Pause)
+      else if (e.code === 'Space') {
         e.preventDefault();
         setIsPlaying(prev => !prev);
-      } else if (e.code === 'Backspace' || e.code === 'Delete') {
+      }
+      // Delete/Backspace
+      else if (e.code === 'Backspace' || e.code === 'Delete') {
         if (selectedTrackItem) {
           e.preventDefault();
           handleDeleteSelected();
@@ -2313,10 +2459,10 @@ export default function VideoEditPage() {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [selectedTrackItem, handleDeleteSelected]);
+  }, [selectedTrackItem, handleDeleteSelected, handleUndo, handleRedo]);
 
   // 示例项目选择器
-  const [sampleProjects, setSampleProjects] = useState<{id: string; title: string; thumbnail_url: string | null; status: string}[]>([]);
+  const [sampleProjects, setSampleProjects] = useState<{ id: string; title: string; thumbnail_url: string | null; status: string }[]>([]);
   const [showSamplePicker, setShowSamplePicker] = useState(false);
 
   useEffect(() => {
@@ -2330,81 +2476,81 @@ export default function VideoEditPage() {
     }
   }, [importId]);
 
-async function seedTestUserVideos(userId: string) {
-  const testVideos = [
-    {
-      title: '时尚秋季外套女款展示',
-      video_url: '/Video/CreatOK_2.mp4',
-      thumbnail_url: null,
-      duration: 5,
-      video_style: '服装',
-    },
-    {
-      title: '智能手表旋转展示',
-      video_url: '/Video/CreatOK_5.mp4',
-      thumbnail_url: null,
-      duration: 10,
-      video_style: '数码',
-    },
-    {
-      title: '运动女鞋减震底测试',
-      video_url: '/Video/CreatOK_8.mp4',
-      thumbnail_url: null,
-      duration: 5,
-      video_style: '服装',
-    },
-    {
-      title: '无线耳机落水测试',
-      video_url: '/Video/CreatOK_10.mp4',
-      thumbnail_url: null,
-      duration: 8,
-      video_style: '数码',
-    },
-    {
-      title: '咖啡拿铁拉花艺术过程',
-      video_url: '/Video/CreatOK_11.mp4',
-      thumbnail_url: null,
-      duration: 6,
-      video_style: '食品',
-    }
-  ];
+  async function seedTestUserVideos(userId: string) {
+    const testVideos = [
+      {
+        title: '时尚秋季外套女款展示',
+        video_url: '/Video/CreatOK_2.mp4',
+        thumbnail_url: null,
+        duration: 5,
+        video_style: '服装',
+      },
+      {
+        title: '智能手表旋转展示',
+        video_url: '/Video/CreatOK_5.mp4',
+        thumbnail_url: null,
+        duration: 10,
+        video_style: '数码',
+      },
+      {
+        title: '运动女鞋减震底测试',
+        video_url: '/Video/CreatOK_8.mp4',
+        thumbnail_url: null,
+        duration: 5,
+        video_style: '服装',
+      },
+      {
+        title: '无线耳机落水测试',
+        video_url: '/Video/CreatOK_10.mp4',
+        thumbnail_url: null,
+        duration: 8,
+        video_style: '数码',
+      },
+      {
+        title: '咖啡拿铁拉花艺术过程',
+        video_url: '/Video/CreatOK_11.mp4',
+        thumbnail_url: null,
+        duration: 6,
+        video_style: '食品',
+      }
+    ];
 
-  for (const v of testVideos) {
-    const { data: existingProj } = await supabase
-      .from('video_projects')
-      .select('id')
-      .eq('user_id', userId)
-      .eq('video_url', v.video_url)
-      .maybeSingle();
-
-    if (!existingProj) {
-      const { data: insertedProj } = await supabase
+    for (const v of testVideos) {
+      const { data: existingProj } = await supabase
         .from('video_projects')
-        .insert({
-          user_id: userId,
-          title: v.title,
-          video_url: v.video_url,
-          thumbnail_url: v.thumbnail_url,
-          duration: v.duration,
-          video_style: v.video_style,
-          status: 'completed',
-          progress: 100,
-        })
-        .select()
-        .single();
+        .select('id')
+        .eq('user_id', userId)
+        .eq('video_url', v.video_url)
+        .maybeSingle();
 
-      if (insertedProj) {
-        await supabase.from('materials').insert({
-          user_id: userId,
-          name: v.title,
-          url: v.video_url,
-          type: 'video',
-          size: 1024 * 1024 * 5,
-        });
+      if (!existingProj) {
+        const { data: insertedProj } = await supabase
+          .from('video_projects')
+          .insert({
+            user_id: userId,
+            title: v.title,
+            video_url: v.video_url,
+            thumbnail_url: v.thumbnail_url,
+            duration: v.duration,
+            video_style: v.video_style,
+            status: 'completed',
+            progress: 100,
+          })
+          .select()
+          .single();
+
+        if (insertedProj) {
+          await supabase.from('materials').insert({
+            user_id: userId,
+            name: v.title,
+            url: v.video_url,
+            type: 'video',
+            size: 1024 * 1024 * 5,
+          });
+        }
       }
     }
   }
-}
 
   // 加载已生成完成的视频（供一键导入）
   const loadImportedVideos = useCallback(async () => {
@@ -2446,6 +2592,18 @@ async function seedTestUserVideos(userId: string) {
   // 加载项目（同时读取 video_url 用于预览）
   const loadProject = useCallback(async () => {
     if (!importId || !user) return;
+
+    // Check if we already restored a matching draft from localStorage to avoid database override
+    const saved = localStorage.getItem(`video-editor-draft-${user.id}`);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed.importId === importId) {
+          return; // Skip database fetch to use newer local edits
+        }
+      } catch (e) { }
+    }
+
     const { data } = await supabase
       .from('video_projects')
       .select('title,metadata,video_url')
@@ -2458,8 +2616,12 @@ async function seedTestUserVideos(userId: string) {
       const meta = (data.metadata || {}) as any;
       if (meta.tracks && meta.tracks.length > 0) {
         setTracks(meta.tracks);
+        setTracksHistory([meta.tracks]);
+        setHistoryIndex(0);
       } else {
         setTracks(DEFAULT_TRACKS);
+        setTracksHistory([DEFAULT_TRACKS]);
+        setHistoryIndex(0);
       }
       if (meta.duration) setDuration(meta.duration);
     }
@@ -2471,18 +2633,97 @@ async function seedTestUserVideos(userId: string) {
     if (importId) loadProject();
   }, [loadMaterials, loadImportedVideos, loadProject, importId]);
 
+  // Load from localStorage draft if present on mount
+  useEffect(() => {
+    if (!user) return;
+    const saved = localStorage.getItem(`video-editor-draft-${user.id}`);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (importId) {
+          if (parsed.importId === importId) {
+            if (parsed.projectTitle) setProjectTitle(parsed.projectTitle);
+            if (parsed.tracks) {
+              setTracks(parsed.tracks);
+              setTracksHistory([parsed.tracks]);
+              setHistoryIndex(0);
+            }
+            if (parsed.zoom !== undefined) setZoom(parsed.zoom);
+            if (parsed.duration) setDuration(parsed.duration);
+            if (parsed.previewVideoUrl) setPreviewVideoUrl(parsed.previewVideoUrl);
+          }
+        } else {
+          if (parsed.projectTitle) setProjectTitle(parsed.projectTitle);
+          if (parsed.tracks) {
+            setTracks(parsed.tracks);
+            setTracksHistory([parsed.tracks]);
+            setHistoryIndex(0);
+          }
+          if (parsed.zoom !== undefined) setZoom(parsed.zoom);
+          if (parsed.duration) setDuration(parsed.duration);
+          if (parsed.previewVideoUrl) setPreviewVideoUrl(parsed.previewVideoUrl);
+        }
+      } catch (e) {
+        console.error('Error restoring local draft:', e);
+      }
+    }
+  }, [user, importId]);
+
+  // Auto-save to localStorage
+  useEffect(() => {
+    if (user && tracks.length > 0) {
+      const stateToSave = {
+        importId,
+        projectTitle,
+        tracks,
+        zoom,
+        duration,
+        previewVideoUrl
+      };
+      localStorage.setItem(`video-editor-draft-${user.id}`, JSON.stringify(stateToSave));
+    }
+  }, [tracks, zoom, duration, projectTitle, previewVideoUrl, importId, user]);
+
+  // Debounced auto-save to database
+  useEffect(() => {
+    if (!importId || !user || tracks.length === 0) return;
+
+    const timer = setTimeout(async () => {
+      const payload = {
+        title: projectTitle,
+        user_id: user.id,
+        status: 'draft',
+        metadata: { duration, tracks, zoom, edit_mode: true, last_saved_at: new Date().toISOString() },
+      };
+      try {
+        await supabase.from('video_projects').update(payload).eq('id', importId);
+        console.log('Database auto-saved successfully');
+      } catch (e) {
+        console.error('Database auto-save error:', e);
+      }
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, [tracks, zoom, duration, projectTitle, importId, user]);
+
+
   // 同步播放/暂停到 video 元素
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
-    if (isPlaying) { v.play().catch(() => setIsPlaying(false)); }
-    else { v.pause(); }
+    if (isPlaying) {
+      v.muted = false;
+      v.removeAttribute('muted');
+      v.play().catch((err) => console.warn('Play sync fail:', err));
+    } else {
+      v.pause();
+    }
   }, [isPlaying, currentVideoSrc]);
 
-  // Fallback playhead timer for when no video is active
+  // Master playhead timer that drives timeline currentTime forward
   useEffect(() => {
     let intervalId: any;
-    if (isPlaying && !currentVideoSrc) {
+    if (isPlaying) {
       let lastTime = Date.now();
       intervalId = setInterval(() => {
         const now = Date.now();
@@ -2501,55 +2742,50 @@ async function seedTestUserVideos(userId: string) {
     return () => {
       if (intervalId) clearInterval(intervalId);
     };
-  }, [isPlaying, currentVideoSrc, duration]);
+  }, [isPlaying, duration]);
 
-  // Sync player time when scrubbing or when timeline currentTime changes
+  // Sync player time during active playback (drift correction)
   useEffect(() => {
+    if (!isPlaying) return;
+    const v = videoRef.current;
+    if (!v || v.seeking || v.readyState < 2) return;
+    if (activeVideoClip) {
+      const expectedLocalTime = currentTime - activeVideoClip.start;
+      if (Math.abs(v.currentTime - expectedLocalTime) > 0.3) {
+        v.currentTime = Math.max(0, Math.min(activeVideoClip.duration, expectedLocalTime));
+      }
+    }
+  }, [currentTime, isPlaying, activeVideoClip]);
+
+  // Sync player time when scrubbing or when timeline currentTime changes (non-playing)
+  useEffect(() => {
+    if (isPlaying) return; // Do not seek the video element while playing to avoid stutter and feedback loops
     const v = videoRef.current;
     if (!v) return;
     if (activeVideoClip) {
       const localTime = currentTime - activeVideoClip.start;
-      if (Math.abs(v.currentTime - localTime) > 0.3) {
+      if (Math.abs(v.currentTime - localTime) > 0.1) {
         v.currentTime = Math.max(0, Math.min(activeVideoClip.duration, localTime));
       }
     } else if (previewVideoUrl) {
-      if (Math.abs(v.currentTime - currentTime) > 0.3) {
+      if (Math.abs(v.currentTime - currentTime) > 0.1) {
         v.currentTime = Math.max(0, Math.min(duration, currentTime));
       }
     }
-  }, [currentTime, activeVideoClip, previewVideoUrl, duration]);
-
-  const handleTimeUpdate = () => {
-    const v = videoRef.current;
-    if (!v) return;
-    if (isPlaying) {
-      if (activeVideoClip) {
-        setCurrentTime(activeVideoClip.start + v.currentTime);
-      } else {
-        setCurrentTime(v.currentTime);
-      }
-    }
-  };
+  }, [currentTime, isPlaying, activeVideoClip, previewVideoUrl, duration]);
 
   const handleSeek = (clientX: number) => {
     const ruler = rulerRef.current;
     if (!ruler) return;
-    const rect = ruler.getBoundingClientRect();
-    const relativeX = clientX - rect.left;
-    
-    // Ruler layout offset starts after: left padding (8px) + header (64px) + gap (8px mr-2) = 80px
-    const leftOffset = 80;
-    const rightPadding = 8;
-    const scrollableWidth = rect.width - leftOffset - rightPadding;
-    
-    if (scrollableWidth <= 0) return;
-    
-    let percentage = (relativeX - leftOffset) / scrollableWidth;
-    percentage = Math.max(0, Math.min(1, percentage));
-    
-    const newTime = percentage * duration;
+    const ticksContainer = ruler.querySelector('.ruler-ticks-container');
+    if (!ticksContainer) return;
+    const rect = ticksContainer.getBoundingClientRect();
+
+    const x = clientX - rect.left;
+    const timelineX = x + timelineScrollOffset;
+    const newTime = Math.max(0, Math.min(duration, timelineX / pxPerSec));
     setCurrentTime(newTime);
-    
+
     if (videoRef.current) {
       const activeVideo = tracks.find(track => {
         const end = track.start + track.duration;
@@ -2570,16 +2806,16 @@ async function seedTestUserVideos(userId: string) {
   const handleRulerMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
     handleSeek(e.clientX);
-    
+
     const handleMouseMove = (moveEvent: MouseEvent) => {
       handleSeek(moveEvent.clientX);
     };
-    
+
     const handleMouseUp = () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-    
+
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseup', handleMouseUp);
   };
@@ -2612,7 +2848,7 @@ async function seedTestUserVideos(userId: string) {
   };
 
   // 添加素材到时间轴
-  const addToTimeline = (material: {id: string; name: string; url: string; type: string}) => {
+  const addToTimeline = (material: { id: string; name: string; url: string; type: string }) => {
     const trackType = material.type === 'audio' ? 'audio' : material.type === 'image' ? 'image' : 'video';
     setTracks(prev => [...prev, {
       id: `item-${Date.now()}`,
@@ -2627,7 +2863,7 @@ async function seedTestUserVideos(userId: string) {
   };
 
   // 一键导入生成视频到素材库
-  const handleImportVideo = async (v: {id: string; title: string; video_url: string; thumbnail_url: string | null}) => {
+  const handleImportVideo = async (v: { id: string; title: string; video_url: string; thumbnail_url: string | null }) => {
     if (!user) { toast.error('请先登录'); return; }
     // 先在预览区加载该视频
     setPreviewVideoUrl(v.video_url);
@@ -2656,7 +2892,7 @@ async function seedTestUserVideos(userId: string) {
     const isVideo = ['mp4', 'mov', 'avi', 'webm'].includes(ext);
     const isAudio = ['mp3', 'wav', 'ogg', 'm4a'].includes(ext);
     if (!isImage && !isVideo && !isAudio) { toast.error(`不支持的格式：${ext}`); return; }
-    
+
     const toastId = toast.loading(`正在上传 ${file.name}...`);
     try {
       const path = `${user.id}/${crypto.randomUUID()}.${ext}`;
@@ -2681,10 +2917,38 @@ async function seedTestUserVideos(userId: string) {
   // 导出视频
   const handleExport = async () => {
     if (!user) { toast.error('请先登录'); return; }
+
+    let currentId = importId;
+    if (!currentId) {
+      setSaving(true);
+      const toastId = toast.loading('正在保存项目并准备导出...');
+      try {
+        const payload = {
+          title: projectTitle || '未命名项目',
+          user_id: user.id,
+          status: 'draft',
+          metadata: { duration, tracks, zoom, edit_mode: true, last_saved_at: new Date().toISOString() },
+        };
+        const { data, error } = await supabase.from('video_projects').insert(payload).select('id').single();
+        if (error) throw error;
+        if (data?.id) {
+          currentId = data.id;
+          navigate(`/video/edit?importId=${data.id}`, { replace: true });
+        }
+      } catch (e: any) {
+        toast.error('导出前自动保存失败：' + (e.message || e), { id: toastId });
+        setSaving(false);
+        return;
+      } finally {
+        toast.dismiss(toastId);
+        setSaving(false);
+      }
+    }
+
     toast.info('正在提交导出任务…');
     try {
       const { error } = await supabase.functions.invoke('ai-assistant', {
-        body: { action: 'generate_video', project_id: importId || undefined }
+        body: { action: 'generate_video', project_id: currentId }
       });
       if (error) throw error;
       toast.success('导出任务已提交，可在作品素材查看进度');
@@ -2709,10 +2973,10 @@ async function seedTestUserVideos(userId: string) {
             <Upload className="w-4 h-4 mr-1.5" /><span className="hidden md:inline">刷新素材</span>
           </Button>
           <div className="w-px h-4 bg-zinc-700 mx-1" />
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-white hover:bg-zinc-800" title="撤销 Ctrl+Z" onClick={() => toast.info('撤销')}>
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-white hover:bg-zinc-800" title="撤销 Ctrl+Z" onClick={handleUndo}>
             <Undo className="w-4 h-4" />
           </Button>
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-white hover:bg-zinc-800" title="重做 Ctrl+Y" onClick={() => toast.info('重做')}>
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-white hover:bg-zinc-800" title="重做 Ctrl+Y" onClick={handleRedo}>
             <Redo className="w-4 h-4" />
           </Button>
         </div>
@@ -2725,11 +2989,11 @@ async function seedTestUserVideos(userId: string) {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" className="h-8 text-zinc-400 hover:text-white hover:bg-zinc-800" onClick={() => setSaveDialogOpen(true)} disabled={saving}>
+          <Button variant="ghost" size="sm" className="h-8 text-zinc-400 hover:text-white hover:bg-zinc-800" onClick={handleSave} disabled={saving}>
             {saving ? <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> : <Save className="w-4 h-4 mr-1.5" />}
             <span className="hidden md:inline">保存</span>
           </Button>
-          <Button size="sm" className="h-8 bg-indigo-600 hover:bg-indigo-700 text-white" onClick={handleExport}>
+          <Button size="sm" className="h-8 bg-indigo-600 hover:bg-indigo-700 text-white" onClick={handleExport} disabled={saving}>
             <Download className="w-4 h-4 mr-1.5" /><span className="hidden md:inline">导出</span>
           </Button>
         </div>
@@ -2742,14 +3006,13 @@ async function seedTestUserVideos(userId: string) {
         <LeftSidebar materials={materials} onAdd={addToTimeline} importedVideos={importedVideos} onImportVideo={handleImportVideo} onUpload={handleUpload} onDelete={handleDeleteMaterial} />
 
         {/* 中央预览区 */}
-        <div className="flex-1 flex flex-col bg-black relative min-w-0">
+        <div className="flex-1 flex flex-col bg-black relative min-w-0" ref={previewContainerRef}>
           <div className="flex-1 flex items-center justify-center p-4 min-h-0">
-            <div className={`w-full bg-zinc-900 border border-zinc-800 shadow-2xl relative overflow-hidden flex items-center justify-center transition-all duration-300 ${
-              editorAspect === 'aspect-[9/16]' ? 'aspect-[9/16] max-w-[280px] md:max-w-[340px]' :
-              editorAspect === 'aspect-[3/4]' ? 'aspect-[3/4] max-w-[380px]' :
-              editorAspect === 'aspect-square' ? 'aspect-square max-w-md' :
-              'aspect-video max-w-3xl'
-            }`}>
+            <div className={`w-auto h-full max-h-full max-w-full bg-zinc-900 border border-zinc-800 shadow-2xl relative overflow-hidden flex items-center justify-center transition-all duration-300 ${editorAspect === 'aspect-[9/16]' ? 'aspect-[9/16]' :
+              editorAspect === 'aspect-[3/4]' ? 'aspect-[3/4]' :
+                editorAspect === 'aspect-square' ? 'aspect-square' :
+                  'aspect-video'
+              }`}>
 
               {/* 无项目时 — 示例项目入口已移除，方便直接播放/预览 */}
 
@@ -2806,16 +3069,34 @@ async function seedTestUserVideos(userId: string) {
                     else setEditorAspect('aspect-video');
                   }}
                 />
-              ) : currentVideoSrc ? (
+              ) : (currentVideoSrc || hasVideoClips) ? (
                 <video
                   ref={videoRef}
                   src={currentVideoSrc}
-                  className="w-full h-full object-contain transition-all"
+                  className="w-full h-full object-contain transition-all bg-black"
                   style={{
                     transform: `scale(${(selectedTrackObj?.scale ?? 100) / 100})`,
                     opacity: (selectedTrackObj?.opacity ?? 100) / 100,
                   }}
-                  onTimeUpdate={handleTimeUpdate}
+                  onPlay={(e) => {
+                    const vid = e.currentTarget;
+                    vid.muted = false;
+                    vid.removeAttribute('muted');
+                  }}
+                  onCanPlay={(e) => {
+                    const vid = e.currentTarget;
+                    vid.muted = false;
+                    vid.removeAttribute('muted');
+                    if (activeVideoClip) {
+                      const localTime = currentTime - activeVideoClip.start;
+                      vid.currentTime = Math.max(0, Math.min(activeVideoClip.duration, localTime));
+                    } else if (previewVideoUrl) {
+                      vid.currentTime = Math.max(0, Math.min(duration, currentTime));
+                    }
+                    if (isPlaying) {
+                      vid.play().catch(err => console.warn('onCanPlay play fail:', err));
+                    }
+                  }}
                   onLoadedMetadata={(e) => {
                     if (!activeVideoClip && videoRef.current) {
                       setDuration(videoRef.current.duration || 30);
@@ -2827,7 +3108,11 @@ async function seedTestUserVideos(userId: string) {
                     else if (ratio < 1.2) setEditorAspect('aspect-square');
                     else setEditorAspect('aspect-video');
                   }}
-                  onEnded={() => setIsPlaying(false)}
+                  onEnded={() => {
+                    if (currentTime >= duration - 0.2) {
+                      setIsPlaying(false);
+                    }
+                  }}
                   playsInline
                 />
               ) : (
@@ -2860,8 +3145,9 @@ async function seedTestUserVideos(userId: string) {
           </div>
           <div className="h-10 bg-zinc-900 border-t border-zinc-800 flex items-center justify-between px-4 text-xs font-mono text-zinc-400 shrink-0">
             <span>{formatTime(currentTime)} / {formatTime(duration)}</span>
-            <span className="flex items-center gap-1 cursor-pointer hover:text-zinc-200" onClick={() => toast.info('全屏预览')}>
-              <Maximize className="w-3.5 h-3.5" />全屏
+            <span className="flex items-center gap-1 cursor-pointer hover:text-zinc-200" onClick={handleFullscreen}>
+              {isFullscreen ? <Minimize className="w-3.5 h-3.5" /> : <Maximize className="w-3.5 h-3.5" />}
+              {isFullscreen ? '退出全屏' : '全屏'}
             </span>
           </div>
         </div>
@@ -2949,7 +3235,7 @@ async function seedTestUserVideos(userId: string) {
       </div>
 
       {/* ─── 底部时间轴 ──────────────────────────────────────────── */}
-      <div className="h-64 border-t border-zinc-800 bg-zinc-950 flex flex-col shrink-0">
+      <div className="h-[235px] border-t border-zinc-800 bg-zinc-950 flex flex-col shrink-0">
         <div className="h-10 border-b border-zinc-800 flex items-center justify-between px-4 bg-zinc-900/50 shrink-0">
           <div className="flex items-center gap-1">
             <Button variant="ghost" size="icon" className="w-8 h-8 text-zinc-400 hover:text-white hover:bg-zinc-800" title="分割 S" onClick={handleSplit}>
@@ -2966,146 +3252,199 @@ async function seedTestUserVideos(userId: string) {
               <Plus className="w-4 h-4" />
             </Button>
           </div>
-          <div className="flex items-center gap-2 w-36">
-            <ZoomOut className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
+
+          <div className="font-mono text-[11px] text-zinc-400 select-none bg-zinc-950/80 px-2.5 py-1 rounded border border-zinc-800/80 flex items-center gap-1.5 shadow-sm">
+            <span className="text-zinc-200 font-medium">{formatTime(currentTime)}</span>
+            <span className="text-zinc-650">/</span>
+            <span className="text-zinc-500">{formatTime(duration)}</span>
+          </div>
+
+          <div className="flex items-center gap-1.5 w-36 shrink-0">
+            <button
+              className="p-1 hover:bg-zinc-800 rounded transition-colors text-zinc-400 hover:text-white"
+              onClick={() => setZoom(prev => Math.max(0, prev - 10))}
+              title="缩小"
+            >
+              <ZoomOut className="w-3.5 h-3.5 shrink-0" />
+            </button>
             <Slider value={[zoom]} onValueChange={([v]) => setZoom(v)} max={100} className="flex-1 [&_[role=slider]]:h-3 [&_[role=slider]]:w-3" />
-            <ZoomIn className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
+            <button
+              className="p-1 hover:bg-zinc-800 rounded transition-colors text-zinc-400 hover:text-white"
+              onClick={() => setZoom(prev => Math.min(100, prev + 10))}
+              title="放大"
+            >
+              <ZoomIn className="w-3.5 h-3.5 shrink-0" />
+            </button>
           </div>
         </div>
 
-        <div className="flex-1 overflow-auto relative bg-zinc-950">
-          {/* 时间刻度 */}
-          <div 
-            ref={rulerRef}
-            className="h-6 sticky top-0 bg-zinc-900 border-b border-zinc-800 z-10 text-[10px] text-zinc-500 font-mono flex items-end px-2 cursor-ew-resize select-none"
-            onClick={handleRulerClick}
-            onMouseDown={handleRulerMouseDown}
+        {/* 时间刻度 — 固定在滚动区域顶部，独立不受scroll影响 */}
+        <div
+          ref={rulerRef}
+          className="h-7 border-b border-zinc-800 bg-zinc-900 z-10 text-[10px] text-zinc-500 font-mono flex items-end cursor-ew-resize select-none shrink-0 overflow-hidden"
+          onClick={handleRulerClick}
+          onMouseDown={handleRulerMouseDown}
+        >
+          <div className="shrink-0 h-full bg-zinc-900" style={{ width: TRACK_LABEL_W + 6 }} />
+          <div className="relative h-full overflow-hidden ruler-ticks-container" style={{ flex: 1 }}>
+            <div className="absolute top-0 left-0 h-full" style={{ width: duration * pxPerSec, transform: `translateX(-${timelineScrollOffset}px)` }}>
+              {(() => {
+                const ticks = [];
+                const step = pxPerSec < 15 ? 10 : pxPerSec < 40 ? 5 : 1;
+                for (let i = 0; i <= duration; i += step) {
+                  ticks.push(i);
+                }
+                return ticks.map(sec => (
+                  <div key={sec} className="absolute bottom-0" style={{ left: `${sec * pxPerSec}px` }}>
+                    <div className="h-1.5 w-px bg-zinc-600 mb-0.5" />
+                    {sec % (step * 2) === 0 && (
+                      <span className="absolute -left-3 bottom-2 whitespace-nowrap">
+                        {Math.floor(sec / 60)}:{(sec % 60).toString().padStart(2, '0')}
+                      </span>
+                    )}
+                  </div>
+                ));
+              })()}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex-1 overflow-x-auto overflow-y-auto relative bg-zinc-950" ref={timelineScrollRef}>
+          <div
+            style={{ width: Math.max(timelinePxWidth, timelineMinWidth), minWidth: '100%' }}
+            className="min-h-full flex flex-col relative"
           >
-            <div className="w-16 shrink-0 mr-2 h-full" />
-            <div className="flex-1 border-b border-zinc-700/50 relative h-full">
-              {[0, 5, 10, 15, 20, 25, 30].map(sec => (
-                <div key={sec} className="absolute bottom-0" style={{ left: `${(sec / 30) * 100}%` }}>
-                  <div className="h-1.5 w-px bg-zinc-600 mb-0.5" />
-                  <span className="absolute -left-3 bottom-2">00:{sec.toString().padStart(2, '0')}</span>
+            {/* 轨道时间线刻度网格线背景 */}
+            {(() => {
+              const ticks = [];
+              const step = duration > 120 ? 20 : duration > 60 ? 10 : 5;
+              for (let i = 0; i <= duration; i += step) {
+                ticks.push(i);
+              }
+              return ticks.map(sec => (
+                <div
+                  key={`grid-${sec}`}
+                  className="absolute top-0 bottom-0 w-px border-l border-zinc-800/40 border-dashed pointer-events-none z-0"
+                  style={{ left: `${TRACK_LABEL_W + sec * pxPerSec}px` }}
+                />
+              ));
+            })()}
+
+            <div className="p-1.5 space-y-1 relative z-10">
+              {/* 主视频轨道 */}
+              <div className="flex gap-1.5">
+                <div className="shrink-0 h-10 bg-zinc-900 border border-zinc-800 rounded flex flex-col items-center justify-center text-zinc-500 sticky left-0 z-10" style={{ width: TRACK_LABEL_W }}>
+                  <Film className="w-3.5 h-3.5 mb-0.5" />
+                  <span className="text-[8px]">主轨道</span>
                 </div>
-              ))}
-            </div>
-          </div>
+                <div className="relative h-10 bg-zinc-900/30 rounded border border-zinc-800/50" style={{ width: duration * pxPerSec }}>
+                  {tracks.filter(item => item.type === 'video').map(item => (
+                    <div
+                      key={item.id}
+                      className={`absolute top-1 bottom-1 bg-indigo-600/50 border border-indigo-400/60 rounded flex items-center px-2 cursor-pointer hover:bg-indigo-600/70 select-none ${selectedTrackItem === item.id ? 'ring-2 ring-indigo-400' : ''}`}
+                      style={{
+                        left: item.start * pxPerSec,
+                        width: item.duration * pxPerSec,
+                        transform: dragInfo?.id === item.id ? `translate(${dragInfo.offsetX}px, ${dragInfo.offsetY}px)` : undefined,
+                        zIndex: dragInfo?.id === item.id ? 50 : undefined,
+                        opacity: dragInfo?.id === item.id ? 0.8 : undefined,
+                      }}
+                      onClick={() => setSelectedTrackItem(item.id)}
+                      onMouseDown={(e) => handleTrackItemMouseDown(e, item)}
+                    >
+                      <span className="text-[11px] text-indigo-100 truncate">{item.name}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
 
-          <div className="p-2 space-y-1.5">
-            {/* 主视频轨道 */}
-            <div className="flex gap-2">
-              <div className="w-16 shrink-0 h-14 bg-zinc-900 border border-zinc-800 rounded flex flex-col items-center justify-center text-zinc-500 sticky left-0 z-10">
-                <Film className="w-4 h-4 mb-1" />
-                <span className="text-[9px]">主轨道</span>
+              {/* 音频轨道 */}
+              <div className="flex gap-1.5">
+                <div className="shrink-0 h-8 bg-zinc-900 border border-zinc-800 rounded flex flex-col items-center justify-center text-zinc-500 sticky left-0 z-10" style={{ width: TRACK_LABEL_W }}>
+                  <Music2 className="w-3.5 h-3.5 mb-0.5" />
+                  <span className="text-[8px]">音频</span>
+                </div>
+                <div className="relative h-8 bg-zinc-900/30 rounded border border-zinc-800/50" style={{ width: duration * pxPerSec }}>
+                  {tracks.filter(item => item.type === 'audio').map(item => (
+                    <div
+                      key={item.id}
+                      className={`absolute top-0.5 bottom-0.5 bg-emerald-600/50 border border-emerald-400/60 rounded flex items-center px-2 cursor-pointer hover:bg-emerald-600/70 select-none ${selectedTrackItem === item.id ? 'ring-2 ring-emerald-400' : ''}`}
+                      style={{
+                        left: item.start * pxPerSec,
+                        width: item.duration * pxPerSec,
+                        transform: dragInfo?.id === item.id ? `translate(${dragInfo.offsetX}px, ${dragInfo.offsetY}px)` : undefined,
+                        zIndex: dragInfo?.id === item.id ? 50 : undefined,
+                        opacity: dragInfo?.id === item.id ? 0.8 : undefined,
+                      }}
+                      onClick={() => setSelectedTrackItem(item.id)}
+                      onMouseDown={(e) => handleTrackItemMouseDown(e, item)}
+                    >
+                      <span className="text-[10px] text-emerald-100 truncate font-mono">{item.name}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div className="flex-1 relative h-14 bg-zinc-900/30 rounded border border-zinc-800/50">
-                {tracks.filter(item => item.type === 'video').map(item => (
-                  <div
-                    key={item.id}
-                    className={`absolute top-1 bottom-1 bg-indigo-600/30 border border-indigo-500/50 rounded flex items-center px-2 cursor-pointer hover:bg-indigo-600/40 select-none ${selectedTrackItem === item.id ? 'ring-2 ring-indigo-400' : ''}`}
-                    style={{
-                      left: `${(item.start / duration) * 100}%`,
-                      width: `${(item.duration / duration) * 100}%`,
-                      transform: dragInfo?.id === item.id ? `translate(${dragInfo.offsetX}px, ${dragInfo.offsetY}px)` : undefined,
-                      zIndex: dragInfo?.id === item.id ? 50 : undefined,
-                      opacity: dragInfo?.id === item.id ? 0.8 : undefined,
-                    }}
-                    onClick={() => setSelectedTrackItem(item.id)}
-                    onMouseDown={(e) => handleTrackItemMouseDown(e, item)}
-                  >
-                    <span className="text-xs text-indigo-200 truncate">{item.name}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
 
-            {/* 音频轨道 */}
-            <div className="flex gap-2">
-              <div className="w-16 shrink-0 h-10 bg-zinc-900 border border-zinc-800 rounded flex flex-col items-center justify-center text-zinc-500 sticky left-0 z-10">
-                <Music2 className="w-4 h-4 mb-0.5" />
-                <span className="text-[9px]">音频</span>
+              {/* 字幕轨道 */}
+              <div className="flex gap-1.5">
+                <div className="shrink-0 h-7 bg-zinc-900 border border-zinc-800 rounded flex items-center justify-center text-zinc-500 sticky left-0 z-10" style={{ width: TRACK_LABEL_W }}>
+                  <Type className="w-3.5 h-3.5" />
+                </div>
+                <div className="relative h-7 bg-zinc-900/30 rounded border border-zinc-800/50" style={{ width: duration * pxPerSec }}>
+                  {tracks.filter(item => item.type === 'text').map(item => (
+                    <div
+                      key={item.id}
+                      className={`absolute top-0.5 bottom-0.5 bg-amber-600/50 border border-amber-400/60 rounded flex items-center justify-center cursor-pointer hover:bg-amber-600/70 select-none ${selectedTrackItem === item.id ? 'ring-2 ring-amber-400' : ''}`}
+                      style={{
+                        left: item.start * pxPerSec,
+                        width: item.duration * pxPerSec,
+                        transform: dragInfo?.id === item.id ? `translate(${dragInfo.offsetX}px, ${dragInfo.offsetY}px)` : undefined,
+                        zIndex: dragInfo?.id === item.id ? 50 : undefined,
+                        opacity: dragInfo?.id === item.id ? 0.8 : undefined,
+                      }}
+                      onClick={() => setSelectedTrackItem(item.id)}
+                      onMouseDown={(e) => handleTrackItemMouseDown(e, item)}
+                    >
+                      <span className="text-[9px] text-amber-100 truncate px-1">{item.name}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div className="flex-1 relative h-10 bg-zinc-900/30 rounded border border-zinc-800/50">
-                {tracks.filter(item => item.type === 'audio').map(item => (
-                  <div
-                    key={item.id}
-                    className={`absolute top-1 bottom-1 bg-emerald-600/30 border border-emerald-500/50 rounded flex items-center px-2 cursor-pointer hover:bg-emerald-600/40 select-none ${selectedTrackItem === item.id ? 'ring-2 ring-emerald-400' : ''}`}
-                    style={{
-                      left: `${(item.start / duration) * 100}%`,
-                      width: `${(item.duration / duration) * 100}%`,
-                      transform: dragInfo?.id === item.id ? `translate(${dragInfo.offsetX}px, ${dragInfo.offsetY}px)` : undefined,
-                      zIndex: dragInfo?.id === item.id ? 50 : undefined,
-                      opacity: dragInfo?.id === item.id ? 0.8 : undefined,
-                    }}
-                    onClick={() => setSelectedTrackItem(item.id)}
-                    onMouseDown={(e) => handleTrackItemMouseDown(e, item)}
-                  >
-                    <span className="text-xs text-emerald-200 truncate font-mono">{item.name}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
 
-            {/* 字幕轨道 */}
-            <div className="flex gap-2">
-              <div className="w-16 shrink-0 h-8 bg-zinc-900 border border-zinc-800 rounded flex items-center justify-center text-zinc-500 sticky left-0 z-10">
-                <Type className="w-4 h-4" />
-              </div>
-              <div className="flex-1 relative h-8 bg-zinc-900/30 rounded border border-zinc-800/50">
-                {tracks.filter(item => item.type === 'text').map(item => (
-                  <div
-                    key={item.id}
-                    className={`absolute top-1 bottom-1 bg-amber-600/30 border border-amber-500/50 rounded flex items-center justify-center cursor-pointer hover:bg-amber-600/40 select-none ${selectedTrackItem === item.id ? 'ring-2 ring-amber-400' : ''}`}
-                    style={{
-                      left: `${(item.start / duration) * 100}%`,
-                      width: `${(item.duration / duration) * 100}%`,
-                      transform: dragInfo?.id === item.id ? `translate(${dragInfo.offsetX}px, ${dragInfo.offsetY}px)` : undefined,
-                      zIndex: dragInfo?.id === item.id ? 50 : undefined,
-                      opacity: dragInfo?.id === item.id ? 0.8 : undefined,
-                    }}
-                    onClick={() => setSelectedTrackItem(item.id)}
-                    onMouseDown={(e) => handleTrackItemMouseDown(e, item)}
-                  >
-                    <span className="text-[10px] text-amber-200 truncate px-1">{item.name}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* 特效轨道 */}
-            <div className="flex gap-2">
-              <div className="w-16 shrink-0 h-8 bg-zinc-900 border border-zinc-800 rounded flex items-center justify-center text-zinc-500 sticky left-0 z-10">
-                <Sparkles className="w-4 h-4" />
-              </div>
-              <div className="flex-1 relative h-8 bg-zinc-900/30 rounded border border-zinc-800/50">
-                {tracks.filter(item => item.type === 'image').map(item => (
-                  <div
-                    key={item.id}
-                    className={`absolute top-1 bottom-1 bg-purple-600/30 border border-purple-500/50 rounded flex items-center justify-center cursor-pointer hover:bg-purple-600/40 select-none ${selectedTrackItem === item.id ? 'ring-2 ring-purple-400' : ''}`}
-                    style={{
-                      left: `${(item.start / duration) * 100}%`,
-                      width: `${(item.duration / duration) * 100}%`,
-                      transform: dragInfo?.id === item.id ? `translate(${dragInfo.offsetX}px, ${dragInfo.offsetY}px)` : undefined,
-                      zIndex: dragInfo?.id === item.id ? 50 : undefined,
-                      opacity: dragInfo?.id === item.id ? 0.8 : undefined,
-                    }}
-                    onClick={() => setSelectedTrackItem(item.id)}
-                    onMouseDown={(e) => handleTrackItemMouseDown(e, item)}
-                  >
-                    <span className="text-[10px] text-purple-200 px-1 truncate">{item.name}</span>
-                  </div>
-                ))}
+              {/* 特效轨道 */}
+              <div className="flex gap-1.5">
+                <div className="shrink-0 h-7 bg-zinc-900 border border-zinc-800 rounded flex items-center justify-center text-zinc-500 sticky left-0 z-10" style={{ width: TRACK_LABEL_W }}>
+                  <Sparkles className="w-3.5 h-3.5" />
+                </div>
+                <div className="relative h-7 bg-zinc-900/30 rounded border border-zinc-800/50" style={{ width: duration * pxPerSec }}>
+                  {tracks.filter(item => item.type === 'image').map(item => (
+                    <div
+                      key={item.id}
+                      className={`absolute top-0.5 bottom-0.5 bg-purple-600/50 border border-purple-400/60 rounded flex items-center justify-center cursor-pointer hover:bg-purple-600/70 select-none ${selectedTrackItem === item.id ? 'ring-2 ring-purple-400' : ''}`}
+                      style={{
+                        left: item.start * pxPerSec,
+                        width: item.duration * pxPerSec,
+                        transform: dragInfo?.id === item.id ? `translate(${dragInfo.offsetX}px, ${dragInfo.offsetY}px)` : undefined,
+                        zIndex: dragInfo?.id === item.id ? 50 : undefined,
+                        opacity: dragInfo?.id === item.id ? 0.8 : undefined,
+                      }}
+                      onClick={() => setSelectedTrackItem(item.id)}
+                      onMouseDown={(e) => handleTrackItemMouseDown(e, item)}
+                    >
+                      <span className="text-[9px] text-purple-100 px-1 truncate">{item.name}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* 播放指针 */}
-          <div 
-            className="absolute top-0 bottom-0 w-px bg-red-500 z-20 pointer-events-none" 
-            style={{ left: `calc(80px + (100% - 88px) * ${currentTime / duration})` }}
-          >
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3 h-3 rotate-45 bg-red-500" />
+            {/* 播放指针 */}
+            <div
+              className="absolute top-0 bottom-0 w-px bg-orange-500 z-20 pointer-events-none"
+              style={{ left: `${TRACK_LABEL_W + currentTime * pxPerSec}px` }}
+            >
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3 h-3 rotate-45 bg-orange-500" />
+            </div>
           </div>
         </div>
       </div>

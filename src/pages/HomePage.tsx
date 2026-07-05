@@ -22,40 +22,40 @@ const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
 // ── 工具卡片数据 ────────────────────────────────────────────────────────
 const QUICK_TOOLS = [
   {
-    id: 'replicate', label: '爆款复刻', sub: '快速生成可裂变的爆款视频',
+    id: 'script', label: 'AI智能脚本', sub: '智能生成短视频爆款带货脚本',
     gradient: 'from-rose-800/80 to-pink-900/80',
     cover: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=300&h=180&fit=crop',
+    path: '/script',
+  },
+  {
+    id: 'style-copy', label: '爆款风格复刻', sub: '一键复刻高转化内容风格',
+    gradient: 'from-violet-800/80 to-indigo-900/80',
+    cover: 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=300&h=180&fit=crop',
     path: '/style-copy',
   },
   {
-    id: 'prompt', label: '提示词反推', sub: '反推生成视频的AI提示词',
-    gradient: 'from-violet-800/80 to-indigo-900/80',
-    cover: 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=300&h=180&fit=crop',
-    path: '/prompt-templates',
-  },
-  {
-    id: 'subtitle', label: '去字幕', sub: '去除视频字幕',
+    id: 'competitor', label: '竞品爆款分析', sub: '抓取竞品爆款视频策略',
     gradient: 'from-sky-800/80 to-blue-900/80',
     cover: 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=300&h=180&fit=crop',
-    path: '/video/edit',
+    path: '/competitor',
   },
   {
-    id: 'product-set', label: '商品套图', sub: '一键生成可上架的商品套图',
+    id: 'analytics', label: '流量分析', sub: '实时追踪完播率与转化漏斗',
     gradient: 'from-amber-800/80 to-orange-900/80',
     cover: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=300&h=180&fit=crop',
-    path: '/products',
+    path: '/analytics',
   },
   {
-    id: 'detail', label: 'A+ 详情图', sub: '生成专业电商详情图',
+    id: 'live-highlight', label: '直播高光切片', sub: 'AI自动识别直播精华',
     gradient: 'from-teal-800/80 to-emerald-900/80',
     cover: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=300&h=180&fit=crop',
-    path: '/products',
+    path: '/live-highlight',
   },
   {
-    id: 'tryon', label: '换装试穿', sub: 'AI虚拟试穿服装',
+    id: 'knowledge', label: '知识库', sub: '沉淀带货话术，AI语义检索',
     gradient: 'from-fuchsia-800/80 to-purple-900/80',
     cover: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=180&fit=crop',
-    path: '/avatars',
+    path: '/knowledge',
   },
 ];
 

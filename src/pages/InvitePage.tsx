@@ -24,7 +24,7 @@ interface Invitation {
   };
 }
 
-export default function InvitePage({ embedded = false }: { embedded?: boolean }) {
+export default function InvitePage({ embedded = false, dialogMode = false }: { embedded?: boolean; dialogMode?: boolean }) {
   const { user, profile } = useAuth();
   const [loading, setLoading] = useState(true);
   const [invitations, setInvitations] = useState<Invitation[]>([]);
@@ -179,6 +179,130 @@ export default function InvitePage({ embedded = false }: { embedded?: boolean })
       setPosterGenerating(false);
     }
   };
+
+  if (dialogMode) {
+    return (
+      <div className="space-y-5 py-2">
+        {/* 顶部标题与说明 */}
+        <div className="text-center space-y-1">
+          <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-amber-500/10 text-amber-500 mb-1">
+            <Gift className="w-5 h-5" />
+          </div>
+          <h2 className="text-base font-bold text-zinc-100">邀请好友 · 共享好礼</h2>
+          <p className="text-[11px] text-zinc-400">好友注册即得 50 积分，您也得 50 积分</p>
+        </div>
+
+        {/* 邀请码和链接卡片 */}
+        <div className="bg-zinc-850/60 rounded-xl border border-zinc-800/80 p-4 space-y-4">
+          <div className="space-y-1 text-center">
+            <span className="text-[11px] text-zinc-400 font-medium">我的专属邀请码</span>
+            <div className="flex items-center justify-center gap-3">
+              <span className="text-2xl font-mono font-extrabold tracking-wider text-amber-500">
+                {inviteCode || '暂无'}
+              </span>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-8 w-8 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
+                onClick={() => copyToClipboard(inviteCode, '邀请码已复制')}
+              >
+                <Copy className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+
+          <div className="border-t border-zinc-800/80 my-2" />
+
+          <div className="space-y-1">
+            <span className="text-[11px] text-zinc-400 font-medium block">专属邀请链接</span>
+            <div className="flex items-center gap-2">
+              <div className="flex-1 bg-zinc-950/40 border border-zinc-800/80 rounded-lg px-3 py-1.5 text-xs truncate text-zinc-400 select-all font-mono">
+                {inviteUrl}
+              </div>
+              <Button 
+                size="icon" 
+                variant="outline" 
+                className="shrink-0 h-8 w-8 border-zinc-800/80 hover:bg-zinc-800 text-zinc-300" 
+                onClick={() => copyToClipboard(inviteUrl, '邀请链接已复制')}
+              >
+                <Copy className="w-3.5 h-3.5" />
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* 快速数据统计 */}
+        <div className="grid grid-cols-3 gap-2 text-center">
+          <div className="bg-zinc-800/30 rounded-lg border border-zinc-800/60 p-2">
+            <p className="text-base font-bold text-zinc-200">{stats.total}</p>
+            <p className="text-[9px] text-zinc-500 mt-0.5">累计邀请</p>
+          </div>
+          <div className="bg-zinc-800/30 rounded-lg border border-zinc-800/60 p-2">
+            <p className="text-base font-bold text-emerald-500">{stats.completed}</p>
+            <p className="text-[9px] text-zinc-500 mt-0.5">成功注册</p>
+          </div>
+          <div className="bg-zinc-800/30 rounded-lg border border-zinc-800/60 p-2">
+            <p className="text-base font-bold text-amber-500">{stats.credits}</p>
+            <p className="text-[9px] text-zinc-500 mt-0.5">累计奖励</p>
+          </div>
+        </div>
+
+        {/* 操作按钮 */}
+        <div className="flex gap-2">
+          <Button 
+            className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white border-none text-xs font-semibold h-9 shadow-sm" 
+            onClick={generatePoster} 
+            disabled={posterGenerating}
+          >
+            {posterGenerating ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" /> : <ImageIcon className="w-3.5 h-3.5 mr-1.5" />}
+            生成专属分享海报
+          </Button>
+        </div>
+
+        {/* 隐藏的 QR Code */}
+        <div className="hidden" id="invite-qrcode">
+          {inviteUrl && <QRCodeDataUrl value={inviteUrl} size={400} />}
+        </div>
+
+        {/* 海报预览弹窗 */}
+        <Dialog open={posterOpen} onOpenChange={setPosterOpen}>
+          <DialogContent className="max-w-[calc(100%-2rem)] md:max-w-md p-6 bg-zinc-900 border-zinc-800 text-zinc-200">
+            <DialogHeader>
+              <DialogTitle className="text-zinc-100">您的专属分享海报</DialogTitle>
+              <DialogDescription className="text-zinc-400">长按图片保存或直接转发给微信好友</DialogDescription>
+            </DialogHeader>
+            <div className="flex flex-col items-center gap-6 pt-4">
+              <div className="relative w-full max-w-[300px] aspect-[750/1100] rounded-xl overflow-hidden shadow-2xl border border-zinc-800">
+                {posterGenerating ? (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-950/40">
+                    <Loader2 className="w-8 h-8 animate-spin text-primary mb-4" />
+                    <span className="text-sm text-zinc-400">正在生成海报...</span>
+                  </div>
+                ) : posterUrl ? (
+                  <img src={posterUrl} alt="分享海报" className="w-full h-full object-cover" />
+                ) : null}
+              </div>
+
+              <div className="flex w-full gap-3">
+                <Button className="flex-1 border-zinc-700 hover:bg-zinc-850 text-zinc-300" variant="outline" onClick={() => setPosterOpen(false)}>关闭</Button>
+                {posterUrl && (
+                  <Button className="flex-1 bg-primary hover:bg-primary/95 text-white" onClick={() => {
+                    const link = document.createElement('a');
+                    link.href = posterUrl;
+                    link.download = `invite_poster_${inviteCode}.png`;
+                    link.click();
+                    toast.success('海报已开始下载');
+                  }}>
+                    <Download className="w-4 h-4 mr-2" /> 保存图片
+                  </Button>
+                )}
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+    );
+  }
 
   return (
     <div className={cn("space-y-6 max-w-5xl mx-auto", !embedded && "p-4 md:p-6")}>

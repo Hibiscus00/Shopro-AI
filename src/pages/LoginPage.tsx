@@ -456,7 +456,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex bg-muted/10">
+    <div className="min-h-screen flex bg-background">
       <BrandPanel />
       {/* 右侧表单区 */}
       <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 py-4 sm:py-12 bg-background relative overflow-hidden">
@@ -471,7 +471,7 @@ export default function LoginPage() {
         </div>
 
         {/* 登录主体卡片 */}
-        <div className="w-full max-w-md relative bg-card border border-border/60 rounded-2xl sm:rounded-3xl p-5 sm:p-6 md:p-8 shadow-xl">
+        <div className="w-full max-w-md relative bg-background border border-border/60 rounded-2xl sm:rounded-3xl p-5 sm:p-6 md:p-8 shadow-xl">
           {/* 返回按钮（找回密码/手机号模式） */}
           {(mode === 'forgot' || mode === 'phone') && (
             <button
@@ -633,25 +633,25 @@ export default function LoginPage() {
               {mode !== 'forgot' && (
                 <div className="relative my-1 sm:my-2">
                   <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-border" /></div>
-                  <div className="relative flex justify-center"><span className="bg-card px-3 text-xs text-muted-foreground">或</span></div>
+                  <div className="relative flex justify-center"><span className="bg-background px-3 text-xs text-muted-foreground">或</span></div>
                 </div>
               )}
 
-              {/* 手机号验证入口 - 蓝色 */}
+              {/* 手机号验证入口 */}
               {(mode === 'login' || mode === 'register') && (
                 <button type="button" onClick={() => { setMode('phone'); setErrors({}); }}
-                  className="w-full flex items-center justify-center gap-2 py-2 sm:py-3 rounded-lg sm:rounded-xl border border-blue-200 dark:border-blue-900/50 bg-blue-50/30 dark:bg-blue-950/10 text-sm font-semibold text-blue-600 dark:text-blue-400 hover:bg-blue-50/60 dark:hover:bg-blue-950/20 transition-all shadow-sm">
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg border border-border/60 text-sm text-muted-foreground hover:text-foreground hover:border-primary/40 hover:bg-primary/5 transition-all">
                   <Phone className="w-4 h-4" />
                   手机号验证码登录
                 </button>
               )}
 
-              {/* 切换模式 - 紫色 */}
+              {/* 切换模式 */}
               {mode === 'login' && (
                 <p className="text-sm text-center text-muted-foreground mt-2">
                   还没有账号？
                   <button type="button" onClick={() => { setMode('register'); setErrors({}); setForm(f => ({ ...f, confirmPassword: '' })); }}
-                    className="text-indigo-600 dark:text-indigo-400 font-bold hover:underline ml-1">
+                    className="text-primary font-medium hover:underline ml-1">
                     立即注册
                   </button>
                 </p>
@@ -660,7 +660,7 @@ export default function LoginPage() {
                 <p className="text-sm text-center text-muted-foreground mt-2">
                   已有账号？
                   <button type="button" onClick={() => { setMode('login'); setErrors({}); }}
-                    className="text-indigo-600 dark:text-indigo-400 font-bold hover:underline ml-1">
+                    className="text-primary font-medium hover:underline ml-1">
                     直接登录
                   </button>
                 </p>
@@ -672,10 +672,10 @@ export default function LoginPage() {
           {(mode === 'login' || mode === 'register') && !forgotSent && (
             <div className="mt-4 sm:mt-6 pt-3 sm:pt-5 border-t border-border/60">
               <p className="text-xs font-semibold text-muted-foreground mb-2 sm:mb-3 flex items-center gap-1.5 justify-center">
-                <Sparkles className="w-3.5 h-3.5 text-indigo-500 animate-pulse" /> 快速免密体验通道
+                <Sparkles className="w-3.5 h-3.5 text-primary animate-pulse" /> 快速免密体验通道
               </p>
               <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                {[{ user: 'demo_user', pwd: 'demo123456', color: 'orange' }, { user: 'test_user', pwd: 'test123456', color: 'emerald' }].map(({ user, pwd, color }) => (
+                {[{ user: 'demo_user', pwd: 'demo123456' }, { user: 'test_user', pwd: 'test123456' }].map(({ user, pwd }) => (
                   <button
                     key={user}
                     type="button"
@@ -752,15 +752,10 @@ export default function LoginPage() {
                       }
                     }}
                     disabled={loading}
-                    className={cn(
-                      "relative overflow-hidden flex flex-col items-center justify-center p-2 sm:p-3 rounded-xl sm:rounded-2xl border transition-all duration-300 text-center text-xs group",
-                      color === 'orange'
-                        ? "bg-orange-50/40 dark:bg-orange-950/10 border-orange-200 dark:border-orange-900/40 text-orange-600 dark:text-orange-400 hover:bg-orange-50/80 dark:hover:bg-orange-950/20 hover:border-orange-300"
-                        : "bg-emerald-50/40 dark:bg-emerald-950/10 border-emerald-200 dark:border-emerald-900/40 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50/80 dark:hover:bg-emerald-950/20 hover:border-emerald-300"
-                    )}
+                    className="flex flex-col items-center justify-center p-3 rounded-lg border border-border/60 bg-background hover:bg-primary/5 hover:border-primary/30 transition-colors text-center text-xs group"
                   >
-                    <span className="font-bold text-sm transition-colors">{user}</span>
-                    <span className="text-[10px] opacity-80 mt-0.5">一键登录体验</span>
+                    <span className="font-semibold text-foreground group-hover:text-primary transition-colors">{user}</span>
+                    <span className="text-muted-foreground scale-90 opacity-70 mt-0.5">一键登录体验</span>
                   </button>
                 ))}
               </div>

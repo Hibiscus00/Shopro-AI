@@ -54,27 +54,56 @@ function Trend({ val, prev }: { val: number; prev: number }) {
 
 // 生成模拟投放数据（实际场景通过平台API回流）
 function buildDemoData(days: number): AdPerformance[] {
+  // 生成5个平台的所有数据
+  const platforms = ['douyin', 'tiktok', 'xiaohongshu', 'kuaishou', 'bilibili'];
+  const list: AdPerformance[] = [];
+  for (let dIndex = 0; dIndex < days; dIndex++) {
+    const d = new Date(); d.setDate(d.getDate() - (days - 1 - dIndex));
+    const dateStr = d.toISOString().slice(0, 10);
+    platforms.forEach((platform, pIndex) => {
+      const impressions = 5000 + Math.floor(Math.random() * 15000);
+      const clicks = Math.floor(impressions * (0.04 + Math.random() * 0.06));
+      const conversions = Math.floor(clicks * (0.03 + Math.random() * 0.05));
+      const spend = +(200 + Math.random() * 800).toFixed(2);
+      const revenue = +(spend * (1.5 + Math.random() * 2)).toFixed(2);
+      list.push({
+        id: `demo_${dIndex}_${platform}`,
+        platform,
+        date: dateStr,
+        impressions,
+        clicks,
+        conversions,
+        spend,
+        revenue,
+        play_count: impressions,
+        avg_watch_time: +(15 + Math.random() * 20).toFixed(1),
+        ctr: +(clicks / impressions * 100).toFixed(2),
+        cvr: +(conversions / clicks * 100).toFixed(2),
+        roas: +(revenue / spend).toFixed(2),
+      });
+    });
+  }
+  return list;
+}
+
+// 生成全是0的空数据（未登录状态）
+function buildZeroData(days: number): AdPerformance[] {
   return Array.from({ length: days }, (_, i) => {
     const d = new Date(); d.setDate(d.getDate() - (days - 1 - i));
-    const impressions = 5000 + Math.floor(Math.random() * 15000);
-    const clicks = Math.floor(impressions * (0.04 + Math.random() * 0.06));
-    const conversions = Math.floor(clicks * (0.03 + Math.random() * 0.05));
-    const spend = +(200 + Math.random() * 800).toFixed(2);
-    const revenue = +(spend * (1.5 + Math.random() * 2)).toFixed(2);
     return {
-      id: `demo_${i}`,
-      platform: ['douyin','tiktok','xiaohongshu'][i % 3],
+      id: `zero_${i}`,
+      platform: ['douyin', 'tiktok', 'xiaohongshu', 'kuaishou', 'bilibili'][i % 5],
       date: d.toISOString().slice(0,10),
-      impressions,
-      clicks,
-      conversions,
-      spend,
-      revenue,
-      play_count: impressions,
-      avg_watch_time: +(15 + Math.random() * 20).toFixed(1),
-      ctr: +(clicks / impressions * 100).toFixed(2),
-      cvr: +(conversions / clicks * 100).toFixed(2),
-      roas: +(revenue / spend).toFixed(2),
+      impressions: 0,
+      clicks: 0,
+      conversions: 0,
+      spend: 0,
+      revenue: 0,
+      play_count: 0,
+      avg_watch_time: 0,
+      ctr: 0,
+      cvr: 0,
+      roas: 0,
     };
   });
 }
@@ -88,29 +117,95 @@ export default function DataFeedbackPage() {
   const [platform, setPlatform] = useState('all');
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [platformAuths, setPlatformAuths] = useState<Record<string, 'pending' | 'authorized'>>({
+    douyin: 'pending',
     tiktok: 'pending',
     xiaohongshu: 'pending',
     kuaishou: 'pending',
     bilibili: 'pending',
   });
 
-  const loadData = useCallback(async () => {
+  // 从 localStorage 初始化平台授权状态
+  useEffect(() => {
     if (!user) return;
-    setLoading(true);
+    const saved = localStorage.getItem(`platform_auths_${user.id}`);
+    if (saved) {
+      try {
+        setPlatformAuths(JSON.parse(saved));
+      } catch (e) {
+        console.error('Failed to parse platform auths', e);
+      }
+    } else {
+      setPlatformAuths({
+        douyin: 'pending',
+        tiktok: 'pending',
+        xiaohongshu: 'pending',
+        kuaishou: 'pending',
+        bilibili: 'pending',
+      });
+    }
+  }, [user]);
+
+  const updatePlatformAuth = (key: string, status: 'pending' | 'authorized') => {
+    setPlatformAuths(prev => {
+      const next = { ...prev, [key]: status };
+      if (user) {
+        localStorage.setItem(`platform_auths_${user.id}`, JSON.stringify(next));
+      }
+      return next;
+    });
+  };
+
+  const loadData = useCallback(async () => {
     const days = range === '7d' ? 7 : range === '14d' ? 14 : 30;
+    if (!user) {
+      setData(buildZeroData(days));
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
     const since = new Date(Date.now() - days * 86400000).toISOString().slice(0,10);
     let q = supabase.from('ad_performance').select('*').eq('user_id', user.id).gte('date', since).order('date');
     if (platform !== 'all') q = q.eq('platform', platform);
     const { data: rows } = await q;
 
+    // 读取最新的授权状态以进行数据重置/过滤
+    const currentAuths = (() => {
+      const saved = localStorage.getItem(`platform_auths_${user.id}`);
+      if (saved) {
+        try { return JSON.parse(saved); } catch (e) {}
+      }
+      return platformAuths;
+    })();
+
+    const mapData = (rawList: AdPerformance[]) => {
+      return rawList.map(d => {
+        const isAuthorized = currentAuths[d.platform] === 'authorized';
+        if (!isAuthorized) {
+          return {
+            ...d,
+            impressions: 0,
+            clicks: 0,
+            conversions: 0,
+            spend: 0,
+            revenue: 0,
+            play_count: 0,
+            avg_watch_time: 0,
+            ctr: 0,
+            cvr: 0,
+            roas: 0,
+          };
+        }
+        return d;
+      });
+    };
+
     if (!rows || rows.length === 0) {
-      // 使用演示数据
-      setData(buildDemoData(days));
+      setData(mapData(buildDemoData(days)));
     } else {
-      setData(rows as AdPerformance[]);
+      setData(mapData(rows as AdPerformance[]));
     }
     setLoading(false);
-  }, [user, range, platform]);
+  }, [user, range, platform, platformAuths]);
 
   useEffect(() => { loadData(); }, [loadData]);
 
@@ -149,7 +244,13 @@ export default function DataFeedbackPage() {
         <div className="flex items-center gap-2">
           <Button
             size="sm"
-            onClick={() => setAuthModalOpen(true)}
+            onClick={() => {
+              if (!user) {
+                toast.error('请先登录系统以授权第三方账号');
+                return;
+              }
+              setAuthModalOpen(true);
+            }}
             className="h-9 px-3 gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 shrink-0 font-semibold"
           >
             <Plus className="w-4 h-4" />添加账号
@@ -182,9 +283,17 @@ export default function DataFeedbackPage() {
       </div>
 
       {/* 注意：演示数据提示 */}
-      <div className="rounded-xl border border-info/30 bg-info/5 p-3 flex items-center gap-2 text-xs text-info">
+      <div className={cn(
+        "rounded-xl border p-3 flex items-center gap-2 text-xs",
+        (!user || !Object.values(platformAuths).some(v => v === 'authorized')) ? "border-destructive/30 bg-destructive/5 text-destructive" : "border-info/30 bg-info/5 text-info"
+      )}>
         <Zap className="w-3.5 h-3.5 shrink-0" />
-        当前显示演示数据。实际使用时，通过平台 Webhook 或 API 将真实广告数据回传至系统。
+        {!user 
+          ? "未登录账号，当前数据已重置为0。请先登录以查看或管理各平台广告回流数据。"
+          : !Object.values(platformAuths).some(v => v === 'authorized')
+            ? "已登录系统，但暂未授权任何媒体账号（数据均显示为0）。请点击右上角“添加账号”授权并登录抖音、TikTok、小红书、快手、B站账号。"
+            : "当前显示已授权平台的演示数据。实际使用时，通过平台 Webhook 或 API 将真实广告数据回传至系统。"
+        }
       </div>
 
       {/* KPI 指标 */}
@@ -298,24 +407,28 @@ export default function DataFeedbackPage() {
       </div>
 
       {/* 平台授权状态横条 */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-muted/10 border border-border/50 rounded-2xl p-3">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 bg-muted/10 border border-border/50 rounded-2xl p-3">
         {[
+          { key: 'douyin', label: '抖音' },
           { key: 'tiktok', label: 'TikTok' },
           { key: 'xiaohongshu', label: '小红书' },
           { key: 'kuaishou', label: '快手' },
           { key: 'bilibili', label: 'B站' },
         ].map(p => {
-          const auth = platformAuths[p.key] === 'authorized';
+          const auth = user && platformAuths[p.key] === 'authorized';
+          const badgeText = !user ? '未登录' : (auth ? '已授权' : '待授权');
           return (
             <div key={p.key} className="flex items-center justify-between px-3 py-2 rounded-xl bg-card border border-border/40">
               <span className="text-xs font-semibold text-muted-foreground">{p.label}</span>
               <span className={cn(
                 "text-[10px] font-bold px-2 py-0.5 rounded-full border",
-                auth 
-                  ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" 
-                  : "bg-amber-500/10 text-amber-500 border-amber-500/20"
+                !user
+                  ? "bg-destructive/10 text-destructive border-destructive/20"
+                  : auth 
+                    ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" 
+                    : "bg-amber-500/10 text-amber-500 border-amber-500/20"
               )}>
-                {auth ? '已授权' : '待授权'}
+                {badgeText}
               </span>
             </div>
           );
@@ -340,6 +453,7 @@ export default function DataFeedbackPage() {
             </CardHeader>
             <CardContent className="space-y-4 pt-2">
               {[
+                { key: 'douyin', label: '抖音', color: 'bg-black text-white hover:bg-black/90' },
                 { key: 'tiktok', label: 'TikTok', color: 'bg-black text-white hover:bg-black/90' },
                 { key: 'xiaohongshu', label: '小红书', color: 'bg-red-600 text-white hover:bg-red-700' },
                 { key: 'kuaishou', label: '快手', color: 'bg-orange-500 text-white hover:bg-orange-600' },
@@ -374,11 +488,11 @@ export default function DataFeedbackPage() {
                         if (status === 'pending') {
                           const id = toast.loading(`正在拉取 ${p.label} 授权页面...`);
                           setTimeout(() => {
-                            setPlatformAuths(prev => ({ ...prev, [p.key]: 'authorized' }));
-                            toast.success(`成功授权 ${p.label} 账号！`, { id });
+                            updatePlatformAuth(p.key, 'authorized');
+                            toast.success(`成功授权并登录 ${p.label} 账号！`, { id });
                           }, 1200);
                         } else {
-                          setPlatformAuths(prev => ({ ...prev, [p.key]: 'pending' }));
+                          updatePlatformAuth(p.key, 'pending');
                           toast.info(`已解除与 ${p.label} 的账号授权`);
                         }
                       }}

@@ -14,7 +14,7 @@ import {
   Video, Download, Trash2, Play, Search, Plus,
   Clock, CheckCircle2, AlertCircle, FileVideo, BarChart3, RefreshCw,
   Sparkles, ImagePlus, FlipHorizontal, Trophy, TrendingUp,
-  Zap, Target, Activity, Scissors, Upload, ImageIcon,
+  Zap, Target, Activity, Scissors, Upload, ImageIcon, Edit2,
 } from 'lucide-react';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -64,6 +64,32 @@ function WorkCard({
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [updatingCover, setUpdatingCover] = useState(false);
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [titleVal, setTitleVal] = useState(project.title);
+
+  useEffect(() => {
+    setTitleVal(project.title);
+  }, [project.title]);
+
+  const handleSaveTitle = async () => {
+    setIsEditingTitle(false);
+    if (!titleVal.trim() || titleVal.trim() === project.title) {
+      setTitleVal(project.title);
+      return;
+    }
+    try {
+      const { error } = await supabase
+        .from('video_projects')
+        .update({ title: titleVal.trim() })
+        .eq('id', project.id);
+      if (error) throw error;
+      toast.success('标题修改成功');
+      onReload();
+    } catch (err: any) {
+      toast.error('修改标题失败: ' + (err.message || err));
+      setTitleVal(project.title);
+    }
+  };
 
   const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -213,7 +239,35 @@ function WorkCard({
 
       {/* ── 信息区 ── */}
       <div className="px-4 pt-3 pb-1 flex-1 min-w-0">
-        <p className="text-sm font-semibold truncate text-balance" title={project.title}>{project.title}</p>
+        {isEditingTitle ? (
+          <Input
+            value={titleVal}
+            onChange={(e) => setTitleVal(e.target.value)}
+            onBlur={handleSaveTitle}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') handleSaveTitle();
+              if (e.key === 'Escape') {
+                setIsEditingTitle(false);
+                setTitleVal(project.title);
+              }
+            }}
+            autoFocus
+            className="h-7 text-xs py-0.5 px-2 font-medium bg-zinc-800/80 border-zinc-700 text-zinc-100 focus-visible:ring-1 focus-visible:ring-primary w-full"
+          />
+        ) : (
+          <div className="flex items-center gap-1.5 group/title">
+            <p className="text-sm font-semibold truncate text-balance flex-1" title={project.title}>
+              {project.title}
+            </p>
+            <button
+              onClick={(e) => { e.stopPropagation(); setIsEditingTitle(true); }}
+              className="p-1 rounded text-muted-foreground hover:text-primary hover:bg-muted opacity-0 group-hover/title:opacity-100 transition-all shrink-0"
+              title="编辑标题"
+            >
+              <Edit2 className="w-3 h-3" />
+            </button>
+          </div>
+        )}
         <div className="flex items-center gap-2 mt-1.5 flex-wrap">
           {project.video_style && (
             <span className="text-xs px-2 py-0.5 rounded-full bg-primary/15 text-primary font-medium">

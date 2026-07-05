@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { supabase } from '@/db/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -16,7 +16,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import {
-  Sparkles, Search, Languages, Camera, Download, Star, Check, Video, ArrowRight, Info, Eye
+  Sparkles, Search, Languages, Camera, Download, Star, Check, Video, ArrowRight, Info, Eye, Loader2, X
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -80,35 +80,6 @@ const MOCK_SELECTION_POOL: SelectableProduct[] = [
     associated_influencers: 4399,
     shop_type: "crossborder",
     product_type: "hot",
-    status: "active"
-  },
-  {
-    id: "sp-2",
-    name: "Thư cảm ơn quý khách hàng (Premium Thank You Greeting Cards for Shops)",
-    category: "居家日用",
-    original_price: 150000,
-    sale_price: 114819,
-    currency: "₫",
-    country: "越南",
-    country_flag: "🇻🇳",
-    rating: 4.9,
-    commission_rate: 8,
-    stock: 89000,
-    cover_image: "https://images.unsplash.com/photo-1607344645866-009c320c5ab8?w=200",
-    shop_name: "HuiLi.Vn",
-    shop_logo: "https://images.unsplash.com/photo-1516841273335-e39b37888115?w=50",
-    shop_sales: "343.57万",
-    influencer_rate: "-",
-    trend_data: [95, 110, 105, 90, 125, 115, 121],
-    sales_7d: "12.15万",
-    sales_7d_raw: 121500,
-    revenue_7d: "139.54亿₫ ($59.40万)",
-    total_sales: "201.33万",
-    total_sales_raw: 2013300,
-    total_revenue: "2079.41亿₫ ($885.19万)",
-    associated_influencers: 0,
-    shop_type: "local",
-    product_type: "free_shipping",
     status: "active"
   },
   {
@@ -336,9 +307,84 @@ const PRODUCT_STATUSES = [
   { value: 'inactive', label: '下架' }
 ];
 
+const TRANSLATIONS: Record<string, string> = {
+  "sp-1": "【热卖】SOCKS HOUSE 男士纯棉运动短袜 (10双超值装)",
+  "sp-3": "【护肤】Anua 77%鱼腥草舒缓控油爽肤水 250ml",
+  "sp-4": "【清洁】泊泉雅 水杨酸祛痘修护净颜面膜 120g",
+  "sp-5": "【速食】Indomie 营多牌经典印尼捞面 80g x 5包",
+  "sp-6": "【精华】卡尼尔 30倍维他命C强效美白提亮精华液 30ml",
+  "sp-7": "【清洁】高露洁 Max Fresh 冰爽劲白薄荷啫喱牙膏 150g",
+  "sp-8": "【洁面】COSRX 晨间温和弱酸性洁面凝胶 150ml"
+};
+
 export default function ProductSelectionPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
+
+  const [isTranslated, setIsTranslated] = useState(false);
+  const [translating, setTranslating] = useState(false);
+  const [isSearchingByImage, setIsSearchingByImage] = useState(false);
+  const [imageSearchProgress, setImageSearchProgress] = useState(0);
+  const [imageSearchPreview, setImageSearchPreview] = useState<string | null>(null);
+  const [hasActiveImageSearch, setHasActiveImageSearch] = useState(false);
+  const imageSearchInputRef = useRef<HTMLInputElement>(null);
+
+  const handleTranslateToggle = () => {
+    if (isTranslated) {
+      setIsTranslated(false);
+      toast.success('已恢复原始英文标题');
+      return;
+    }
+    setTranslating(true);
+    const toastId = toast.loading('AI 正在智能翻译商品标题及核心详情...');
+    setTimeout(() => {
+      setTranslating(false);
+      setIsTranslated(true);
+      toast.success('翻译完成！已成功切换至中文本地化展示', { id: toastId });
+    }, 1000);
+  };
+
+  const handleTriggerImageSearch = () => {
+    imageSearchInputRef.current?.click();
+  };
+
+  const handleImageSearchUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setImageSearchPreview(reader.result as string);
+        setIsSearchingByImage(true);
+        setImageSearchProgress(0);
+        
+        let progress = 0;
+        const interval = setInterval(() => {
+          progress += 8;
+          if (progress >= 100) {
+            clearInterval(interval);
+            setImageSearchProgress(100);
+            setTimeout(() => {
+              setIsSearchingByImage(false);
+              setHasActiveImageSearch(true);
+              toast.success('🎉 图搜匹配成功！已为您筛选出同款相似的美妆商品。');
+            }, 400);
+          } else {
+            setImageSearchProgress(progress);
+          }
+        }, 120);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleClearImageSearch = () => {
+    setHasActiveImageSearch(false);
+    setImageSearchPreview(null);
+    if (imageSearchInputRef.current) {
+      imageSearchInputRef.current.value = '';
+    }
+    toast.info('已重置商品列表');
+  };
   
   // ── 基础搜索 & 过滤状态 ──────────────────────────────────────────────────
   const [searchQuery, setSearchQuery] = useState('');
@@ -434,7 +480,7 @@ export default function ProductSelectionPage() {
 
       const payload = {
         user_id: user.id,
-        name: item.name,
+        name: isTranslated ? (TRANSLATIONS[item.id] || item.name) : item.name,
         category: targetCategory,
         sub_category: item.category,
         description: `【智能选品导入】来自${item.country}店铺 ${item.shop_name} 的爆款商品。7天销量达 ${item.sales_7d}。`,
@@ -470,10 +516,14 @@ export default function ProductSelectionPage() {
   // ── 计算过滤结果 ──────────────────────────────────────────────────────────
   const filteredProducts = useMemo(() => {
     return MOCK_SELECTION_POOL.filter(item => {
+      // 图搜同款过滤 (只展示美妆个护分类商品作为匹配结果)
+      if (hasActiveImageSearch && item.category !== '美妆个护') return false;
+
       // 搜索框过滤
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase();
-        const matchName = item.name.toLowerCase().includes(query);
+        const displayName = isTranslated ? (TRANSLATIONS[item.id] || item.name) : item.name;
+        const matchName = displayName.toLowerCase().includes(query) || item.name.toLowerCase().includes(query);
         const matchCategory = item.category.toLowerCase().includes(query);
         const matchShop = item.shop_name.toLowerCase().includes(query);
         if (!matchName && !matchCategory && !matchShop) return false;
@@ -532,7 +582,9 @@ export default function ProductSelectionPage() {
     selectedProductTypes,
     minCommission,
     minSales7d,
-    minTotalSales
+    minTotalSales,
+    isTranslated,
+    hasActiveImageSearch
   ]);
 
   // ── CSV 数据导出 ──────────────────────────────────────────────────────────
@@ -631,11 +683,35 @@ export default function ProductSelectionPage() {
             />
           </div>
           <div className="flex gap-2 shrink-0">
-            <Button variant="outline" className="h-11 px-4 gap-2 border-rose-100 dark:border-rose-950/30 text-xs font-medium rounded-xl hover:bg-rose-50 hover:text-rose-600">
-              <Languages className="w-4 h-4 text-rose-500" />
-              <span>翻译</span>
+            <input
+              type="file"
+              ref={imageSearchInputRef}
+              accept="image/*"
+              className="hidden"
+              onChange={handleImageSearchUpload}
+            />
+            <Button
+              variant={isTranslated ? "default" : "outline"}
+              onClick={handleTranslateToggle}
+              disabled={translating}
+              className={cn(
+                "h-11 px-4 gap-2 border-rose-100 dark:border-rose-950/30 text-xs font-medium rounded-xl transition-all",
+                isTranslated
+                  ? "bg-rose-100 text-rose-700 hover:bg-rose-200 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300"
+                  : "hover:bg-rose-50 hover:text-rose-600"
+              )}
+            >
+              {translating ? (
+                <Loader2 className="w-4 h-4 animate-spin text-rose-500" />
+              ) : (
+                <Languages className="w-4 h-4 text-rose-500" />
+              )}
+              <span>{isTranslated ? '显示英文' : '翻译中文'}</span>
             </Button>
-            <Button className="h-11 px-5 gap-2 bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white border-0 font-medium rounded-xl shadow-md shadow-rose-500/25 active:scale-95 transition-all">
+            <Button
+              onClick={handleTriggerImageSearch}
+              className="h-11 px-5 gap-2 bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white border-0 font-medium rounded-xl shadow-md shadow-rose-500/25 active:scale-95 transition-all"
+            >
               <Camera className="w-4 h-4" />
               <span>图搜同款</span>
             </Button>
@@ -836,6 +912,28 @@ export default function ProductSelectionPage() {
         </div>
       </div>
 
+      {hasActiveImageSearch && (
+        <div className="flex items-center justify-between p-3.5 bg-rose-50/80 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-950/15 rounded-xl text-xs">
+          <div className="flex items-center gap-2 text-rose-800 dark:text-rose-300">
+            {imageSearchPreview && (
+              <img src={imageSearchPreview} className="w-8 h-8 object-cover rounded-md border border-rose-200" alt="Search source" />
+            )}
+            <div>
+              <span className="font-semibold">已启用图搜同款过滤</span>
+              <p className="text-[10px] text-muted-foreground mt-0.5">正在为您展示与上传图片视觉特征最相似的商品货源</p>
+            </div>
+          </div>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={handleClearImageSearch}
+            className="h-8 px-2.5 text-rose-600 hover:bg-rose-100/50 hover:text-rose-700 font-semibold"
+          >
+            <X className="w-3.5 h-3.5 mr-1" /> 重置筛选
+          </Button>
+        </div>
+      )}
+
       {/* ── 商品列表表格 ──────────────────────────────────────────────────── */}
       <div className="bg-card border border-rose-100 dark:border-rose-950/20 rounded-2xl shadow-sm overflow-hidden">
         <Table>
@@ -877,8 +975,8 @@ export default function ProductSelectionPage() {
                           }}
                         />
                         <div className="flex flex-col justify-between min-w-0">
-                          <p className="text-xs font-semibold leading-tight text-foreground line-clamp-2 hover:text-rose-500 transition-colors" title={item.name}>
-                            {item.name}
+                          <p className="text-xs font-semibold leading-tight text-foreground line-clamp-2 hover:text-rose-500 transition-colors" title={isTranslated ? (TRANSLATIONS[item.id] || item.name) : item.name}>
+                            {isTranslated ? (TRANSLATIONS[item.id] || item.name) : item.name}
                           </p>
                           <div className="flex flex-wrap items-center gap-1.5 mt-1">
                             <span className="text-xs font-bold text-rose-500">
@@ -1076,6 +1174,53 @@ export default function ProductSelectionPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* ── 图搜扫描动画弹窗 ──────────────────────────────────────────────── */}
+      <Dialog open={isSearchingByImage} onOpenChange={setIsSearchingByImage}>
+        <DialogContent className="max-w-xs rounded-2xl bg-zinc-950 border border-zinc-800/80 p-6 flex flex-col items-center justify-center text-center">
+          <DialogHeader className="w-full">
+            <DialogTitle className="text-sm font-bold text-zinc-200 flex items-center justify-center gap-1.5">
+              <Camera className="w-4 h-4 text-rose-500 animate-pulse" /> 智能以图搜款
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="mt-4 relative w-32 h-32 rounded-xl overflow-hidden border border-zinc-800 bg-zinc-900 flex items-center justify-center">
+            {imageSearchPreview ? (
+              <img src={imageSearchPreview} className="w-full h-full object-cover" alt="Searching" />
+            ) : (
+              <Camera className="w-8 h-8 text-zinc-600" />
+            )}
+            
+            {/* 扫描线动画 */}
+            <div className="absolute inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-rose-500 to-transparent top-0 animate-[scan_2s_ease-in-out_infinite]" style={{ animation: 'scan 2s ease-in-out infinite' }} />
+            <div className="absolute inset-0 bg-rose-500/5 pointer-events-none" />
+          </div>
+
+          <div className="mt-4 w-full space-y-1">
+            <p className="text-xs text-zinc-400 font-medium">AI 正在提取视觉特征并在全球供应链检索...</p>
+            <div className="flex justify-between text-[10px] text-zinc-500 px-1 pt-1.5">
+              <span>检索中...</span>
+              <span>{imageSearchProgress}%</span>
+            </div>
+            {/* 进度条 */}
+            <div className="w-full h-1.5 bg-zinc-900 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-gradient-to-r from-rose-500 to-pink-500 transition-all duration-150"
+                style={{ width: `${imageSearchProgress}%` }}
+              />
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <style>{`
+        @keyframes scan {
+          0% { top: 0%; opacity: 0; }
+          10% { opacity: 1; }
+          90% { opacity: 1; }
+          100% { top: 100%; opacity: 0; }
+        }
+      `}</style>
     </div>
   );
 }

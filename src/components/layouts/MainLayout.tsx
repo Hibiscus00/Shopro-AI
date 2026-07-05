@@ -28,17 +28,8 @@ export type ThemeType = 'light' | 'dark';
 
 function useThemePersist() {
   const [theme, setTheme] = useState<ThemeType>(() => {
-    const saved = localStorage.getItem('theme') as ThemeType;
-    if (saved && ['light', 'dark'].includes(saved)) return saved as ThemeType;
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    return 'dark';
   });
-
-  useEffect(() => {
-    const root = document.documentElement;
-    root.classList.remove('dark', 'theme-ecommerce');
-    if (theme === 'dark') root.classList.add('dark');
-    localStorage.setItem('theme', theme);
-  }, [theme]);
 
   return { theme, setTheme };
 }
@@ -90,7 +81,7 @@ type SearchResult = {
 };
 
 // F-09: 全局搜索组件
-function GlobalSearch() {
+function GlobalSearch({ isDarkHeader }: { isDarkHeader: boolean }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -149,13 +140,17 @@ function GlobalSearch() {
 
   return (
     <>
-      {/* 搜索触发按钮 */}
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-2 h-9 px-3 rounded-lg border border-border/60 bg-muted/40 hover:bg-muted/70 transition-colors text-sm text-muted-foreground md:w-[420px] w-full min-w-0"
+        className={cn(
+          "flex items-center gap-2 h-9 px-3 rounded-lg border transition-colors text-sm md:w-[420px] w-full min-w-0",
+          isDarkHeader
+            ? "border-white/10 bg-white/5 hover:bg-white/10 text-white/50"
+            : "border-zinc-200 bg-zinc-50 hover:bg-zinc-100 text-zinc-500"
+        )}
       >
-        <Search className="w-4 h-4 shrink-0" />
-        <span className="hidden md:inline truncate">搜索商品、视频、素材</span>
+        <Search className={cn("w-4 h-4 shrink-0", isDarkHeader ? "text-white/40" : "text-zinc-400")} />
+        <span className={cn("hidden md:inline truncate", isDarkHeader ? "text-white/60" : "text-zinc-500")}>搜索商品、视频、素材</span>
       </button>
 
       {/* 全屏搜索弹窗 */}
@@ -253,7 +248,6 @@ function AIToolboxNavItem({ onNavClick }: { onNavClick?: () => void }) {
       >
         <LayoutGrid className={cn('w-4 h-4 shrink-0 transition-colors', isActive ? 'text-primary' : 'text-sidebar-foreground/50 group-hover:text-sidebar-foreground')} />
         <span className="flex-1 text-left">AI工具箱</span>
-        <ChevronRight className={cn('w-3.5 h-3.5 shrink-0 transition-transform duration-200 text-sidebar-foreground/40', open && 'rotate-90')} />
       </button>
 
       {/* 二级子菜单 */}
@@ -385,7 +379,7 @@ const NOTIF_INITIAL = [
   { id: '3', title: '系统更新 v42', body: 'AI工具箱升级、数字人库融合视频模板', time: '5小时前', unread: false },
 ];
 
-function TopBarNotificationBell() {
+function TopBarNotificationBell({ isDarkHeader }: { isDarkHeader: boolean }) {
   const navigate = useNavigate();
   const [notifs, setNotifs] = useState(NOTIF_INITIAL);
   const unread = notifs.filter(n => n.unread).length;
@@ -402,10 +396,10 @@ function TopBarNotificationBell() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative shrink-0 text-muted-foreground hover:text-foreground">
+        <Button variant="ghost" size="icon" className={cn("relative shrink-0", isDarkHeader ? "text-white/60 hover:text-white hover:bg-white/10" : "text-zinc-500 hover:text-zinc-800 hover:bg-zinc-100")}>
           <Bell className="w-4 h-4" />
           {unread > 0 && (
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-destructive border-2 border-background" />
+            <span className={cn("absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-destructive border-2", isDarkHeader ? "border-[#0e0e12]" : "border-white")} />
           )}
         </Button>
       </DropdownMenuTrigger>
@@ -478,7 +472,7 @@ function getDisplayAvatar(url: string | null | undefined) {
   return url;
 }
 
-function TopBarUserMenu() {
+function TopBarUserMenu({ isDarkHeader }: { isDarkHeader: boolean }) {
   const { profile, signOut } = useAuth();
   const navigate = useNavigate();
 
@@ -489,7 +483,12 @@ function TopBarUserMenu() {
     <Button
       variant="ghost"
       size="sm"
-      className="h-8 px-2 gap-2 shrink-0 hover:bg-muted"
+      className={cn(
+        "h-8 px-2 gap-2 shrink-0",
+        isDarkHeader
+          ? "hover:bg-white/10 text-white/80 hover:text-white"
+          : "hover:bg-zinc-100 text-zinc-700 hover:text-zinc-950"
+      )}
       onClick={() => navigate('/profile')}
       title="个人中心"
     >
@@ -499,7 +498,7 @@ function TopBarUserMenu() {
           {initial}
         </AvatarFallback>
       </Avatar>
-      <span className="text-sm font-medium hidden md:block max-w-[80px] truncate">{username}</span>
+      <span className={cn("text-sm font-medium hidden md:block max-w-[80px] truncate", isDarkHeader ? "text-white/80" : "text-zinc-700")}>{username}</span>
     </Button>
   );
 }
@@ -514,6 +513,13 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   const isVideoCreatePage = location.pathname.startsWith('/video/create');
   const isVideoEditPage = location.pathname.startsWith('/video/edit');
 
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.remove('theme-ecommerce');
+    root.classList.add('dark');
+    localStorage.setItem('theme', 'dark');
+  }, []);
+
   return (
     <div className="flex min-h-screen w-full bg-background">
       {/* 桌面端侧边栏 */}
@@ -524,76 +530,80 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       {/* 主内容区 */}
       <div className="flex-1 min-w-0 flex flex-col overflow-x-hidden">
         {/* 顶部栏：移动端汉堡 + 全局搜索（桌面端也显示） */}
-        {!isVideoEditPage && !isVideoCreatePage && (
-          <header className="flex items-center gap-3 px-4 h-14 border-b bg-card shrink-0" style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
-            {/* 移动端菜单 */}
-            <div className="lg:hidden">
-              <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-                <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon" className="shrink-0">
-                    <Menu className="w-5 h-5" />
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="left" className="w-64 p-0 bg-sidebar border-sidebar-border">
-                  <SidebarContent onNavClick={() => setMobileOpen(false)} />
-                </SheetContent>
-              </Sheet>
-            </div>
-
-            {/* 移动端 Logo */}
-            <Link to="/landing" className="lg:hidden flex items-center gap-2 min-w-0 shrink-0">
-              <img src="/shopro.png" className="w-7 h-7 object-contain shrink-0" alt="Shopro Logo" />
-              <span className="font-semibold text-sm truncate">电商AIGC带货视频</span>
-            </Link>
-
-            {/* F-09: 全局搜索 — 桌面端占满剩余空间，移动端缩小 */}
-            <div className="flex-1 min-w-0 flex items-center">
-              <GlobalSearch />
-            </div>
-
-            {/* 右上角工具栏：通知 + 主题切换 + 邀请/积分 + 头像 */}
-            <div className="flex items-center gap-1 shrink-0">
-              {/* 消息通知 */}
-              <TopBarNotificationBell />
-
-
-
-              {/* 邀请有礼 + 积分套餐 */}
-              <div className="hidden md:flex items-center">
-                <Link to="/credits?tab=invite">
-                  <button className="flex items-center gap-1.5 h-8 px-3.5 rounded-full font-bold text-[11px] sm:text-xs text-white bg-gradient-to-r from-[#FFB706] to-[#FF5E03] shadow-md shadow-orange-500/20 hover:brightness-110 active:scale-95 transition-all duration-200">
-                    <Gift className="w-3.5 h-3.5 shrink-0 text-white" />
-                    <span>邀请有礼 · 积分</span>
-                  </button>
-                </Link>
+        {!isVideoEditPage && (() => {
+          const isDarkHeader = isVideoCreatePage;
+          return (
+            <header className={cn("flex items-center gap-3 px-4 h-14 border-b shrink-0", isDarkHeader ? "bg-[#0e0e12] border-white/5" : "bg-white border-zinc-200")}>
+              {/* 移动端菜单 */}
+              <div className="lg:hidden">
+                <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+                  <SheetTrigger asChild>
+                    <Button variant="ghost" size="icon" className={cn("shrink-0", isDarkHeader ? "text-white/80 hover:text-white hover:bg-white/10" : "text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100")}>
+                      <Menu className="w-5 h-5" />
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent side="left" className="w-64 p-0 bg-sidebar border-sidebar-border">
+                    <SidebarContent onNavClick={() => setMobileOpen(false)} />
+                  </SheetContent>
+                </Sheet>
               </div>
 
-              {/* 头像 */}
-              <TopBarUserMenu />
+              {/* 移动端 Logo */}
+              <Link to="/landing" className="lg:hidden flex items-center gap-2 min-w-0 shrink-0">
+                <img src="/shopro.png" className="w-7 h-7 object-contain shrink-0" alt="Shopro Logo" />
+                <span className={cn("font-semibold text-sm truncate", isDarkHeader ? "text-white" : "text-zinc-900")}>电商AIGC带货视频</span>
+              </Link>
 
-              {/* 退出登录 */}
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="h-8 px-2 text-muted-foreground hover:text-destructive hover:bg-destructive/5 shrink-0 flex items-center gap-1.5 transition-colors rounded-lg"
-                title="退出登录"
-                onClick={async () => {
-                  try {
-                    await signOut();
-                  } catch (e: any) {
-                    console.error('Logout error:', e);
-                  }
-                  toast.success('已成功退出登录');
-                  navigate('/login');
-                }}
-              >
-                <LogOut className="w-4 h-4" />
-                <span className="text-xs font-semibold hidden md:inline">退出</span>
-              </Button>
-            </div>
-          </header>
-        )}
+              {/* 占位弹性空间 */}
+              <div className="flex-1 min-w-0" />
+
+              {/* 右上角工具栏：通知 + 主题切换 + 邀请/积分 + 头像 */}
+              <div className="flex items-center gap-1 shrink-0">
+                {/* 消息通知 */}
+                <TopBarNotificationBell isDarkHeader={isDarkHeader} />
+
+                {/* 邀请有礼 + 积分套餐 */}
+                <div className="hidden md:flex items-center">
+                  <Link to="/credits?tab=invite">
+                    <button className="flex items-center gap-1.5 h-8 px-3.5 rounded-full font-bold text-[11px] sm:text-xs text-white bg-gradient-to-r from-[#FFB706] to-[#FF5E03] shadow-md shadow-orange-500/20 hover:brightness-110 active:scale-95 transition-all duration-200">
+                      <Gift className="w-3.5 h-3.5 shrink-0 text-white" />
+                      <span>邀请有礼 · 积分</span>
+                    </button>
+                  </Link>
+                </div>
+
+                {/* 头像 */}
+                <TopBarUserMenu isDarkHeader={isDarkHeader} />
+
+                {/* 退出登录 */}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className={cn(
+                    "h-8 px-2 shrink-0 flex items-center gap-1.5 transition-colors rounded-lg",
+                    isDarkHeader
+                      ? "text-white/60 hover:text-red-400 hover:bg-red-500/10"
+                      : "text-zinc-500 hover:text-red-600 hover:bg-red-50"
+                  )}
+                  title="退出登录"
+                  onClick={async () => {
+                    try {
+                      await signOut();
+                    } catch (e: any) {
+                      console.error('Logout error:', e);
+                    }
+                    toast.success('已成功退出登录');
+                    navigate('/login');
+                  }}
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span className="text-xs font-semibold hidden md:inline">退出</span>
+                </Button>
+              </div>
+            </header>
+          );
+        })()}
 
         {/* 页面内容 */}
         <main className="flex-1 min-w-0 overflow-x-hidden">
