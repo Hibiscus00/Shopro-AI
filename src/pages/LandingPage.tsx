@@ -947,17 +947,86 @@ export default function LandingPage() {
       </section>
 
       {/* ── Footer ── */}
-      <footer className="py-8 border-t border-white/5 text-center">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-white/25">
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-md flex items-center justify-center"
-                style={{ background: 'linear-gradient(135deg, #FF6B00, #FFB347)' }}>
-                <Sparkles className="w-3 h-3 text-white" />
+      <footer className="bg-[#0a0c0f] text-white border-t border-white/5 pt-16 pb-12 font-sans select-none">
+        <div className="max-w-7xl mx-auto px-4 md:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 pb-12 justify-items-center text-center">
+            {/* 左侧 Logo 和介绍 */}
+            <div className="flex flex-col items-center space-y-4 max-w-xs">
+              <div className="flex items-center gap-2.5">
+                <img src="/shopro.png" className="w-8 h-8 object-contain shrink-0" alt="Shopro Logo" />
+                <span className="text-lg font-bold text-white tracking-tight">
+                  Shopro 电商AIGC
+                </span>
               </div>
-              <span className="text-white/40 font-medium">Shopro-电商AIGC带货视频</span>
+              <p className="text-sm text-white/50 leading-relaxed text-pretty">
+                AI 驱动的电商AIGC带货视频生成平台，让视频营销及商品管理更精准、更高效。
+              </p>
             </div>
-            <p>© 2025 Shopro. 保留所有权利</p>
+
+            {/* 产品 */}
+            <div className="flex flex-col items-center space-y-4">
+              <h4 className="text-sm font-bold text-white tracking-wider">产品</h4>
+              <ul className="space-y-2.5 text-xs text-white/40">
+                <li>
+                  <a href="#功能" onClick={(e) => {
+                    e.preventDefault();
+                    document.getElementById('功能')?.scrollIntoView({ behavior: 'smooth' });
+                  }} className="hover:text-[#FF6B00] transition-colors">
+                    功能介绍
+                  </a>
+                </li>
+                <li>
+                  <a href="#会员计划" onClick={(e) => {
+                    e.preventDefault();
+                    document.getElementById('会员计划')?.scrollIntoView({ behavior: 'smooth' });
+                  }} className="hover:text-[#FF6B00] transition-colors">
+                    价格方案
+                  </a>
+                </li>
+                <li>
+                  <a href="#用户评价" onClick={(e) => {
+                    e.preventDefault();
+                    document.getElementById('用户评价')?.scrollIntoView({ behavior: 'smooth' });
+                  }} className="hover:text-[#FF6B00] transition-colors">
+                    更新日志
+                  </a>
+                </li>
+                <li>
+                  <a href="/login" className="hover:text-[#FF6B00] transition-colors">
+                    API 文档
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            {/* 公司 */}
+            <div className="flex flex-col items-center space-y-4">
+              <h4 className="text-sm font-bold text-white tracking-wider">公司</h4>
+              <ul className="space-y-2.5 text-xs text-white/40">
+                <li><a href="#" className="hover:text-[#FF6B00] transition-colors">关于我们</a></li>
+                <li><a href="#" className="hover:text-[#FF6B00] transition-colors">加入团队</a></li>
+                <li><a href="#" className="hover:text-[#FF6B00] transition-colors">合作伙伴</a></li>
+                <li><a href="#" className="hover:text-[#FF6B00] transition-colors">媒体资料</a></li>
+              </ul>
+            </div>
+
+            {/* 支持 */}
+            <div className="flex flex-col items-center space-y-4">
+              <h4 className="text-sm font-bold text-white tracking-wider">支持</h4>
+              <ul className="space-y-2.5 text-xs text-white/40">
+                <li><a href="#" className="hover:text-[#FF6B00] transition-colors">帮助中心</a></li>
+                <li><a href="#" className="hover:text-[#FF6B00] transition-colors">联系客服</a></li>
+                <li><a href="#" className="hover:text-[#FF6B00] transition-colors">用户协议</a></li>
+                <li><a href="#" className="hover:text-[#FF6B00] transition-colors">隐私政策</a></li>
+              </ul>
+            </div>
+          </div>
+
+          {/* 底部版权信息 */}
+          <div className="pt-8 border-t border-white/5 text-center">
+            <p className="text-xs text-white/30 tracking-wide">
+              © 2026 Shopro 电商AIGC带货视频 · 保留所有权利
+            </p>
           </div>
         </div>
       </footer>
