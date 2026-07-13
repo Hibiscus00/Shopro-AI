@@ -1,4 +1,4 @@
-# 🎬 Shopro-抖音电商AIGC带货视频生成系统 核心宣传图提示词
+# 🎬 Shopro AI - 抖音/TikTok 电商 AIGC 带货视频系统 核心宣传图提示词
 ## 🖼️ 核心宣传图与海报 AI 绘图提示词 (Promotional Key Visuals)
 
 为了方便《Shopro-抖音电商AIGC带货视频生成系统》在商业发布、路演、展会等场景下的推广，以下针对本项目（暗色玻璃态科技美学、橙黄渐变主色调、数字人克隆、可视化剪辑、爆款复刻、数据看板等核心元素）量身定制了**PPT主视觉/封面宣传图**以及**A3竖版宣传海报图**的专业 AI 电商风格绘图提示词。
@@ -47,7 +47,7 @@
 ---
 
 ### Slide 2: 一、产品概述 🎯 | 项目简介与核心价值
-*   **视觉概念**：一部高质感的 3D 智能手机漂浮在空中，屏幕上展示着商品详情页链接（URL）化作一条金色的光带，飞入一条代表 20 分钟极速生成的视频时间轴中。
+*   **视觉概念**：一部高质感的 3D 智能手机漂浮在空中，屏幕上展示着商品详情页链接（URL）化作一条金色的光带，飞入一条代表 3分钟极速生成的视频时间轴中。
 *   **Midjourney 提示词**：
     ```text
     A high-tech 3D smartphone floating in dark void, a glowing orange beam representing web URL flow out of the screen and transforming into a circular cinema film strip with video frames, futuristic glassmorphic UI, glowing holographic text elements, warm amber accent, 8k, photorealistic, premium tech presentation --ar 16:9 --v 6.0

@@ -675,7 +675,7 @@ export default function LoginPage() {
                 <Sparkles className="w-3.5 h-3.5 text-primary animate-pulse" /> 快速免密体验通道
               </p>
               <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                {[{ user: 'demo_user', pwd: 'demo123456' }, { user: 'test_user', pwd: 'test123456' }].map(({ user, pwd }) => (
+                {[{ user: 'test_user', pwd: 'test123456' }, { user: 'demo_user', pwd: 'demo123456' }].map(({ user, pwd }) => (
                   <button
                     key={user}
                     type="button"

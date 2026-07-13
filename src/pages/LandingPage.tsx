@@ -571,12 +571,14 @@ export default function LandingPage() {
                 style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.6) 50%, transparent 100%)', animation: 'scan-line 1s ease infinite' }} />
             </button>
 
-            <button
-              onClick={goToApp}
-              className="px-8 py-4 rounded-xl text-base font-semibold text-white/80 border border-white/15 hover:border-white/35 hover:text-white transition-all duration-200 hover:bg-white/5 backdrop-blur-sm"
+            <a
+              href="https://my.feishu.cn/wiki/FF9KwlgBQihnK5kkzT5c6lI5nub?from=from_copylink"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center px-8 py-4 rounded-xl text-base font-semibold text-white/80 border border-white/15 hover:border-white/35 hover:text-white transition-all duration-200 hover:bg-white/5 backdrop-blur-sm"
             >
-              查看演示 <span className="ml-1">→</span>
-            </button>
+              开源文档
+            </a>
           </div>
 
           {/* 信任信号 */}
