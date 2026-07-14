@@ -62,9 +62,11 @@ const QUICK_TOOLS = [
 
 
 // 模型与对应后端标识
-type ModelId = 'Seedance' | 'Kling' | 'Krea' | 'Luma' | 'pixverse';
+type ModelId = 'Seedance' | 'Kling' | 'Krea' | 'Luma' | 'pixverse' | 'happyhorse' | 'wan';
 const MODELS: { label: string; id: ModelId }[] = [
   { label: 'Seedance 2.0', id: 'Seedance' },
+  { label: 'happyhorse 1.0', id: 'happyhorse' },
+  { label: 'wan2.7', id: 'wan' },
   { label: 'Kling', id: 'Kling' },
   { label: 'Krea', id: 'Krea' },
   { label: 'Luma', id: 'Luma' },
@@ -165,7 +167,7 @@ const INSPIRE_VIDEOS = [
 ];
 
 const FILTER_CONFIG = [
-  { key: 'model', label: '模型', options: ['全部', 'Seedance 2.0', 'Kling', 'Krea', 'Luma', 'pixverse'] },
+  { key: 'model', label: '模型', options: ['全部', 'Seedance 2.0', 'happyhorse 1.0', 'wan2.7', 'Kling', 'Krea', 'Luma', 'pixverse'] },
   { key: 'ratio', label: '比例', options: ['全部', '9:16', '16:9', '1:1', '3:4'] },
   { key: 'refImage', label: '参考图', options: ['全部', '有参考图', '无参考图'] },
   { key: 'firstLast', label: '首尾帧', options: ['全部', '有首尾帧', '无首尾帧'] },
@@ -744,7 +746,7 @@ export default function HomePage() {
         }
         setTaskId(task_id);
         pollKling(task_id, dbProjectId);
-      } else if (['Krea', 'Luma', 'pixverse'].includes(model.id)) {
+      } else if (['Krea', 'Luma', 'pixverse', 'happyhorse', 'wan'].includes(model.id)) {
         // 模拟生成过程，展示高保真原型
         let dbProjectId: string | null = null;
         if (user) {

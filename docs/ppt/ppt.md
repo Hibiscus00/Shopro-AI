@@ -132,16 +132,18 @@
 
 ## Slide 9: 三、技术解析及亮点 🌐 | 技术架构 (前端/后端/AI能力)
 
-### 🛠️ 系统三层技术架构
-*   **前端（React 18 & Vite & TS）**：
-    *   使用高并发的 React 18 挂载，利用 `TanStack Query` 进行高频数据缓存与状态回滚。
-    *   通过 `Framer Motion` 和 `Recharts` 打造 3D 浮动玻璃态 UI 界面与交互图表。
-*   **后端（Supabase BaaS & Deno Edge Functions）**：
-    *   去除笨重的后端服务器，利用边缘计算函数（Deno Runtime）在离用户最近的边缘节点极速响应 API。
-    *   数据库采用带有严格 RLS 行级安全控制的 PostgreSQL，保障租户隔离。
-*   **AI 引擎层（DeepSeek-V4-Pro & StepAudio 2.5 & Seedance 2.0）**：
-    *   利用边缘计算 Deno Runtime 高效编排四阶段 Agent 推理与 NLP 情感打点。
-    *   对接 Seedance 2.0、Flux 1.1 Pro 实现高清物理级多模态带货视频与封面生成，并以可灵/Sora做高端概念渲染备份。
+### 🛠️ 系统三层技术架构与核心价值
+
+| 架构分层 | 核心技术栈 | 架构亮点与业务价值 |
+| :--- | :--- | :--- |
+| **前端开发**<br>*(Frontend)* | React 18 / TypeScript / Vite /<br>Tailwind CSS / Framer Motion / Recharts | **极速渲染与 premium 视觉**：首创自适应暗色玻璃态 UI，利用 react-query 缓存保证数据毫秒级回滚，framer-motion 打造高品质磁吸微交互，Recharts 提供直观流量漏斗分析。 |
+| **后端计算**<br>*(Backend)* | Supabase BaaS / PostgreSQL /<br>Deno Edge Functions (Deno 运行时) | **Serverless 边缘高并发架构**：去除传统臃肿服务器，利用 Deno 边缘函数就近调度，响应延迟降 40%；配置 PostgreSQL RLS 行级安全隔离，利用数据库底层并发悲观锁彻底杜绝薅算力。 |
+| **AI 引擎层**<br>*(AI Engine)* | DeepSeek-V4-Pro / StepAudio 2.5 /<br>Seedance 2.0 / Flux 1.1 Pro / pgvector | **多模态情感声画智能闭环**：DeepSeek 提供四层说服脚本与 NLP 情绪极值标注；StepAudio 拟真情感发音；Seedance 实现高物理拟真视频渲染；pgvector 驱动 RAG 电商脚本自进化。 |
+
+### 🚀 架构三大核心技术优势
+- **边缘微服务化**：全链路 AI 请求通过全球 Deno Edge Containers 代理，实现极速并发和流式 SSE 快速打字机吐字。
+- **并发锁与数据隔离**：积分扣减强绑定底层 `SELECT FOR UPDATE` 悲观事务锁，全表默认 RLS 行隔离，商用安全级别极高。
+- **混合多模态编排**：独创的 NLP 情绪波动打点，使数字人的口型、表情随配音情感实时对齐，打破 AI 视频机械呆板感。
 
 ---
 

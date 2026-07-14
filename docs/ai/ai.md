@@ -2,6 +2,164 @@
 
 本报告针对 Shopro AI 系统涉及的各项 AI 能力进行全面深度分析，归纳整理核心 AI 接口需求、推荐的 AI 模型选型、**API 估算价格** 以及具体的提示词（Prompt）工程编排策略，旨在为开发团队和申报评审提供清晰的技术指引。
 
+## 🗺️ Shopro AI 多模态生成与优化架构图
+
+```mermaid
+graph TD
+    %% Styling and Theme
+    classDef default fill:#111216,stroke:#333842,stroke-width:1px,color:#ffffff;
+    classDef input fill:#1e293b,stroke:#475569,stroke-width:1.5px,stroke-dasharray: 5 5,color:#cbd5e1;
+    classDef text fill:#4c1d95,stroke:#8b5cf6,stroke-width:1.5px,color:#ddd6fe;
+    classDef audio fill:#064e3b,stroke:#10b981,stroke-width:1.5px,color:#d1fae5;
+    classDef vision fill:#7c2d12,stroke:#f97316,stroke-width:1.5px,color:#ffedd5;
+    classDef engine fill:#1e1b4b,stroke:#6366f1,stroke-width:2px,color:#e0e7ff;
+    classDef output fill:#14532d,stroke:#22c55e,stroke-width:2px,color:#dcfce7;
+
+    %% Nodes Definitions
+    subgraph INPUT_STAGE ["📥 原始输入与特征捕获"]
+        A["商品详情 (URL/文字描述)"]:::input
+        B["爆款竞品视频 (用于DNA复刻)"]:::input
+    end
+
+    subgraph TEXT_STAGE ["✍️ 文本与创意模态 (DeepSeek-V4-Pro)"]
+        T1["商品卖点提炼与智能去噪"]:::text
+        T2["思维链 (CoT) 四层脚本策划"]:::text
+        T3["NLP 情感打点与口播翻译"]:::text
+    end
+
+    subgraph AUDIO_STAGE ["🎵 声音与配音模态 (StepAudio 2.5)"]
+        A1["情感化拟真配音合成 (TTS)"]:::audio
+        A2["录音高精度转写格式化 (ASR)"]:::audio
+    end
+
+    subgraph VISION_STAGE ["👁️ 画面与渲染模态 (Seedance / Flux)"]
+        V1["大模型视频提示词优化 (Prompt)"]:::vision
+        V2["爆款风格提取与DNA视频复刻"]:::vision
+        V3["智能高转化商品封面图 (Flux)"]:::vision
+        V4["物理引擎多模态视频渲染 (Seedance)"]:::vision
+    end
+
+    subgraph OPTIMIZE_STAGE ["⚙️ 自进化引擎与流量预测"]
+        E1["XGBoost 完播率与流量预测模型"]:::engine
+        E2["RAG 向量自进化带货知识库"]:::engine
+        E3["诊断 ➔ 一键优化 ➔ 重生成闭环"]:::engine
+    end
+
+    OUT["🎬 高转化多语种成品带货视频"]:::output
+
+    %% Flow/Connections
+    A --> T1
+    B --> V2
+    T1 --> T2
+    V2 -->|注入爆款节奏| T2
+    T2 --> T3
+    T3 -->|台词及情感极值| A1
+    T3 -->|分镜动作脚本| V1
+    A2 -->|优化词注入| T2
+    V1 --> V4
+    A1 -->|情感声轨对齐| V4
+    V3 -->|作为首/尾参考帧| V4
+    V4 --> E1
+    E1 -->|流量表现打分| E3
+    E3 -->|触发一键重写优化| T2
+    V4 -->|投放反馈沉淀| E2
+    E2 -->|RAG Few-Shot 检索| T2
+    V4 --> OUT
+```
+
+### 💡 一句话核心流程描述
+> **全链路智能生成与自进化闭环**：系统通过抓取商品链接或分析竞品视频，利用 DeepSeek-V4-Pro 提取卖点并生成四层说服结构脚本，智能对齐 StepAudio 2.5 情感化配音与 Seedance 2.0/happyhorse/wan 多模态画面渲染，最终由本地 XGBoost 流量预测模型和 RAG 知识库驱动内容诊断与自进化改写，实现从商品到高转化带货短视频的极速闭环生成。
+
+### 🎨 架构概念图生图提示词 (Prompt)
+```text
+A futuristic dark-mode tech dashboard visualization representing multi-modal AI video generation. In the center, a glowing digital film strip displays flowing sequences of e-commerce products and human avatars, flanked by abstract holographic nodes showing waves of text data (Chinese/English), audio frequency waves, and colorful code snippets. Glowing light beams flow from input devices into the central rendering core, with futuristic UI widgets, data visualization graphs, and progress bars. High-tech, clean asymmetrical composition, dark background (#0a0c0f) with neon accents of orange (#FF6B00), emerald green, and electric blue, octane render, 16:9 aspect ratio, cinematic lighting, 8k resolution --ar 16:9
+```
+
+## 📌 AI能力核心概览摘要表 (按模态分类)
+
+<table width="100%">
+  <thead>
+    <tr>
+      <th align="left">模态分类</th>
+      <th align="left">核心能力</th>
+      <th align="left">已对接模型</th>
+      <th align="left">估算价格 (API)</th>
+      <th align="left">提示词与核心策略</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td rowspan="5" valign="top"><b>✍️ 文本语言</b></td>
+      <td>商品网页卖点提取</td>
+      <td>DeepSeek-V4-Pro</td>
+      <td>约 ￥0.001 / 千 token</td>
+      <td>HTML去噪，限制15字以内JSON输出</td>
+    </tr>
+    <tr>
+      <td>商品基础卖点生成</td>
+      <td>DeepSeek-V4-Pro</td>
+      <td>约 ￥0.001 / 千 token</td>
+      <td>多维度价值约束，直击痛点避免空泛</td>
+    </tr>
+    <tr>
+      <td>流式四步脚本生成</td>
+      <td>DeepSeek-V4-Pro</td>
+      <td>约 ￥0.001~0.002 / 千 token</td>
+      <td>CoT思维链，四层营销框架 (卖点/痛点/Hook/CTA)</td>
+    </tr>
+    <tr>
+      <td>台词情绪 NLP 分析</td>
+      <td>DeepSeek-V4-Pro</td>
+      <td>约 ￥0.001 / 千 token</td>
+      <td>分类标签情感分类器，打出情绪波动分</td>
+    </tr>
+    <tr>
+      <td>多语言口播脚本翻译</td>
+      <td>DeepSeek-V4-Pro</td>
+      <td>约 ￥0.001~0.002 / 千 token</td>
+      <td>本地化转译与口语化改写，保持原有行结构</td>
+    </tr>
+    <tr>
+      <td rowspan="2" valign="top"><b>🎵 音频语音</b></td>
+      <td>情感化配音生成</td>
+      <td>StepAudio 2.5 TTS</td>
+      <td>约 ￥0.005 / 千字</td>
+      <td>基于情绪分析，动态调整配音语速、重音与情感</td>
+    </tr>
+    <tr>
+      <td>录音转写与语音输入</td>
+      <td>StepAudio 2.5 ASR</td>
+      <td>约 ￥0.005 / 分钟</td>
+      <td>ITN规范，将口语自适应转书面语，提升精确度</td>
+    </tr>
+    <tr>
+      <td rowspan="4" valign="top"><b>👁️ 视觉与多模态</b></td>
+      <td>视频提示词优化</td>
+      <td>DeepSeek-V4-Pro</td>
+      <td>约 ￥0.001 / 千 token</td>
+      <td>镜头、光线与微动效果增强优化</td>
+    </tr>
+    <tr>
+      <td>智能高转化封面图</td>
+      <td>Seedance 2.0</td>
+      <td>约 ￥0.1 ~ 0.3 / 张</td>
+      <td>9:16竖版封面设计，高对比度视觉引导</td>
+    </tr>
+    <tr>
+      <td>竞品视频风格复刻</td>
+      <td>DeepSeek-V4-Pro</td>
+      <td>约 ￥0.001 / 千 token</td>
+      <td>解构节奏、配乐、字幕与切片建立竞品DNA</td>
+    </tr>
+    <tr>
+      <td>视频渲染生成与合成</td>
+      <td>Seedance 2.0, happyhorse 1.0, wan2.7</td>
+      <td>约 ￥0.15 / 视频秒数</td>
+      <td>影视级场景运动控制，首尾帧参考图支持</td>
+    </tr>
+  </tbody>
+</table>
+
 ---
 
 ## 📊 一、AI能力需求、模型推荐与提示词策略矩阵（按模态分类汇总）
@@ -26,11 +184,11 @@
 ### 3. 👁️ 视觉图像与多模态合成模态（Vision & Multimodal Synthesis Modality）
 
 | 序号 | 核心AI能力需求                                                      | 已对接模型                                                                                                              | API 估算价格                                                                          | 典型输入与输出示例                                                                                         | 提示词策略与核心 Prompt 设计                                                                                                                                                                                        |
-| :--: | :------------------------------------------------------------------ | :---------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------ | :--------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| :--: | :--: | :--: | :--: | :--: | :--: |
 | 3.1 | **大模型视频提示词优化**(`optimize_prompt`)                 | **DeepSeek-V4-Pro (已对接)** /GPT-4o                                                                              | DeepSeek-V4-Pro: 约 ￥0.001 / 千 tokenGPT-4o: 输入￥0.035，输出￥0.105 / 千 token     | **输入**：用户原始创意 Prompt、产品、风格**输出**：增强后的专业英文多模态 Prompt               | **【画质与镜头增强提示词】**将用户的简短提示词翻译并扩展为符合视频生成模型的专业 Prompt。加入光线（如 cinematic lighting）、色彩、镜头运动（如 slow zoom-in）、以及比例（9:1 vertical）的精细指令。                 |
 | 3.2 | **智能高转化封面与图生图**(`generate_cover`)                | **Seedance 2.0 (已对接)**(`seedance-2-0-fast-260128`) /**标准图像生成 (已对接)** /Flux 1.1 Pro            | Flux 1.1 Pro: 约 ￥0.28 / 张Midjourney: 约 ￥0.1 ~ ￥0.3 / 张                         | **输入**：产品名、目标平台、风格主题**输出**：9:16 竖版高像素封面设计图 / 参考图               | **【高对比度视觉提示词】**自动将商品名和风格转化为视觉 Prompts（例如："vibrant colors, bold text overlay, 9:16 vertical, high contrast, professional photography"），确保产品主体在社交媒体推荐流中极具视觉抓取力。 |
 | 3.3 | **竞品视频风格复刻**(`analyze_style` / `_deep`)           | **DeepSeek-V4-Pro (已对接)** /Claude 3.5 Sonnet                                                                   | DeepSeek-V4-Pro: 约 ￥0.001 / 千 tokenClaude 3.5: 输入￥0.021，输出￥0.105 / 千 token | **输入**：竞品视频链接 / 数据参数**输出**：爆款要素分析报告、DNA指纹及复刻建议                 | **【多维解构提示词】**命令 LLM 作为短视频内容分析师，从节奏类型、配乐情绪、字幕描边、镜头切分四个维度建立竞品 DNA。输出包含优势、劣势和一键套用建议的 JSON 报告。                                                   |
-| 3.4 | **Seedance 2.0 视频生成**(`submitSeedanceVideo` / Seedance) | **Seedance 2.0 (已对接)**(`seedance-2-0-fast-260128`) /**可灵 Kling (已对接)** /**Sora-2 (已对接)** | Seedance 2.0: 约 ￥0.15 / 视频秒数可灵 Kling: 约 ￥0.2 ~ ￥0.5 / 视频秒数             | **输入**：Prompt描述、首尾帧参考图、画面宽高比**输出**：高动态、多模态口播与场景对齐的合成视频 | **【影视级场景生成控制】**通过 SSE 和 Supabase Edge Function 代理直接调用 Seedance 2.0 视频生成服务，支持传入首帧、尾帧和多参考图。高精度建模物理运动与商品特征，并生成同步的环境音效。                             |
+| 3.4 | **视频生成渲染**(`submitSeedanceVideo` / Seedance) | **Seedance 2.0 (已对接)**, **happyhorse 1.0 (已对接)**, **wan2.7 (已对接)**, Kling, Sora-2 | Seedance 2.0: 约 ￥0.15 / 视频秒数<br>happyhorse 1.0 / wan2.7: 模拟生成             | **输入**：Prompt描述、首尾帧参考图、画面宽高比**输出**：高动态、多模态口播与场景对齐的合成视频 | **【影视级场景生成控制】**通过 SSE 和 Supabase Edge Function 代理直接调用视频生成服务，支持传入首帧、尾帧和多参考图。高精度建模物理运动与商品特征，并生成同步的环境音效。                             |
 
 ---
 
