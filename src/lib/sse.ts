@@ -112,90 +112,60 @@ const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
 export async function sendDeepSeekStreamRequest(options: DeepSeekStreamOptions): Promise<void> {
   const { messages, max_tokens, temperature, onData, onComplete, onError, signal } = options;
 
-  let fallbackTriggered = false;
-
-  async function callDirectAPI() {
-    if (fallbackTriggered) return;
-    fallbackTriggered = true;
-
-    console.log("Edge Function deepseek-v4-pro returned error, trying direct API fallback...");
-    const apiKey = import.meta.env.VITE_DEEPSEEK_API_KEY as string;
-    if (!apiKey) {
-      onError(new Error("Missing VITE_DEEPSEEK_API_KEY in environment configuration."));
-      return;
-    }
-
-    try {
-      const response = await fetch('https://api.gmi-serving.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: 'deepseek-ai/DeepSeek-V4-Pro',
-          messages,
-          temperature: temperature ?? 0,
-          max_tokens: max_tokens ?? 1000,
-          stream: true,
-        }),
-        signal,
-      });
-
-      if (!response.ok || !response.body) {
-        throw new Error(`Direct API response error: ${response.status}`);
-      }
-
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder('utf8');
-      const parser = createParser({
-        onEvent: (event) => {
-          if (!event.data) return;
-          onData(event.data);
-        },
-      });
-
-      const read = (): void => {
-        reader.read().then((result) => {
-          if (result.done) {
-            onComplete();
-            return;
-          }
-          parser.feed(decoder.decode(result.value, { stream: true }));
-          read();
-        }).catch((error) => {
-          if (signal?.aborted) return;
-          onError(error as Error);
-        });
-      };
-
-      read();
-    } catch (err) {
-      if (!signal?.aborted) {
-        onError(err as Error);
-      }
-    }
+  const apiKey = import.meta.env.VITE_PROXY_API_KEY as string;
+  if (!apiKey) {
+    onError(new Error("Missing VITE_PROXY_API_KEY in environment configuration."));
+    return;
   }
 
-  // Try Edge Function first
   try {
-    await sendStreamRequest({
-      functionUrl: `${SUPABASE_URL}/functions/v1/deepseek-v4-pro`,
-      requestBody: { messages, max_tokens, temperature },
-      supabaseAnonKey: SUPABASE_ANON_KEY,
-      onData,
-      onComplete,
-      onError: (err) => {
-        callDirectAPI().catch((fallbackErr) => {
-          onError(new Error(`Edge function failed (${err.message}) and fallback failed: ${fallbackErr.message}`));
-        });
+    const response = await fetch('https://mangdream.com/api/innoreation/v1/proxy/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Proxy API Key': apiKey,
       },
+      body: JSON.stringify({
+        model: 'deepseek-v4-pro',
+        messages,
+        temperature: temperature ?? 0.7,
+        stream: true,
+      }),
       signal,
     });
-  } catch (err) {
-    callDirectAPI().catch((fallbackErr) => {
-      onError(new Error(`Edge function invocation failed and fallback failed: ${fallbackErr.message}`));
+
+    if (!response.ok || !response.body) {
+      throw new Error(`Proxy API response error: ${response.status}`);
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder('utf8');
+    const parser = createParser({
+      onEvent: (event) => {
+        if (!event.data || event.data === '[DONE]') return;
+        onData(event.data);
+      },
     });
+
+    const read = (): void => {
+      reader.read().then((result) => {
+        if (result.done) {
+          onComplete();
+          return;
+        }
+        parser.feed(decoder.decode(result.value, { stream: true }));
+        read();
+      }).catch((error) => {
+        if (signal?.aborted) return;
+        onError(error as Error);
+      });
+    };
+
+    read();
+  } catch (err) {
+    if (!signal?.aborted) {
+      onError(err as Error);
+    }
   }
 }
 

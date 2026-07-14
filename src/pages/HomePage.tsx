@@ -398,22 +398,51 @@ export default function HomePage() {
   const handleEnhanceImgPrompt = async () => {
     if (!imgPrompt.trim()) { toast.error('请输入图片描述'); return; }
     setEnhancingImg(true);
+
+    const originalPrompt = imgPrompt;
+    setImgPrompt(''); // 清空，准备流式打字效果
+
+    abortRef.current = new AbortController();
+    let fullText = '';
+
     try {
-      const { data, error } = await supabase.functions.invoke('enhance-prompt', {
-        body: {
-          messages: [{
-            role: 'user',
-            content: `请将以下简短图片描述扩展为一段专业的AI绘图提示词，要求：画面细节丰富、构图精美、适合带货电商场景。原文：${imgPrompt}`,
-          }],
-          max_completion_tokens: 512,
+      await sendDeepSeekStreamRequest({
+        messages: [{
+          role: 'user',
+          content: `请将以下简短图片描述扩展为一段专业的AI绘图提示词，要求：画面细节丰富、构图精美、适合带货电商场景。原文：${originalPrompt}`,
+        }],
+        max_tokens: 1000,
+        onData: (data) => {
+          if (data === '[DONE]') return;
+          try {
+            const parsed = JSON.parse(data);
+            const chunk = parsed.choices?.[0]?.delta?.content ?? '';
+            if (chunk) {
+              fullText += chunk;
+              setImgPrompt(fullText);
+            }
+          } catch { /* skip */ }
         },
+        onComplete: () => {
+          toast.success('图片提示词已增强');
+          setEnhancingImg(false);
+        },
+        onError: (err) => {
+          if (!abortRef.current?.signal.aborted) {
+            toast.error(`增强失败：${err.message}`);
+            setImgPrompt(originalPrompt);
+          }
+          setEnhancingImg(false);
+        },
+        signal: abortRef.current.signal,
       });
-      if (error) { const msg = await error?.context?.text(); throw new Error(msg || error.message); }
-      const enhanced = data?.choices?.[0]?.message?.content;
-      if (enhanced) { setImgPrompt(enhanced); toast.success('图片提示词已增强'); }
     } catch (e: unknown) {
-      toast.error(`增强失败：${(e as Error).message}`);
-    } finally { setEnhancingImg(false); }
+      if (!abortRef.current?.signal.aborted) {
+        toast.error(`增强失败：${(e as Error).message}`);
+        setImgPrompt(originalPrompt);
+      }
+      setEnhancingImg(false);
+    }
   };
 
   const handleImgVoiceInput = async () => {
