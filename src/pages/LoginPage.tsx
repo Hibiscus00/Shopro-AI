@@ -752,9 +752,19 @@ export default function LoginPage() {
                       }
                     }}
                     disabled={loading}
-                    className="flex flex-col items-center justify-center p-3 rounded-lg border border-border/60 bg-background hover:bg-primary/5 hover:border-primary/30 transition-colors text-center text-xs group"
+                    className={cn(
+                      "flex flex-col items-center justify-center p-3 rounded-xl border transition-all text-center text-xs group",
+                      user === 'test_user'
+                        ? "bg-orange-500/5 dark:bg-orange-500/10 border-orange-500/20 dark:border-orange-500/30 hover:bg-orange-500/10 dark:hover:bg-orange-500/20 hover:border-orange-500/40"
+                        : "bg-teal-500/5 dark:bg-teal-500/10 border-teal-500/20 dark:border-teal-500/30 hover:bg-teal-500/10 dark:hover:bg-teal-500/20 hover:border-teal-500/40"
+                    )}
                   >
-                    <span className="font-semibold text-foreground group-hover:text-primary transition-colors">{user}</span>
+                    <span className={cn(
+                      "font-semibold transition-colors",
+                      user === 'test_user'
+                        ? "text-orange-600 dark:text-orange-400 group-hover:text-orange-700 dark:group-hover:text-orange-300"
+                        : "text-teal-600 dark:text-teal-400 group-hover:text-teal-700 dark:group-hover:text-teal-300"
+                    )}>{user}</span>
                     <span className="text-muted-foreground scale-90 opacity-70 mt-0.5">一键登录体验</span>
                   </button>
                 ))}

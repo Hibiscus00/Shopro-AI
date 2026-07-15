@@ -11,7 +11,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import ProductVideoWizard from './VideoCreatePage';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { sendDeepSeekStreamRequest, sendStepAudioASR, submitSeedanceVideo, querySeedanceVideo } from '@/lib/sse';
+import { sendDeepSeekStreamRequest, sendStepAudioASR, submitSeedanceVideo, querySeedanceVideo, sendStepFlashStreamRequest } from '@/lib/sse';
 import { audioRecorder } from '@/lib/audioRecorder';
 
 
@@ -325,7 +325,7 @@ export default function HomePage() {
             setPrompt(prev => prev + (prev ? '，' : '') + text);
           },
           onComplete: () => {
-            toast.success('🎙️ 语音识别完成，已自动填入描述');
+            toast.success('🎙️ 语音识别成功');
           },
           onError: (err) => {
             console.error('ASR error:', err);
@@ -398,51 +398,22 @@ export default function HomePage() {
   const handleEnhanceImgPrompt = async () => {
     if (!imgPrompt.trim()) { toast.error('请输入图片描述'); return; }
     setEnhancingImg(true);
-
-    const originalPrompt = imgPrompt;
-    setImgPrompt(''); // 清空，准备流式打字效果
-
-    abortRef.current = new AbortController();
-    let fullText = '';
-
     try {
-      await sendDeepSeekStreamRequest({
-        messages: [{
-          role: 'user',
-          content: `请将以下简短图片描述扩展为一段专业的AI绘图提示词，要求：画面细节丰富、构图精美、适合带货电商场景。原文：${originalPrompt}`,
-        }],
-        max_tokens: 1000,
-        onData: (data) => {
-          if (data === '[DONE]') return;
-          try {
-            const parsed = JSON.parse(data);
-            const chunk = parsed.choices?.[0]?.delta?.content ?? '';
-            if (chunk) {
-              fullText += chunk;
-              setImgPrompt(fullText);
-            }
-          } catch { /* skip */ }
+      const { data, error } = await supabase.functions.invoke('enhance-prompt', {
+        body: {
+          messages: [{
+            role: 'user',
+            content: `请将以下简短图片描述扩展为一段专业的AI绘图提示词，要求：画面细节丰富、构图精美、适合带货电商场景。原文：${imgPrompt}`,
+          }],
+          max_completion_tokens: 512,
         },
-        onComplete: () => {
-          toast.success('图片提示词已增强');
-          setEnhancingImg(false);
-        },
-        onError: (err) => {
-          if (!abortRef.current?.signal.aborted) {
-            toast.error(`增强失败：${err.message}`);
-            setImgPrompt(originalPrompt);
-          }
-          setEnhancingImg(false);
-        },
-        signal: abortRef.current.signal,
       });
+      if (error) { const msg = await error?.context?.text(); throw new Error(msg || error.message); }
+      const enhanced = data?.choices?.[0]?.message?.content;
+      if (enhanced) { setImgPrompt(enhanced); toast.success('图片提示词已增强'); }
     } catch (e: unknown) {
-      if (!abortRef.current?.signal.aborted) {
-        toast.error(`增强失败：${(e as Error).message}`);
-        setImgPrompt(originalPrompt);
-      }
-      setEnhancingImg(false);
-    }
+      toast.error(`增强失败：${(e as Error).message}`);
+    } finally { setEnhancingImg(false); }
   };
 
   const handleImgVoiceInput = async () => {
@@ -457,7 +428,7 @@ export default function HomePage() {
             setImgPrompt(prev => prev + (prev ? '，' : '') + text);
           },
           onComplete: () => {
-            toast.success('🎙️ 语音识别完成，已自动填入描述');
+            toast.success('🎙️ 语音识别成功');
           },
           onError: (err) => {
             console.error('ASR error:', err);
@@ -847,19 +818,18 @@ export default function HomePage() {
     }
   };
 
-  // DeepSeek-V4-Pro 提示词增强 (流式打字机效果)
+  // step-3.7-flash 提示词增强 (流式打字机效果)
   const handleEnhancePrompt = async () => {
     if (!prompt.trim()) { toast.error('请先输入基础描述'); return; }
     setEnhancing(true);
 
     const originalPrompt = prompt;
-    setPrompt(''); // 清空并在生成时使用流式打字机效果
-
     abortRef.current = new AbortController();
     let fullText = '';
+    let isFirstChunk = true;
 
     try {
-      await sendDeepSeekStreamRequest({
+      await sendStepFlashStreamRequest({
         messages: [{
           role: 'user',
           content: `请将以下简短视频描述扩展为一段专业的AI视频生成提示词，要求：画面细节丰富、镜头语言清晰、氛围感强、适合带货电商场景。原文：${originalPrompt}`,
@@ -871,6 +841,10 @@ export default function HomePage() {
             const parsed = JSON.parse(data);
             const chunk = parsed.choices?.[0]?.delta?.content ?? '';
             if (chunk) {
+              if (isFirstChunk) {
+                setPrompt('');
+                isFirstChunk = false;
+              }
               fullText += chunk;
               setPrompt(fullText);
             }
@@ -883,7 +857,9 @@ export default function HomePage() {
         onError: (err) => {
           if (!abortRef.current?.signal.aborted) {
             toast.error(`增强失败：${err.message}`);
-            setPrompt(originalPrompt);
+            if (isFirstChunk) {
+              setPrompt(originalPrompt);
+            }
           }
           setEnhancing(false);
         },
@@ -892,7 +868,9 @@ export default function HomePage() {
     } catch (e: unknown) {
       if (!abortRef.current?.signal.aborted) {
         toast.error(`增强失败：${(e as Error).message}`);
-        setPrompt(originalPrompt);
+        if (isFirstChunk) {
+          setPrompt(originalPrompt);
+        }
       }
       setEnhancing(false);
     }
@@ -903,6 +881,16 @@ export default function HomePage() {
       className="min-h-screen w-full text-white overflow-x-hidden"
       style={{ background: 'linear-gradient(160deg,#0e0e12 0%,#14111a 40%,#0c0e14 100%)' }}
     >
+      <style dangerouslySetInnerHTML={{ __html: `
+        @keyframes textWaveRipple {
+          0% { text-shadow: 0 0 0px rgba(236, 72, 153, 0); color: rgba(255, 255, 255, 0.8); }
+          50% { text-shadow: 0 0 10px rgba(236, 72, 153, 0.8), 0 0 20px rgba(168, 85, 247, 0.5); color: #f472b6; }
+          100% { text-shadow: 0 0 0px rgba(236, 72, 153, 0); color: rgba(255, 255, 255, 0.8); }
+        }
+        .enhancing-text-wave { animation: textWaveRipple 1.6s ease-in-out infinite; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      `}} />
       <div className="max-w-6xl mx-auto px-4 md:px-8 py-10 space-y-10">
 
         {/* ── 大标题 ────────────────────────────────────────────────── */}
@@ -924,7 +912,7 @@ export default function HomePage() {
         {/* ── 视频生成输入区 ───────────────────────────────────────────────── */}
         {mainTab === '视频生成' && (
           <div className="rounded-2xl" style={{ background: 'linear-gradient(135deg, #4f3fa8 0%, #1aad6b 50%, #d44800 100%)', padding: '1.5px' }}>
-            <div className="rounded-[14px] bg-[#16151f]">
+            <div className="rounded-[14px] bg-[#16151f] border border-transparent transition-all duration-300">
               {/* 顶部 Tab + 展开按钮 */}
               <div className="flex items-center justify-between px-3 md:px-4 pt-3 pb-1">
                 <div className="flex items-center gap-0.5 overflow-x-auto">
@@ -1059,7 +1047,10 @@ export default function HomePage() {
                   </div>
                   <textarea rows={3} value={prompt} onChange={e => setPrompt(e.target.value)}
                     placeholder="描述视频画面内容和动态过程，使用 @ 指定参考图或参考视频"
-                    className="flex-1 min-w-0 bg-transparent resize-none text-sm text-white/80 placeholder:text-white/25 outline-none min-h-[72px] leading-relaxed"
+                    className={cn(
+                      "flex-1 min-w-0 bg-transparent resize-none text-sm text-white/80 placeholder:text-white/25 outline-none min-h-[72px] leading-relaxed transition-all duration-300",
+                      enhancing && "enhancing-text-wave"
+                    )}
                     disabled={generating}
                   />
                 </div>
@@ -1108,12 +1099,12 @@ export default function HomePage() {
               )}
 
               {/* 底部工具栏 */}
-              <div className="flex items-center justify-between px-3 md:px-4 pb-3 pt-1 border-t border-white/5 gap-2 flex-wrap">
-                <div className="flex items-center gap-1.5 flex-wrap">
+              <div className="flex items-center justify-between px-3 md:px-4 pb-3 pt-2 border-t border-white/5 gap-2 w-full">
+                <div className="flex items-center gap-1.5 py-0.5 pr-2">
                   {/* 模型选择 */}
                   <div className="relative">
                     <button onClick={() => { setModelOpen(o => !o); setResOpen(false); }}
-                      className="flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-lg bg-white/6 hover:bg-white/10 text-xs text-white/70 transition-colors border border-white/8">
+                      className="flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/15 text-xs text-emerald-400 transition-colors border border-emerald-500/20">
                       <Sparkles className="w-3 h-3 text-emerald-400" />
                       <span className="hidden sm:inline">{model.label}</span>
                       <span className="sm:hidden">模型</span>
@@ -1134,7 +1125,7 @@ export default function HomePage() {
                   {/* 分辨率与高级参数弹窗 */}
                   <div className="relative">
                     <button onClick={() => { setResOpen(o => !o); setModelOpen(false); }}
-                      className="flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-lg bg-white/6 hover:bg-white/10 text-xs text-white/70 transition-colors border border-white/8">
+                      className="flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/15 text-xs text-blue-400 transition-colors border border-blue-500/20">
                       <BarChart2 className="w-3 h-3" />
                       <span className="hidden sm:inline">{resolution}</span>
                       <span className="sm:hidden">尺寸</span>
@@ -1236,19 +1227,20 @@ export default function HomePage() {
                   </div>
 
                   <button onClick={handleEnhancePrompt} disabled={enhancing || generating}
-                    className="hidden sm:flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-lg bg-white/6 hover:bg-white/10 text-xs text-white/70 transition-colors border border-white/8 disabled:opacity-40">
-                    {enhancing ? <Loader2 className="w-3 h-3 animate-spin text-amber-400" /> : <Sparkles className="w-3 h-3 text-amber-400" />}
-                    提示词增强
+                    className="flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-lg bg-pink-500/10 hover:bg-pink-500/15 text-xs text-pink-400 transition-colors border border-pink-500/20 disabled:opacity-40 shrink-0">
+                    {enhancing ? <Loader2 className="w-3 h-3 animate-spin text-pink-400" /> : <Sparkles className="w-3 h-3 text-pink-400" />}
+                    <span className="hidden sm:inline">提示词增强</span>
                   </button>
                 </div>
 
-                <div className="flex items-center gap-2 md:gap-3 ml-auto">
+                <div className="flex items-center gap-1.5 md:gap-2.5 shrink-0 ml-auto">
                   <span className="text-xs text-white/25 hidden sm:block">{prompt.length}/8000</span>
                   {generating ? (
                     <button onClick={() => { stopPoll(); setGenerating(false); setGenProgress(0); }}
-                      className="flex items-center gap-1.5 px-3 md:px-4 py-2 rounded-xl text-sm font-semibold transition-all"
+                      className="flex items-center justify-center gap-1.5 w-9 h-9 sm:w-auto sm:h-auto sm:px-3 sm:py-2 rounded-xl text-sm font-semibold transition-all shrink-0"
                       style={{ background: 'rgba(239,68,68,0.2)', border: '1px solid rgba(239,68,68,0.4)', color: '#ef4444' }}>
-                      <X className="w-3.5 h-3.5" /> 取消
+                      <X className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">取消</span>
                     </button>
                   ) : (
                     <>
@@ -1256,16 +1248,20 @@ export default function HomePage() {
                         type="button"
                         onClick={handleVoiceInput}
                         className={cn(
-                          "w-9 h-9 rounded-xl bg-white/6 hover:bg-white/10 flex items-center justify-center transition-all border border-white/8 shrink-0 text-white/60 hover:text-white/90",
-                          recording && "animate-pulse border-red-500/50 text-red-500 bg-red-500/10"
+                          "w-9 h-9 rounded-xl flex items-center justify-center transition-all border shrink-0",
+                          recording
+                            ? "animate-pulse border-red-500/50 text-red-500 bg-red-500/10"
+                            : "bg-purple-500/10 border-purple-500/30 text-purple-400 hover:bg-purple-500/20 hover:text-purple-300"
                         )}
                       >
                         <Mic className="w-4 h-4" />
                       </button>
                       <button onClick={handleGenerate}
-                        className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 hover:scale-105 active:scale-95"
+                        className="flex items-center justify-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 hover:scale-105 active:scale-95 shrink-0"
                         style={{ background: 'linear-gradient(135deg,#22c55e,#16a34a)', color: '#fff', boxShadow: '0 0 20px rgba(34,197,94,0.35)' }}>
-                        <Plus className="w-3.5 h-3.5" /> AI视频生成
+                        <Play className="w-3.5 h-3.5 fill-current" />
+                        <span className="sm:hidden">生成</span>
+                        <span className="hidden sm:inline">AI视频生成</span>
                       </button>
                     </>
                   )}
@@ -1278,7 +1274,7 @@ export default function HomePage() {
         {/* ── 图片生成输入区 ────────────────────────────────────────────── */}
         {mainTab === '图片生成' && (
           <div className="rounded-2xl" style={{ background: 'linear-gradient(135deg, #ec4899 0%, #8b5cf6 50%, #3b82f6 100%)', padding: '1.5px' }}>
-            <div className="rounded-[14px] bg-[#16151f]">
+            <div className="rounded-[14px] bg-[#16151f] border border-transparent transition-all duration-300">
               {/* 顶部 Tab + 展开按钮 */}
               <div className="flex items-center justify-between px-3 md:px-4 pt-3 pb-1">
                 <div className="flex items-center gap-0.5 overflow-x-auto">
@@ -1331,7 +1327,10 @@ export default function HomePage() {
                         ? "上传要扩展的图片并描述扩图的延伸区域与比例，例如：‘扩展画面四周，延伸背景为茂密的森林，自然光线，无缝衔接’"
                         : "上传参考风格图与主体图，描述融合后的画面，例如：‘将主体图的人物置入参考图的赛博朋克霓虹街区风格中，红蓝霓虹光影’"
                   }
-                  className="flex-1 min-w-0 bg-transparent resize-none text-sm text-white/80 placeholder:text-white/25 outline-none min-h-[72px] leading-relaxed"
+                  className={cn(
+                    "flex-1 min-w-0 bg-transparent resize-none text-sm text-white/80 placeholder:text-white/25 outline-none min-h-[72px] leading-relaxed transition-all duration-300",
+                    enhancingImg && "enhancing-text-wave"
+                  )}
                   disabled={imgGenerating}
                 />
               </div>
@@ -1365,12 +1364,12 @@ export default function HomePage() {
               )}
 
               {/* 底部工具栏 */}
-              <div className="flex items-center justify-between px-3 md:px-4 pb-3 pt-1 border-t border-white/5 gap-2 flex-wrap">
-                <div className="flex items-center gap-1.5 flex-wrap">
+              <div className="flex items-center justify-between px-3 md:px-4 pb-3 pt-2 border-t border-white/5 gap-2 w-full">
+                <div className="flex items-center gap-1.5 py-0.5 pr-2">
                   {/* 模型选择 */}
                   <div className="relative">
                     <button onClick={() => { setImgModelOpen(o => !o); setImgResOpen(false); }}
-                      className="flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-lg bg-white/6 hover:bg-white/10 text-xs text-white/70 transition-colors border border-white/8">
+                      className="flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-lg bg-pink-500/10 hover:bg-pink-500/15 text-xs text-pink-400 transition-colors border border-pink-500/20">
                       <Sparkles className="w-3 h-3 text-pink-400" />
                       <span className="hidden sm:inline">{imgModel.label}</span>
                       <span className="sm:hidden">模型</span>
@@ -1391,7 +1390,7 @@ export default function HomePage() {
                   {/* 尺寸/比例 */}
                   <div className="relative">
                     <button onClick={() => { setImgResOpen(o => !o); setImgModelOpen(false); }}
-                      className="flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-lg bg-white/6 hover:bg-white/10 text-xs text-white/70 transition-colors border border-white/8">
+                      className="flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-lg bg-purple-500/10 hover:bg-purple-500/15 text-xs text-purple-400 transition-colors border border-purple-500/20">
                       <BarChart2 className="w-3 h-3 text-purple-400" />
                       <span className="hidden sm:inline">{imgResolution}</span>
                       <span className="sm:hidden">尺寸</span>
@@ -1510,9 +1509,9 @@ export default function HomePage() {
 
                   {/* 提示词增强 */}
                   <button onClick={handleEnhanceImgPrompt} disabled={enhancingImg || imgGenerating}
-                    className="hidden sm:flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-lg bg-white/6 hover:bg-white/10 text-xs text-white/70 transition-colors border border-white/8 disabled:opacity-40">
+                    className="flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-lg bg-pink-500/10 hover:bg-pink-500/15 text-xs text-pink-400 transition-colors border border-pink-500/20 disabled:opacity-40 shrink-0">
                     {enhancingImg ? <Loader2 className="w-3 h-3 animate-spin text-pink-400" /> : <Sparkles className="w-3.5 h-3.5 text-pink-400" />}
-                    提示词增强
+                    <span className="hidden sm:inline">提示词增强</span>
                   </button>
                 </div>
 
@@ -1522,8 +1521,10 @@ export default function HomePage() {
                       type="button"
                       onClick={handleImgVoiceInput}
                       className={cn(
-                        "w-9 h-9 rounded-xl bg-white/6 hover:bg-white/10 flex items-center justify-center transition-all border border-white/8 shrink-0 text-white/60 hover:text-white/90",
-                        imgRecording && "animate-pulse border-red-500/50 text-red-500 bg-red-500/10"
+                        "w-9 h-9 rounded-xl flex items-center justify-center transition-all border shrink-0",
+                        imgRecording
+                          ? "animate-pulse border-red-500/50 text-red-500 bg-red-500/10"
+                          : "bg-purple-500/10 border-purple-500/30 text-purple-400 hover:bg-purple-500/20 hover:text-purple-300"
                       )}
                     >
                       <Mic className="w-4 h-4" />
@@ -1531,15 +1532,18 @@ export default function HomePage() {
                   )}
                   {imgGenerating ? (
                     <button onClick={() => { setImgGenerating(false); setImgProgress(0); }}
-                      className="flex items-center gap-1.5 px-3 md:px-4 py-2 rounded-xl text-sm font-semibold transition-all"
+                      className="flex items-center justify-center gap-1.5 w-9 h-9 sm:w-auto sm:h-auto sm:px-3 sm:py-2 rounded-xl text-sm font-semibold transition-all shrink-0"
                       style={{ background: 'rgba(239,68,68,0.2)', border: '1px solid rgba(239,68,68,0.4)', color: '#ef4444' }}>
-                      <X className="w-3.5 h-3.5" /> 取消
+                      <X className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">取消</span>
                     </button>
                   ) : (
                     <button onClick={handleImageGenerate}
-                      className="flex items-center gap-1.5 px-3 md:px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 hover:scale-105 active:scale-95"
+                      className="flex items-center justify-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 hover:scale-105 active:scale-95 shrink-0"
                       style={{ background: 'linear-gradient(135deg,#ec4899,#8b5cf6)', color: '#fff', boxShadow: '0 0 20px rgba(236,72,153,0.35)' }}>
-                      <Plus className="w-3.5 h-3.5" /> 生成图片
+                      <ImageIcon className="w-3.5 h-3.5" />
+                      <span className="sm:hidden">生成</span>
+                      <span className="hidden sm:inline">生成图片</span>
                     </button>
                   )}
                 </div>

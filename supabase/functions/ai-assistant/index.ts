@@ -475,7 +475,7 @@ async function generateVideo(body: Record<string, unknown>, supabase: ReturnType
   };
   if (!project_id) return { success: false, message: '缺少 project_id' };
 
-  let apiKey = Deno.env.get('SEEDANCE_API_KEY');
+  let apiKey = Deno.env.get('VECTRUST_API_KEY') || Deno.env.get('SEEDANCE_API_KEY');
   if (!apiKey) {
     try {
       const keyUrl = new URL('./key.txt', import.meta.url);
@@ -487,7 +487,7 @@ async function generateVideo(body: Record<string, unknown>, supabase: ReturnType
 
   // Fallback to mock progress generation if no API key is found
   if (!apiKey) {
-    console.warn('No SEEDANCE_API_KEY found, falling back to mock video generation.');
+    console.warn('No VECTRUST_API_KEY found, falling back to mock video generation.');
     const steps = [10, 25, 40, 60, 75, 90, 100];
     for (const progress of steps) {
       await new Promise(r => setTimeout(r, 800));
@@ -506,37 +506,38 @@ async function generateVideo(body: Record<string, unknown>, supabase: ReturnType
     return { success: true, message: '视频生成完成 (Mock)' };
   }
 
-  // We have the api key, let's call Seedance 2.0 Fast
+  // We have the api key, let's call Seedance 2.0 Fast via Vectrust
   try {
     const promptText = prompt.prompt_text || 'A high-converting product demo video, professional lighting, cinematic style';
     const duration = prompt.duration || 8;
     const ratio = prompt.aspect_ratio || '16:9';
 
-    const payload: any = {
-      prompt: promptText,
-      duration: Number(duration),
-      resolution: '720p',
-      ratio: ratio,
-      watermark: false,
-      generate_audio: true,
-    };
-
-    // Use first material image if available as first_frame
-    const firstImg = Array.isArray(materials) ? materials.find(m => m.type === 'image') : null;
-    if (firstImg) {
-      payload.first_frame = firstImg.url;
+    let finalPrompt = promptText;
+    if (!finalPrompt.includes('--resolution')) {
+      finalPrompt += ` --resolution 720p`;
+    }
+    if (!finalPrompt.includes('--duration')) {
+      finalPrompt += ` --duration ${duration}`;
+    }
+    if (!finalPrompt.includes('--aspect_ratio') && !finalPrompt.includes('--ratio')) {
+      finalPrompt += ` --aspect_ratio ${ratio}`;
     }
 
-    // Submit Seedance video generation request
-    const requestBody = {
-      model: 'seedance-2-0-fast-260128',
-      payload,
+    const requestBody: any = {
+      model: 'doubao-seedance-2-0-fast-260128',
+      prompt: finalPrompt,
+      watermark: false,
     };
+
+    const firstImg = Array.isArray(materials) ? materials.find(m => m.type === 'image') : null;
+    if (firstImg) {
+      requestBody.first_frame = firstImg.url;
+    }
 
     await supabase.from('video_projects').update({ progress: 40, status: 'processing' }).eq('id', project_id);
 
     const upstreamSubmit = await fetch(
-      'https://console.gmicloud.ai/api/v1/ie/requestqueue/apikey/requests',
+      'https://draw.openai-next.com/v1/video/generations',
       {
         method: 'POST',
         headers: {
@@ -553,7 +554,7 @@ async function generateVideo(body: Record<string, unknown>, supabase: ReturnType
     }
 
     const resData = await upstreamSubmit.json();
-    const requestId = resData.request_id;
+    const requestId = resData.id || resData.task_id || resData.request_id;
     if (!requestId) {
       throw new Error('Seedance API did not return a request_id');
     }
@@ -582,7 +583,7 @@ async function pollSeedanceBackground(
     await new Promise(r => setTimeout(r, 6000)); // poll every 6s
     try {
       const upstreamQuery = await fetch(
-        `https://console.gmicloud.ai/api/v1/ie/requestqueue/apikey/requests/${requestId}`,
+        `https://draw.openai-next.com/v1/tasks/${requestId}`,
         {
           method: 'GET',
           headers: {
@@ -596,10 +597,9 @@ async function pollSeedanceBackground(
       const data = await upstreamQuery.json();
       const status = data?.status;
 
-      if (status === 'success') {
-        const outcome = data?.outcome || {};
-        const videoUrl = outcome.video_url || 'https://www.w3schools.com/html/mov_bbb.mp4';
-        const thumbnailUrl = outcome.thumbnail_image_url || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=640&h=360&fit=crop';
+      if (status === 'completed' || status === 'succeeded' || status === 'success') {
+        const videoUrl = data?.result_url || data?.result?.data?.content?.video_url || data?.video_url || 'https://www.w3schools.com/html/mov_bbb.mp4';
+        const thumbnailUrl = data?.result?.data?.content?.thumbnail_image_url || data?.thumbnail_url || (videoUrl ? `${videoUrl}?vframe/jpg/offset/1` : 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=640&h=360&fit=crop');
         
         await supabase.from('video_projects').update({
           progress: 100,
@@ -1011,7 +1011,7 @@ async function generateCover(body: Record<string, unknown>, supabase: ReturnType
     ? `E-commerce product thumbnail for TikTok, ${product_name || ''}, vibrant colors, bold text overlay, 9:16 vertical, high contrast, eye-catching, professional photography`
     : `电商带货视频封面，产品：${product_name || ''}，风格：${style || '活力高饱和'}，竖版9:16，高对比度，专业摄影，产品主体突出`);
 
-  let seedanceApiKey = Deno.env.get('SEEDANCE_API_KEY');
+  let seedanceApiKey = Deno.env.get('VECTRUST_API_KEY') || Deno.env.get('SEEDANCE_API_KEY');
   if (!seedanceApiKey) {
     try {
       const keyUrl = new URL('./key.txt', import.meta.url);
@@ -1022,28 +1022,35 @@ async function generateCover(body: Record<string, unknown>, supabase: ReturnType
   // If Seedance API Key is available, use Seedance to generate a highly dynamic video cover and extract its thumbnail!
   if (seedanceApiKey) {
     try {
-      const submitRes = await fetch('https://console.gmicloud.ai/api/v1/ie/requestqueue/apikey/requests', {
+      let finalPrompt = coverPrompt;
+      if (!finalPrompt.includes('--resolution')) {
+        finalPrompt += ` --resolution 720p`;
+      }
+      if (!finalPrompt.includes('--duration')) {
+        finalPrompt += ` --duration 5`;
+      }
+      if (!finalPrompt.includes('--aspect_ratio') && !finalPrompt.includes('--ratio')) {
+        finalPrompt += ` --aspect_ratio 9:16`;
+      }
+
+      const requestBody: any = {
+        model: 'doubao-seedance-2-0-fast-260128',
+        prompt: finalPrompt,
+        watermark: false,
+      };
+
+      const submitRes = await fetch('https://draw.openai-next.com/v1/video/generations', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${seedanceApiKey}`,
         },
-        body: JSON.stringify({
-          model: 'seedance-2-0-fast-260128',
-          payload: {
-            prompt: coverPrompt,
-            duration: 5,
-            resolution: '720p',
-            ratio: '9:16',
-            watermark: false,
-            generate_audio: false,
-          }
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       if (submitRes.ok) {
         const resJson = await submitRes.json();
-        const requestId = resJson.request_id;
+        const requestId = resJson.id || resJson.task_id || resJson.request_id;
         if (requestId) {
           const taggedTaskId = `seedance_${requestId}`;
           if (user_id && project_id) {
@@ -1059,7 +1066,7 @@ async function generateCover(body: Record<string, unknown>, supabase: ReturnType
       console.warn('Seedance cover generation failed, falling back to standard image generation:', err);
     }
   }
-
+  
   const apiKey = Deno.env.get('INTEGRATIONS_API_KEY');
   if (!apiKey) throw new Error('Missing INTEGRATIONS_API_KEY');
   const submitRes = await fetch('https://app-bnjgmg2jpu6a-api-ra5EZDjVKkXa-gateway.appmiaoda.com/image-generation/submit', {
@@ -1086,16 +1093,16 @@ async function queryCoverTask(body: Record<string, unknown>, supabase: ReturnTyp
 
   if (task_id.startsWith('seedance_')) {
     const rawTaskId = task_id.replace('seedance_', '');
-    let seedanceApiKey = Deno.env.get('SEEDANCE_API_KEY');
+    let seedanceApiKey = Deno.env.get('VECTRUST_API_KEY') || Deno.env.get('SEEDANCE_API_KEY');
     if (!seedanceApiKey) {
       try {
         const keyUrl = new URL('./key.txt', import.meta.url);
         seedanceApiKey = (await Deno.readTextFile(keyUrl)).trim();
       } catch { /* noop */ }
     }
-    if (!seedanceApiKey) throw new Error('Missing SEEDANCE_API_KEY for querying cover task');
+    if (!seedanceApiKey) throw new Error('Missing VECTRUST_API_KEY for querying cover task');
 
-    const queryRes = await fetch(`https://console.gmicloud.ai/api/v1/ie/requestqueue/apikey/requests/${rawTaskId}`, {
+    const queryRes = await fetch(`https://draw.openai-next.com/v1/tasks/${rawTaskId}`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${seedanceApiKey}`,
@@ -1107,8 +1114,8 @@ async function queryCoverTask(body: Record<string, unknown>, supabase: ReturnTyp
     const status = qj.status;
     let imageUrl = null;
     
-    if (status === 'success') {
-      imageUrl = qj.outcome?.thumbnail_image_url || qj.outcome?.video_url;
+    if (status === 'completed' || status === 'success' || status === 'succeeded') {
+      imageUrl = qj.result_url || qj.result?.data?.content?.thumbnail_image_url || qj.result?.data?.content?.video_url || qj.thumbnail_url || qj.video_url;
       if (imageUrl && user_id) {
         const ctrScore = 75 + Math.floor(Math.random() * 20); // Seedance generates higher-converting covers!
         await supabase.from('cover_candidates')
@@ -1122,7 +1129,7 @@ async function queryCoverTask(body: Record<string, unknown>, supabase: ReturnTyp
           .eq('gen_task_id', task_id).eq('user_id', user_id);
       }
     }
-    return { status: status === 'success' ? 'SUCCESS' : status === 'failed' || status === 'cancelled' ? 'FAILED' : 'PROCESSING', image_url: imageUrl, task_id };
+    return { status: (status === 'completed' || status === 'success' || status === 'succeeded') ? 'SUCCESS' : (status === 'failed' || status === 'cancelled') ? 'FAILED' : 'PROCESSING', image_url: imageUrl, task_id };
   }
 
   const apiKey = Deno.env.get('INTEGRATIONS_API_KEY');

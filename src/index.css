@@ -193,6 +193,13 @@
   .animate-pulse-ring {
     animation: pulseRing 2s cubic-bezier(0.4,0,0.6,1) infinite;
   }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
 
 @keyframes slideUp {

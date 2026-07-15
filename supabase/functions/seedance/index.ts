@@ -32,7 +32,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
     );
   }
 
-  let apiKey = Deno.env.get('SEEDANCE_API_KEY');
+  let apiKey = Deno.env.get('VECTRUST_API_KEY') || Deno.env.get('SEEDANCE_API_KEY');
   if (!apiKey) {
     try {
       const keyUrl = new URL('./key.txt', import.meta.url);
@@ -44,7 +44,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
   if (!apiKey) {
     return new Response(
-      JSON.stringify({ error: 'Server configuration error: missing SEEDANCE_API_KEY' }),
+      JSON.stringify({ error: 'Server configuration error: missing VECTRUST_API_KEY' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
@@ -73,30 +73,35 @@ Deno.serve(async (req: Request): Promise<Response> => {
       );
     }
 
-    const payload: any = {
-      prompt,
-      duration: Number(duration),
-      resolution,
-      ratio,
+    let finalPrompt = prompt;
+    if (!finalPrompt.includes('--resolution')) {
+      finalPrompt += ` --resolution ${resolution}`;
+    }
+    if (!finalPrompt.includes('--duration')) {
+      finalPrompt += ` --duration ${duration}`;
+    }
+    if (!finalPrompt.includes('--aspect_ratio') && !finalPrompt.includes('--ratio')) {
+      finalPrompt += ` --aspect_ratio ${ratio}`;
+    }
+
+    const requestBody: any = {
+      model: 'doubao-seedance-2-0-fast-260128',
+      prompt: finalPrompt,
       watermark: Boolean(watermark),
-      generate_audio: Boolean(generate_audio),
-      web_search: Boolean(web_search),
     };
 
-    if (first_frame) payload.first_frame = first_frame;
-    if (last_frame) payload.last_frame = last_frame;
-    if (seed !== undefined && seed !== null) payload.seed = Number(seed);
-    if (reference_images.length > 0) payload.reference_images = reference_images;
-    if (reference_videos.length > 0) payload.reference_videos = reference_videos;
-    if (reference_audios.length > 0) payload.reference_audios = reference_audios;
-
-    const requestBody = {
-      model: 'seedance-2-0-fast-260128',
-      payload,
-    };
+    if (first_frame) {
+      requestBody.first_frame = first_frame;
+    }
+    if (last_frame) {
+      requestBody.last_frame = last_frame;
+    }
+    if (reference_images && reference_images.length > 0) {
+      requestBody.input_image_url = reference_images;
+    }
 
     const upstream = await fetch(
-      'https://console.gmicloud.ai/api/v1/ie/requestqueue/apikey/requests',
+      'https://draw.openai-next.com/v1/video/generations',
       {
         method: 'POST',
         headers: {
@@ -116,7 +121,15 @@ Deno.serve(async (req: Request): Promise<Response> => {
     }
 
     const resData = await upstream.json();
-    return new Response(JSON.stringify(resData), {
+    const requestId = resData.id || resData.task_id || resData.request_id;
+    if (!requestId) {
+      return new Response(
+        JSON.stringify({ error: `Invalid response from Vectrust upstream: ${JSON.stringify(resData)}` }),
+        { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    return new Response(JSON.stringify({ request_id: requestId }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
@@ -131,7 +144,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
     }
 
     const upstream = await fetch(
-      `https://console.gmicloud.ai/api/v1/ie/requestqueue/apikey/requests/${request_id}`,
+      `https://draw.openai-next.com/v1/tasks/${request_id}`,
       {
         method: 'GET',
         headers: {
@@ -149,7 +162,31 @@ Deno.serve(async (req: Request): Promise<Response> => {
     }
 
     const resData = await upstream.json();
-    return new Response(JSON.stringify(resData), {
+    const status = resData.status;
+    let mappedResponse: any = {};
+
+    if (status === 'completed' || status === 'succeeded' || status === 'success') {
+      const videoUrl = resData.result_url || resData.result?.data?.content?.video_url || resData.video_url;
+      mappedResponse = {
+        status: 'success',
+        video_url: videoUrl,
+        outcome: {
+          video_url: videoUrl,
+          thumbnail_image_url: resData.result?.data?.content?.thumbnail_image_url || resData.thumbnail_url || (videoUrl ? `${videoUrl}?vframe/jpg/offset/1` : ''),
+        }
+      };
+    } else if (status === 'failed' || status === 'cancelled') {
+      mappedResponse = {
+        status: 'failed',
+        error: resData.error_message || resData.error || 'Video generation task failed.',
+      };
+    } else {
+      mappedResponse = {
+        status: 'processing',
+      };
+    }
+
+    return new Response(JSON.stringify(mappedResponse), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

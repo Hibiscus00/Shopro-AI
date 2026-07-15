@@ -655,12 +655,12 @@ export default function LandingPage() {
             title={<>谁在用 <span style={{ color: '#FF6B00' }}>电商AIGC</span>？</>}
             sub="我们服务各类电商从业者，帮助他们以最低成本产出最高转化内容"
           />
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="flex md:grid md:grid-cols-3 overflow-x-auto md:overflow-x-visible pb-6 md:pb-0 -mx-4 px-4 md:mx-0 md:px-0 gap-6 snap-x snap-mandatory scrollbar-none">
             {personas.map((p, i) => {
               const { ref, inView } = useInView(0.15);
               return (
                 <div key={p.role} ref={ref}
-                  className={cn('transition-all duration-700', inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8')}
+                  className={cn('transition-all duration-700 w-[80vw] sm:w-[350px] md:w-auto shrink-0 snap-center', inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8')}
                   style={{ transitionDelay: `${i * 120}ms` }}>
                   <TiltCard>
                     <div className="rounded-2xl p-6 h-full landing-card-dark transition-all duration-300 hover:shadow-2xl"
@@ -708,7 +708,7 @@ export default function LandingPage() {
             title={<>六大 AI 引擎<br /><span style={{ color: '#00E599' }}>全程护航你的视频</span></>}
             sub="从脚本策划到视频生成，AI 全流程辅助，每一步都有智能加持"
           />
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-5">
             {features.map((f, i) => {
               const { ref, inView } = useInView(0.1);
               return (
@@ -716,7 +716,7 @@ export default function LandingPage() {
                   className={cn('transition-all duration-700', inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8')}
                   style={{ transitionDelay: `${i * 80}ms` }}>
                   <TiltCard className="h-full">
-                    <div className="rounded-2xl p-6 h-full group cursor-default landing-card-dark transition-all duration-300 hover:shadow-xl"
+                    <div className="rounded-2xl p-4 sm:p-6 h-full group cursor-default landing-card-dark transition-all duration-300 hover:shadow-xl"
                       style={{ '--glow': f.glow } as React.CSSProperties}>
                       <div className="w-12 h-12 rounded-xl mb-4 flex items-center justify-center transition-transform duration-200 group-hover:scale-110"
                         style={{ background: f.glow, border: `1px solid ${f.color}30` }}>
@@ -839,12 +839,12 @@ export default function LandingPage() {
             sub="从免费体验到企业定制，满足不同规模的电商团队需求"
           />
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="flex md:grid md:grid-cols-3 overflow-x-auto md:overflow-x-visible pb-6 md:pb-0 -mx-4 px-4 md:mx-0 md:px-0 gap-6 snap-x snap-mandatory scrollbar-none">
             {plans.map((plan, i) => {
               const { ref, inView } = useInView(0.1);
               return (
                 <div key={plan.name} ref={ref}
-                  className={cn('transition-all duration-700', inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8')}
+                  className={cn('transition-all duration-700 w-[80vw] sm:w-[350px] md:w-auto shrink-0 snap-center', inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8')}
                   style={{ transitionDelay: `${i * 120}ms` }}>
                   <TiltCard className="h-full">
                     <div className={cn('rounded-2xl p-6 h-full flex flex-col relative overflow-hidden transition-all duration-300 hover:shadow-2xl')}
@@ -951,9 +951,9 @@ export default function LandingPage() {
       {/* ── Footer ── */}
       <footer className="bg-[#0a0c0f] text-white border-t border-white/5 pt-16 pb-12 font-sans select-none">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 pb-12 justify-items-center text-center">
+          <div className="flex flex-col lg:flex-row justify-between items-center lg:items-start gap-8 pb-12 text-center lg:text-left">
             {/* 左侧 Logo 和介绍 */}
-            <div className="flex flex-col items-center space-y-4 max-w-xs">
+            <div className="flex flex-col items-center lg:items-start space-y-4 max-w-xs">
               <div className="flex items-center gap-2.5">
                 <img src="/shopro.png" className="w-8 h-8 object-contain shrink-0" alt="Shopro Logo" />
                 <span className="text-lg font-bold text-white tracking-tight">
@@ -965,62 +965,65 @@ export default function LandingPage() {
               </p>
             </div>
 
-            {/* 产品 */}
-            <div className="flex flex-col items-center space-y-4">
-              <h4 className="text-sm font-bold text-white tracking-wider">产品</h4>
-              <ul className="space-y-2.5 text-xs text-white/40">
-                <li>
-                  <a href="#功能" onClick={(e) => {
-                    e.preventDefault();
-                    document.getElementById('功能')?.scrollIntoView({ behavior: 'smooth' });
-                  }} className="hover:text-[#FF6B00] transition-colors">
-                    功能介绍
-                  </a>
-                </li>
-                <li>
-                  <a href="#会员计划" onClick={(e) => {
-                    e.preventDefault();
-                    document.getElementById('会员计划')?.scrollIntoView({ behavior: 'smooth' });
-                  }} className="hover:text-[#FF6B00] transition-colors">
-                    价格方案
-                  </a>
-                </li>
-                <li>
-                  <a href="#用户评价" onClick={(e) => {
-                    e.preventDefault();
-                    document.getElementById('用户评价')?.scrollIntoView({ behavior: 'smooth' });
-                  }} className="hover:text-[#FF6B00] transition-colors">
-                    更新日志
-                  </a>
-                </li>
-                <li>
-                  <a href="/login" className="hover:text-[#FF6B00] transition-colors">
-                    API 文档
-                  </a>
-                </li>
-              </ul>
-            </div>
+            {/* 右侧链接容器：移动端也是一排显示3列，完全不换行 */}
+            <div className="grid grid-cols-3 gap-x-4 sm:gap-x-12 md:gap-x-16 justify-items-center w-full lg:w-auto">
+              {/* 产品 */}
+              <div className="flex flex-col items-center space-y-4">
+                <h4 className="text-sm font-bold text-white tracking-wider">产品</h4>
+                <ul className="space-y-2.5 text-xs text-white/40">
+                  <li>
+                    <a href="#功能" onClick={(e) => {
+                      e.preventDefault();
+                      document.getElementById('功能')?.scrollIntoView({ behavior: 'smooth' });
+                    }} className="hover:text-[#FF6B00] transition-colors">
+                      功能介绍
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#会员计划" onClick={(e) => {
+                      e.preventDefault();
+                      document.getElementById('会员计划')?.scrollIntoView({ behavior: 'smooth' });
+                    }} className="hover:text-[#FF6B00] transition-colors">
+                      价格方案
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#用户评价" onClick={(e) => {
+                      e.preventDefault();
+                      document.getElementById('用户评价')?.scrollIntoView({ behavior: 'smooth' });
+                    }} className="hover:text-[#FF6B00] transition-colors">
+                      更新日志
+                    </a>
+                  </li>
+                  <li>
+                    <a href="/login" className="hover:text-[#FF6B00] transition-colors">
+                      API 文档
+                    </a>
+                  </li>
+                </ul>
+              </div>
 
-            {/* 公司 */}
-            <div className="flex flex-col items-center space-y-4">
-              <h4 className="text-sm font-bold text-white tracking-wider">公司</h4>
-              <ul className="space-y-2.5 text-xs text-white/40">
-                <li><a href="#" className="hover:text-[#FF6B00] transition-colors">关于我们</a></li>
-                <li><a href="#" className="hover:text-[#FF6B00] transition-colors">加入团队</a></li>
-                <li><a href="#" className="hover:text-[#FF6B00] transition-colors">合作伙伴</a></li>
-                <li><a href="#" className="hover:text-[#FF6B00] transition-colors">媒体资料</a></li>
-              </ul>
-            </div>
+              {/* 公司 */}
+              <div className="flex flex-col items-center space-y-4">
+                <h4 className="text-sm font-bold text-white tracking-wider">公司</h4>
+                <ul className="space-y-2.5 text-xs text-white/40">
+                  <li><a href="#" className="hover:text-[#FF6B00] transition-colors">关于我们</a></li>
+                  <li><a href="#" className="hover:text-[#FF6B00] transition-colors">加入团队</a></li>
+                  <li><a href="#" className="hover:text-[#FF6B00] transition-colors">合作伙伴</a></li>
+                  <li><a href="#" className="hover:text-[#FF6B00] transition-colors">媒体资料</a></li>
+                </ul>
+              </div>
 
-            {/* 支持 */}
-            <div className="flex flex-col items-center space-y-4">
-              <h4 className="text-sm font-bold text-white tracking-wider">支持</h4>
-              <ul className="space-y-2.5 text-xs text-white/40">
-                <li><a href="#" className="hover:text-[#FF6B00] transition-colors">帮助中心</a></li>
-                <li><a href="#" className="hover:text-[#FF6B00] transition-colors">联系客服</a></li>
-                <li><a href="#" className="hover:text-[#FF6B00] transition-colors">用户协议</a></li>
-                <li><a href="#" className="hover:text-[#FF6B00] transition-colors">隐私政策</a></li>
-              </ul>
+              {/* 支持 */}
+              <div className="flex flex-col items-center space-y-4">
+                <h4 className="text-sm font-bold text-white tracking-wider">支持</h4>
+                <ul className="space-y-2.5 text-xs text-white/40">
+                  <li><a href="#" className="hover:text-[#FF6B00] transition-colors">帮助中心</a></li>
+                  <li><a href="#" className="hover:text-[#FF6B00] transition-colors">联系客服</a></li>
+                  <li><a href="#" className="hover:text-[#FF6B00] transition-colors">用户协议</a></li>
+                  <li><a href="#" className="hover:text-[#FF6B00] transition-colors">隐私政策</a></li>
+                </ul>
+              </div>
             </div>
           </div>
 

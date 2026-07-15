@@ -2,7 +2,22 @@
 
 ---
 
-## Slide 1: 一、需求洞察 🔍 | 痛点与解决方案
+## Slide 1: 封面 🚀 | Shopro AI：电商 AIGC 带货视频智能生成与优化系统
+
+### 📦 开启电商智能视频新纪元
+
+*   **项目名称**：Shopro AI (电商 AIGC 带货视频)
+*   **平台口号**：增长每一件商品的营销潜力，让全球生意更简单！
+*   **核心亮点**：DeepSeek-V4-Pro 营销脚本 / StepAudio 2.5 情感配音 / Seedance 2.0带货视频生成
+
+---
+
+### 🖼️ 封面幻灯片 AI 提示词 (Prompt)
+> "A highly premium and cinematic presentation cover slide with an e-commerce theme. In the background, dark glowing shelves with blurred products, orange and neon gold neon light trails flowing dynamically. A sleek, semi-transparent glassmorphic card in the center holds the title 'Shopro AI' in a glowing, modern sans-serif typeface, with small 3D icons of a video camera, shopping bag, and lightning bolt floating around it. High tech, volumetric studio lighting, photorealistic, 8k resolution."
+
+---
+
+## Slide 2: 一、需求洞察 🔍 | 痛点与解决方案
 
 ### ❌ 传统视频制作痛点
 *   **成本高昂**：雇用外籍演员与搭建专业录音棚成本极高（单条视频高达 ¥500 - ¥2000）。
@@ -18,7 +33,7 @@
 
 ---
 
-## Slide 2: 二、团队及产品介绍 👥 | 团队介绍 (产品/开发/Agent)
+## Slide 3: 二、团队及产品介绍 👥 | 团队介绍 (产品/开发/Agent)
 
 ### 🎨 产品运营团队 (Product & Operations)
 *   **职责定位**：负责跨境电商趋势洞察、多平台（抖音/TikTok/小红书）爆款特征库提炼，及 SaaS 会员积分体系商业化闭环设计。
@@ -34,7 +49,7 @@
 
 ---
 
-## Slide 3: 二、团队及产品介绍 🎯 | 我们的核心理念：重塑营销引擎
+## Slide 4: 二、团队及产品介绍 🎯 | 我们的核心理念：重塑营销引擎
 
 ### 💡 我们主张的句式与信条
 *   我们销售的**不是一套常规的视频剪辑工具**，**而是支撑商家电商销售额倍增的高效引擎**。
@@ -48,7 +63,7 @@
 
 ---
 
-## Slide 4: 二、团队及产品介绍 🎬 | 项目简介 (名称/定位/价值)
+## Slide 5: 二、团队及产品介绍 🎬 | 项目简介 (名称/定位/价值)
 
 ### 📦 项目简介
 *   **项目名称**：Shopro-电商AIGC带货视频
@@ -63,7 +78,7 @@
 
 ---
 
-## Slide 5: 二、团队及产品介绍 👥 | 用户画像 (年龄/身份/场景)
+## Slide 6: 二、团队及产品介绍 👥 | 用户画像 (年龄/身份/场景)
 
 ### 🛒 跨境电商运营者
 *   **年龄/身份**：24 - 40 岁，Amazon、TikTok Shop、Shopee 及独立站的商家与投放总监。
@@ -79,7 +94,7 @@
 
 ---
 
-## Slide 6: 二、团队及产品介绍 ⚡ | 核心与特色功能概览
+## Slide 7: 二、团队及产品介绍 ⚡ | 核心与特色功能概览
 
 🛠️ 六大核心功能
 全球智能选品：汇聚全球电商爆款，大数据实时追踪，一键导入商品并创作AIGC带货视频
@@ -95,7 +110,7 @@ AI带货视频生成:采用Seedance 2.0/happyhorse1.0 /wan2.0前沿视频生成�
 
 ---
 
-## Slide 7: 二、团队及产品介绍 📊 | 竞品调研与创新差异化
+## Slide 8: 二、团队及产品介绍 📊 | 竞品调研与创新差异化
 
 ### ⚔️ 行业竞品矩阵分析
 *   **传统人工服务**：周期 2 天以上，单价高（¥500+/条），无数字人，且出品质量起伏不定。
@@ -111,7 +126,7 @@ AI带货视频生成:采用Seedance 2.0/happyhorse1.0 /wan2.0前沿视频生成�
 
 ---
 
-## Slide 8: 二、团队及产品介绍 🏆 | 评分亮点与核心卖点
+## Slide 9: 二、团队及产品介绍 🏆 | 评分亮点与核心卖点
 
 ### 📊 系统评估评分 (满分 100)
 *   **生成效率**：`95分` ── 打字机 SSE 协议与异步多边缘计算节点排片，体验极速。
@@ -128,7 +143,7 @@ AI带货视频生成:采用Seedance 2.0/happyhorse1.0 /wan2.0前沿视频生成�
 
 ---
 
-## Slide 9: 三、技术解析及亮点 🌐 | 技术架构 (前端/后端/AI能力)
+## Slide 10: 三、技术解析及亮点 🌐 | 技术架构 (前端/后端/AI能力)
 
 ### 🛠️ 系统三层技术架构与核心价值
 
@@ -145,7 +160,7 @@ AI带货视频生成:采用Seedance 2.0/happyhorse1.0 /wan2.0前沿视频生成�
 
 ---
 
-## Slide 10: 三、技术解析及亮点 🎨 | UI设计 (前端/可视化)
+## Slide 11: 三、技术解析及亮点 🎨 | UI设计 (前端/可视化)
 
 ### 🌌 暗色玻璃态美学 (Aesthetic Design System)
 *   **配色方案**：以深邃暗灰（`#0a0c0f`）为背景，配以橙黄渐变（`#FF6B00` ➔ `#FFB347`）作为品牌亮点，翡翠绿与科技蓝作为辅助警示色。
@@ -160,7 +175,7 @@ AI带货视频生成:采用Seedance 2.0/happyhorse1.0 /wan2.0前沿视频生成�
 
 ---
 
-## Slide 11: 三、技术解析及亮点 💾 | 后端服务 (API/数据库/并发锁)
+## Slide 12: 三、技术解析及亮点 💾 | 后端服务 (API/数据库/并发锁)
 
 ### 🔒 Supabase RLS 安全与事务控制
 *   **行级安全防护 (Row-Level Security)**：
@@ -172,7 +187,7 @@ AI带货视频生成:采用Seedance 2.0/happyhorse1.0 /wan2.0前沿视频生成�
 
 ---
 
-## Slide 12: 三、技术解析及亮点 🤖 | AI能力 (模型/RAG检索/Agent流程)
+## Slide 13: 三、技术解析及亮点 🤖 | AI能力 (模型/RAG检索/Agent流程)
 
 ### 🔄 Deno Agent 流水线编排
 1.  **提取阶段**：通过 Deno 函数调用 DeepSeek-V4-Pro 从详情页中清洗爬取的文本，提炼 3 个黄金核心卖点。
@@ -185,7 +200,7 @@ AI带货视频生成:采用Seedance 2.0/happyhorse1.0 /wan2.0前沿视频生成�
 
 ---
 
-## Slide 13: 四、商业模式及创新 💰 | 商业模式 (成本/收益/市场)
+## Slide 14: 四、商业模式及创新 💰 | 商业模式 (成本/收益/市场)
 
 ### 📈 会员订阅与积分变现机制
 ```
@@ -207,7 +222,7 @@ AI带货视频生成:采用Seedance 2.0/happyhorse1.0 /wan2.0前沿视频生成�
 
 ---
 
-## Slide 14: 四、商业模式及创新 🚀 | 行业落地价值 (效率/测试用户数据)
+## Slide 15: 四、商业模式及创新 🚀 | 行业落地价值 (效率/测试用户数据)
 
 ### ⚡ 行业落地价值
 *   **效率革命**：传统剪辑与制作耗时约 48 小时，Shopro 缩短至 **3分钟**（最快1分钟），综合效率提升 **140倍** 以上。
@@ -224,7 +239,7 @@ AI带货视频生成:采用Seedance 2.0/happyhorse1.0 /wan2.0前沿视频生成�
 
 ---
 
-## Slide 15: 四、商业模式及创新 🎨 | 助力公益：大山深处的“黄金带货官”
+## Slide 16: 四、商业模式及创新 🎨 | 助力公益：大山深处的“黄金带货官”
 
 ### 🍎 “大山之声”免费农产品助农计划
 *   **公益定位**：Shopro 承诺面向偏远山区农户和助农企业，无限期免费开放“Shopro 助农专用版”。
@@ -235,7 +250,7 @@ AI带货视频生成:采用Seedance 2.0/happyhorse1.0 /wan2.0前沿视频生成�
 
 ---
 
-## Slide 16: 五、评分维度对照 📊 | 核心优势与评分总览
+## Slide 17: 五、评分维度对照 📊 | 核心优势与评分总览
 
 ### 🏆 评分维度对照矩阵表
 
@@ -249,7 +264,7 @@ AI带货视频生成:采用Seedance 2.0/happyhorse1.0 /wan2.0前沿视频生成�
 
 ---
 
-## Slide 17: 谢幕致谢 🌟 | Q&A 与合作交流
+## Slide 18: 谢幕致谢 🌟 | Q&A 与合作交流
 
 ### 🎬 Shopro AI: 释放每一件商品的营销潜力，让全球生意更简单
 
