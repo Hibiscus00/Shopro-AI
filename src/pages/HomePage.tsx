@@ -832,7 +832,7 @@ export default function HomePage() {
       await sendStepFlashStreamRequest({
         messages: [{
           role: 'user',
-          content: `请将以下简短视频描述扩展为一段专业的AI视频生成提示词，要求：画面细节丰富、镜头语言清晰、氛围感强、适合带货电商场景。原文：${originalPrompt}`,
+          content: `请对以下视频描述进行提示词优化与增强，使其更具视觉表现力和AI生成效果。请直接输出优化后的提示词，不要包含任何中文或英文的解释、前缀或引导语。原描述：${originalPrompt}`,
         }],
         max_tokens: 1000,
         onData: (data) => {
@@ -1051,7 +1051,7 @@ export default function HomePage() {
                       "flex-1 min-w-0 bg-transparent resize-none text-sm text-white/80 placeholder:text-white/25 outline-none min-h-[72px] leading-relaxed transition-all duration-300",
                       enhancing && "enhancing-text-wave"
                     )}
-                    disabled={generating}
+                    disabled={generating || enhancing}
                   />
                 </div>
 

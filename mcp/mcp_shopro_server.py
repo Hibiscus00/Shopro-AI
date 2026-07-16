@@ -1,0 +1,369 @@
+import os
+import base64
+import logging
+import asyncio
+from typing import Optional, Dict, Any
+from mcp.server.fastmcp import FastMCP
+import httpx
+from dotenv import load_dotenv
+
+# Load environment variables from parent directory if exists, otherwise local env
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), "..", ".env"))
+load_dotenv()
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger("shopro-mcp-shopro-server")
+
+# Initialize FastMCP Server
+mcp = FastMCP("Shopro AI E-Commerce AIGC Video System MCP Server")
+
+# Retrieve API Keys from environment
+DEEPSEEK_API_KEY = os.getenv("VITE_DEEPSEEK_API_KEY") or os.getenv("DEEPSEEK_API_KEY")
+STEP_API_KEY = os.getenv("VITE_STEP_API_KEY") or os.getenv("STEP_API_KEY")
+VECTRUST_API_KEY = os.getenv("VITE_VECTRUST_API_KEY") or os.getenv("VECTRUST_API_KEY")
+
+# API Base URLs
+DEEPSEEK_BASE_URL = "https://api.gmi-serving.com/v1"
+STEP_BASE_URL = "https://api.stepfun.com/step_plan/v1"
+VECTRUST_BASE_URL = "https://draw.openai-next.com/v1"
+
+# Helper for wrapping tool calls with tracing and structured errors
+async def handle_tool_call(tool_name: str, coro):
+    trace_id = os.urandom(8).hex()
+    logger.info(f"Tool call started: {tool_name} | Trace ID: {trace_id}")
+    start_time = asyncio.get_event_loop().time()
+    try:
+        result = await coro
+        duration = (asyncio.get_event_loop().time() - start_time) * 1000
+        logger.info(f"Tool call succeeded: {tool_name} | Trace ID: {trace_id} | Duration: {duration:.2f}ms")
+        return result
+    except httpx.HTTPStatusError as e:
+        duration = (asyncio.get_event_loop().time() - start_time) * 1000
+        logger.error(f"Tool call failed (HTTP): {tool_name} | Trace ID: {trace_id} | Status: {e.response.status_code} | Duration: {duration:.2f}ms | Error: {e.response.text}")
+        return {
+            "error": "upstream_http_error",
+            "status_code": e.response.status_code,
+            "message": e.response.text,
+            "trace_id": trace_id
+        }
+    except Exception as e:
+        duration = (asyncio.get_event_loop().time() - start_time) * 1000
+        logger.error(f"Tool call failed (Exception): {tool_name} | Trace ID: {trace_id} | Duration: {duration:.2f}ms | Error: {str(e)}")
+        return {
+            "error": "internal_error",
+            "message": str(e),
+            "trace_id": trace_id
+        }
+
+@mcp.tool(
+    name="extract_product_highlights",
+    description="Extracts key selling points, target audience pain points, and core marketing angles from raw product descriptions or URL landing text using DeepSeek-V4-Pro."
+)
+async def extract_product_highlights(product_info: str) -> Dict[str, Any]:
+    async def _impl():
+        if not DEEPSEEK_API_KEY:
+            return {"error": "missing_api_key", "message": "DeepSeek API key (VITE_DEEPSEEK_API_KEY) is not configured."}
+
+        prompt = (
+            "You are a master e-commerce marketer. Analyze the following product description/link text and extract:\n"
+            "1. Core Selling Points (Top 3)\n"
+            "2. Target Audience & Their Key Pain Points\n"
+            "3. High-Converting Marketing Angle for video ads.\n\n"
+            f"Product Info:\n{product_info}"
+        )
+
+        async with httpx.AsyncClient(timeout=45.0) as client:
+            response = await client.post(
+                f"{DEEPSEEK_BASE_URL}/chat/completions",
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {DEEPSEEK_API_KEY}"
+                },
+                json={
+                    "model": "deepseek-ai/DeepSeek-V4-Pro",
+                    "messages": [{"role": "user", "content": prompt}],
+                    "temperature": 0.3
+                }
+            )
+            response.raise_for_status()
+            res_data = response.json()
+            analysis = res_data["choices"][0]["message"]["content"].strip()
+            return {"product_info": product_info[:200] + "...", "highlights": analysis}
+
+    return await handle_tool_call("extract_product_highlights", _impl())
+
+@mcp.tool(
+    name="generate_marketing_script",
+    description="Generates a structured TikTok/Douyin/Shorts style high-converting marketing script with detailed scene instructions (Hook, Pain Point, Solution, Call to Action) and digital human speech texts using DeepSeek-V4-Pro."
+)
+async def generate_marketing_script(
+    product_highlights: str,
+    target_audience: str,
+    platform: str = "TikTok",
+    language: str = "Chinese"
+) -> Dict[str, Any]:
+    async def _impl():
+        if not DEEPSEEK_API_KEY:
+            return {"error": "missing_api_key", "message": "DeepSeek API key (VITE_DEEPSEEK_API_KEY) is not configured."}
+
+        prompt = (
+            f"Write a professional video marketing script for {platform} in {language} language.\n"
+            f"Use the AIDA (Attention, Interest, Desire, Action) model.\n"
+            f"Include exact spoken text for a digital human avatar and detailed scene/visual instructions for each step.\n\n"
+            f"Product Highlights:\n{product_highlights}\n\n"
+            f"Target Audience:\n{target_audience}"
+        )
+
+        async with httpx.AsyncClient(timeout=45.0) as client:
+            response = await client.post(
+                f"{DEEPSEEK_BASE_URL}/chat/completions",
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {DEEPSEEK_API_KEY}"
+                },
+                json={
+                    "model": "deepseek-ai/DeepSeek-V4-Pro",
+                    "messages": [{"role": "user", "content": prompt}],
+                    "temperature": 0.7
+                }
+            )
+            response.raise_for_status()
+            res_data = response.json()
+            script_content = res_data["choices"][0]["message"]["content"].strip()
+            return {"script": script_content, "platform": platform, "language": language}
+
+    return await handle_tool_call("generate_marketing_script", _impl())
+
+@mcp.tool(
+    name="translate_marketing_script",
+    description="Translates the generated marketing script to a target language (e.g. Chinese to English, Spanish, etc.) while preserving scene instructions and placeholders intact using DeepSeek-V4-Pro."
+)
+async def translate_marketing_script(script: str, target_language: str) -> Dict[str, Any]:
+    async def _impl():
+        if not DEEPSEEK_API_KEY:
+            return {"error": "missing_api_key", "message": "DeepSeek API key (VITE_DEEPSEEK_API_KEY) is not configured."}
+
+        prompt = (
+            f"Translate the following e-commerce marketing video script into {target_language}.\n"
+            "Keep all visual/scene descriptions and structure identical, only translate the text.\n\n"
+            f"Original Script:\n{script}"
+        )
+
+        async with httpx.AsyncClient(timeout=45.0) as client:
+            response = await client.post(
+                f"{DEEPSEEK_BASE_URL}/chat/completions",
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {DEEPSEEK_API_KEY}"
+                },
+                json={
+                    "model": "deepseek-ai/DeepSeek-V4-Pro",
+                    "messages": [{"role": "user", "content": prompt}],
+                    "temperature": 0.2
+                }
+            )
+            response.raise_for_status()
+            res_data = response.json()
+            translated = res_data["choices"][0]["message"]["content"].strip()
+            return {"translated_script": translated, "target_language": target_language}
+
+    return await handle_tool_call("translate_marketing_script", _impl())
+
+@mcp.tool(
+    name="synthesize_voice_tts",
+    description="Synthesizes speech from a script line using StepAudio stepaudio-2.5-tts. Returns base64 encoded MP3 audio data."
+)
+async def synthesize_voice_tts(
+    text: str,
+    voice_id: str = "cixingnansheng",
+    speed: float = 1.0,
+    volume: float = 0.9
+) -> Dict[str, Any]:
+    async def _impl():
+        if not STEP_API_KEY:
+            return {"error": "missing_api_key", "message": "StepFun API key (VITE_STEP_API_KEY) is not configured."}
+
+        instruction = f"语气自然、情感丰富饱满，语速为 {speed}x，音量为 {volume}"
+        
+        async with httpx.AsyncClient(timeout=45.0) as client:
+            response = await client.post(
+                f"{STEP_BASE_URL}/audio/speech",
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {STEP_API_KEY}"
+                },
+                json={
+                    "model": "stepaudio-2.5-tts",
+                    "input": text,
+                    "voice": voice_id,
+                    "instruction": instruction,
+                    "response_format": "mp3"
+                }
+            )
+            response.raise_for_status()
+            audio_bytes = response.content
+            audio_base64 = base64.b64encode(audio_bytes).decode("utf-8")
+            
+            return {
+                "format": "mp3",
+                "audio_base64": audio_base64,
+                "voice_id": voice_id,
+                "instruction": instruction
+            }
+
+    return await handle_tool_call("synthesize_voice_tts", _impl())
+
+@mcp.tool(
+    name="enhance_prompt",
+    description="Enhances/optimizes a raw prompt text into a detailed, high-quality prompt suitable for digital human or video generation using StepFun step-3.7-flash."
+)
+async def enhance_prompt(prompt: str) -> Dict[str, Any]:
+    async def _impl():
+        if not STEP_API_KEY:
+            return {"error": "missing_api_key", "message": "StepFun API key (VITE_STEP_API_KEY) is not configured."}
+
+        messages = [
+            {
+                "role": "system",
+                "content": "You are a professional video prompt generator. Enhance the user's prompt by adding vivid, detailed sensory descriptions (lighting, camera moves, character expressions, cinematic elements) to make it suitable for high-quality AI video generation. Keep the output concise and in the same language as the input."
+            },
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ]
+
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.post(
+                f"{STEP_BASE_URL}/chat/completions",
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {STEP_API_KEY}"
+                },
+                json={
+                    "model": "step-3.7-flash",
+                    "messages": messages,
+                    "temperature": 0.7,
+                    "max_tokens": 1000
+                }
+            )
+            response.raise_for_status()
+            res_data = response.json()
+            enhanced_text = res_data["choices"][0]["message"]["content"].strip()
+            return {"original_prompt": prompt, "enhanced_prompt": enhanced_text}
+
+    return await handle_tool_call("enhance_prompt", _impl())
+
+@mcp.tool(
+    name="submit_video_generation",
+    description="Submits a video generation task using Seedance 2.0. Requires prompt, duration, resolution, aspect ratio."
+)
+async def submit_video_generation(
+    prompt: str,
+    duration: int = 8,
+    resolution: str = "720p",
+    ratio: str = "16:9",
+    first_frame_url: Optional[str] = None,
+    watermark: bool = False
+) -> Dict[str, Any]:
+    async def _impl():
+        if not VECTRUST_API_KEY:
+            return {"error": "missing_api_key", "message": "Vectrust/Seedance API key (VITE_VECTRUST_API_KEY) is not configured."}
+
+        # Format prompt with parameters per Volcengine Ark requirements
+        final_prompt = prompt
+        if "--resolution" not in final_prompt:
+            final_prompt += f" --resolution {resolution}"
+        if "--duration" not in final_prompt:
+            final_prompt += f" --duration {duration}"
+        if "--aspect_ratio" not in final_prompt and "--ratio" not in final_prompt:
+            final_prompt += f" --aspect_ratio {ratio}"
+
+        request_body = {
+            "model": "doubao-seedance-2-0-fast-260128",
+            "prompt": final_prompt,
+            "watermark": watermark
+        }
+
+        if first_frame_url:
+            request_body["first_frame"] = first_frame_url
+
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.post(
+                f"{VECTRUST_BASE_URL}/video/generations",
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {VECTRUST_API_KEY}"
+                },
+                json=request_body
+            )
+            response.raise_for_status()
+            res_data = response.json()
+
+            request_id = res_data.get("id") or res_data.get("task_id") or res_data.get("request_id")
+            if not request_id:
+                return {"error": "invalid_response", "message": "No request_id returned from upstream API.", "raw": res_data}
+
+            return {
+                "status": "submitted",
+                "request_id": request_id,
+                "prompt": final_prompt
+            }
+
+    return await handle_tool_call("submit_video_generation", _impl())
+
+@mcp.tool(
+    name="query_video_status",
+    description="Queries the status of a submitted video generation task by request_id."
+)
+async def query_video_status(request_id: str) -> Dict[str, Any]:
+    async def _impl():
+        if not VECTRUST_API_KEY:
+            return {"error": "missing_api_key", "message": "Vectrust/Seedance API key (VITE_VECTRUST_API_KEY) is not configured."}
+
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.get(
+                f"{VECTRUST_BASE_URL}/tasks/{request_id}",
+                headers={
+                    "Authorization": f"Bearer {VECTRUST_API_KEY}"
+                }
+            )
+            response.raise_for_status()
+            res_data = response.json()
+
+            status = res_data.get("status")
+            if status in ["completed", "succeeded", "success"]:
+                video_url = res_data.get("result_url") or res_data.get("result", {}).get("data", {}).get("content", {}).get("video_url") or res_data.get("video_url")
+                thumbnail = res_data.get("result", {}).get("data", {}).get("content", {}).get("thumbnail_image_url") or res_data.get("thumbnail_url") or (f"{video_url}?vframe/jpg/offset/1" if video_url else "")
+                return {
+                    "status": "success",
+                    "request_id": request_id,
+                    "video_url": video_url,
+                    "thumbnail_url": thumbnail
+                }
+            elif status in ["failed", "cancelled"]:
+                return {
+                    "status": "failed",
+                    "request_id": request_id,
+                    "error": res_data.get("error_message") or res_data.get("error") or "Generation task failed."
+                }
+            else:
+                return {
+                    "status": "processing",
+                    "request_id": request_id
+                }
+
+    return await handle_tool_call("query_video_status", _impl())
+
+if __name__ == "__main__":
+    # Start the Streamable-HTTP server (listening on 8080 by default)
+    host = os.getenv("HOST", "0.0.0.0")
+    port = int(os.getenv("PORT", 8080))
+    logger.info(f"Starting Shopro AI Full System MCP Server on {host}:{port} using streamable-http transport")
+    mcp.settings.host = host
+    mcp.settings.port = port
+    mcp.run(transport="streamable-http")

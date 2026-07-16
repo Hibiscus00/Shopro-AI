@@ -347,7 +347,19 @@ export default function AvatarsPage() {
     (async () => {
       setLoading(true);
       const { data } = await supabase.from('avatars').select('*').eq('is_active', true).order('use_count', { ascending: false });
-      setAvatars(Array.isArray(data) ? data : []);
+      const mapped = (Array.isArray(data) ? data : []).map(a => {
+        if (a.name === 'Mia') {
+          return { ...a, preview_image: '/mia_avatar.png' };
+        }
+        if (a.name === '阳阳') {
+          return { ...a, preview_image: '/yangyang_avatar.png' };
+        }
+        if (a.name === 'Brandon') {
+          return { ...a, preview_image: '/brandon_avatar.png' };
+        }
+        return a;
+      });
+      setAvatars(mapped);
       setLoading(false);
     })();
   }, []);

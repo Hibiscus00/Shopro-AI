@@ -26,6 +26,7 @@ import {
 import { cn } from '@/lib/utils';
 import { DouyinIcon, TikTokIcon, XiaohongshuIcon } from '@/components/ui/platform-icons';
 import type { ProductFormData, PromptConfig, Shot, MaterialItem, VideoProject } from '@/types/types';
+import { sendStepFlashStreamRequest } from '@/lib/sse';
 
 // ── CR-05 跨平台适配配置 ────────────────────────────────────────────────────
 const PLATFORM_CONFIGS = [
@@ -747,6 +748,15 @@ function Step2Prompt({ data, onChange, onNext, onPrev, productData }: {
 }) {
   const [optimizing, setOptimizing] = useState(false);
   const navigate = useNavigate();
+  const abortRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (abortRef.current) {
+        abortRef.current.abort();
+      }
+    };
+  }, []);
 
   const autoPrompt = `为【${productData.name ?? '商品'}】制作一个${data.duration ?? 30}秒的带货视频，
 风格：${data.video_style ?? '活泼热情'}，目标平台：抖音/TikTok，
@@ -757,17 +767,67 @@ function Step2Prompt({ data, onChange, onNext, onPrev, productData }: {
   const initPrompt = data.prompt_text ?? autoPrompt;
 
   const handleOptimize = async () => {
+    const inputPrompt = data.prompt_text ?? autoPrompt;
+    if (!inputPrompt.trim()) {
+      toast.error('请先输入或生成基础描述');
+      return;
+    }
+
     setOptimizing(true);
+    
+    if (abortRef.current) {
+      abortRef.current.abort();
+    }
+    abortRef.current = new AbortController();
+
+    const originalPrompt = inputPrompt;
+    let fullText = '';
+    let isFirstChunk = true;
+
     try {
-      const { data: res, error } = await supabase.functions.invoke('ai-assistant', {
-        body: { action: 'optimize_prompt', prompt: data.prompt_text ?? autoPrompt, product_name: productData.name }
+      await sendStepFlashStreamRequest({
+        messages: [{
+          role: 'user',
+          content: `请优化以下AI视频生成 Prompt，将其扩展为一段专业的英文AI视频生成提示词。要求：画面细节丰富、镜头语言清晰、色彩与构图精美、适合带货电商场景。请直接输出优化后的英文Prompt，不要包含任何中文或多余的解释。原文：${originalPrompt}`,
+        }],
+        max_tokens: 1000,
+        onData: (chunkData) => {
+          if (chunkData === '[DONE]') return;
+          try {
+            const parsed = JSON.parse(chunkData);
+            const chunk = parsed.choices?.[0]?.delta?.content ?? '';
+            if (chunk) {
+              if (isFirstChunk) {
+                onChange({ ...data, prompt_text: '' });
+                isFirstChunk = false;
+              }
+              fullText += chunk;
+              onChange({ ...data, prompt_text: fullText });
+            }
+          } catch { /* skip */ }
+        },
+        onComplete: () => {
+          toast.success('Prompt已优化');
+          setOptimizing(false);
+        },
+        onError: (err) => {
+          if (!abortRef.current?.signal.aborted) {
+            toast.error(`优化失败：${err.message}`);
+            if (isFirstChunk) {
+              onChange({ ...data, prompt_text: originalPrompt });
+            }
+          }
+          setOptimizing(false);
+        },
+        signal: abortRef.current.signal,
       });
-      if (error) throw error;
-      onChange({ ...data, prompt_text: res?.optimized_prompt ?? data.prompt_text });
-      toast.success('Prompt已优化');
-    } catch {
-      toast.info('Prompt已按默认规则优化，您可以继续手动编辑');
-    } finally {
+    } catch (e: unknown) {
+      if (!abortRef.current?.signal.aborted) {
+        toast.error(`优化失败：${(e as Error).message}`);
+        if (isFirstChunk) {
+          onChange({ ...data, prompt_text: originalPrompt });
+        }
+      }
       setOptimizing(false);
     }
   };
@@ -778,7 +838,7 @@ function Step2Prompt({ data, onChange, onNext, onPrev, productData }: {
       <div className="space-y-3">
         <div className="flex justify-between items-center">
           <Label className="text-base">选择数字人</Label>
-          <Button variant="ghost" size="sm" onClick={() => navigate('/avatars')} className="text-primary h-8 px-2 text-xs">
+          <Button variant="ghost" size="sm" onClick={() => !optimizing && navigate('/avatars')} disabled={optimizing} className="text-primary h-8 px-2 text-xs">
             管理数字人库 <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
           </Button>
         </div>
@@ -793,9 +853,10 @@ function Step2Prompt({ data, onChange, onNext, onPrev, productData }: {
               key={avatar.id} 
               className={cn(
                 "flex flex-col items-center gap-2 cursor-pointer transition-all shrink-0",
-                data.avatar_id === avatar.id ? "scale-105" : "hover:scale-105 opacity-70 hover:opacity-100"
+                data.avatar_id === avatar.id ? "scale-105" : "hover:scale-105 opacity-70 hover:opacity-100",
+                optimizing && "pointer-events-none opacity-40"
               )}
-              onClick={() => onChange({ ...data, avatar_id: avatar.id })}
+              onClick={() => !optimizing && onChange({ ...data, avatar_id: avatar.id })}
             >
               <div className={cn(
                 "w-16 h-16 rounded-full overflow-hidden border-2 p-0.5 transition-colors",
@@ -811,8 +872,11 @@ function Step2Prompt({ data, onChange, onNext, onPrev, productData }: {
           ))}
           
           <div 
-            className="flex flex-col items-center gap-2 cursor-pointer group shrink-0"
-            onClick={() => navigate('/avatars')}
+            className={cn(
+              "flex flex-col items-center gap-2 cursor-pointer group shrink-0",
+              optimizing && "pointer-events-none opacity-40"
+            )}
+            onClick={() => !optimizing && navigate('/avatars')}
           >
             <div className="w-16 h-16 rounded-full border-2 border-dashed border-border group-hover:border-primary/50 group-hover:bg-primary/5 flex items-center justify-center transition-colors">
               <Plus className="w-6 h-6 text-muted-foreground group-hover:text-primary transition-colors" />
@@ -825,7 +889,7 @@ function Step2Prompt({ data, onChange, onNext, onPrev, productData }: {
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <div className="space-y-1.5">
           <Label>视频风格</Label>
-          <Select value={data.video_style ?? 'active'} onValueChange={v => onChange({ ...data, video_style: v })}>
+          <Select disabled={optimizing} value={data.video_style ?? 'active'} onValueChange={v => onChange({ ...data, video_style: v })}>
             <SelectTrigger><SelectValue placeholder="选择风格" /></SelectTrigger>
             <SelectContent>
               {VIDEO_STYLES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
@@ -834,7 +898,7 @@ function Step2Prompt({ data, onChange, onNext, onPrev, productData }: {
         </div>
         <div className="space-y-1.5">
           <Label>背景音乐</Label>
-          <Select value={data.bgm ?? ''} onValueChange={v => onChange({ ...data, bgm: v })}>
+          <Select disabled={optimizing} value={data.bgm ?? ''} onValueChange={v => onChange({ ...data, bgm: v })}>
             <SelectTrigger><SelectValue placeholder="选择BGM" /></SelectTrigger>
             <SelectContent>
               {BGM_OPTIONS.map(b => <SelectItem key={b} value={b}>{b}</SelectItem>)}
@@ -843,7 +907,7 @@ function Step2Prompt({ data, onChange, onNext, onPrev, productData }: {
         </div>
         <div className="space-y-1.5">
           <Label>字幕样式</Label>
-          <Select value={data.subtitle_style ?? ''} onValueChange={v => onChange({ ...data, subtitle_style: v })}>
+          <Select disabled={optimizing} value={data.subtitle_style ?? ''} onValueChange={v => onChange({ ...data, subtitle_style: v })}>
             <SelectTrigger><SelectValue placeholder="选择字幕" /></SelectTrigger>
             <SelectContent>
               {SUBTITLE_STYLES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
@@ -852,7 +916,7 @@ function Step2Prompt({ data, onChange, onNext, onPrev, productData }: {
         </div>
         <div className="space-y-1.5">
           <Label>目标语言</Label>
-          <Select value={data.language ?? 'zh'} onValueChange={v => onChange({ ...data, language: v })}>
+          <Select disabled={optimizing} value={data.language ?? 'zh'} onValueChange={v => onChange({ ...data, language: v })}>
             <SelectTrigger><SelectValue placeholder="选择语言" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="zh">中文</SelectItem>
@@ -868,6 +932,7 @@ function Step2Prompt({ data, onChange, onNext, onPrev, productData }: {
           <Label>视频时长：{data.duration ?? 30}秒</Label>
           <div className="pt-2 px-1">
             <Slider
+              disabled={optimizing}
               min={15} max={60} step={5}
               value={[data.duration ?? 30]}
               onValueChange={([v]) => onChange({ ...data, duration: v })}
@@ -905,6 +970,7 @@ function Step2Prompt({ data, onChange, onNext, onPrev, productData }: {
           className="px-3 resize-none font-mono text-sm"
           value={data.prompt_text ?? initPrompt}
           onChange={e => onChange({ ...data, prompt_text: e.target.value })}
+          disabled={optimizing}
           placeholder="输入或自动生成Prompt..."
         />
         <p className="text-xs text-muted-foreground">提示：Prompt会直接影响视频生成效果，可手动修改或点击AI优化</p>
@@ -926,8 +992,8 @@ function Step2Prompt({ data, onChange, onNext, onPrev, productData }: {
       </div>
 
       <div className="flex items-center justify-between pt-2">
-        <Button variant="outline" onClick={onPrev}><ChevronLeft className="w-4 h-4 mr-1" />上一步</Button>
-        <Button onClick={onNext}>下一步 <ChevronRight className="w-4 h-4 ml-1" /></Button>
+        <Button variant="outline" onClick={onPrev} disabled={optimizing}><ChevronLeft className="w-4 h-4 mr-1" />上一步</Button>
+        <Button onClick={onNext} disabled={optimizing}>下一步 <ChevronRight className="w-4 h-4 ml-1" /></Button>
       </div>
     </div>
   );
