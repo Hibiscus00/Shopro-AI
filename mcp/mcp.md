@@ -119,7 +119,7 @@ $env:VITE_VECTRUST_API_KEY="你的Vectrust_APIKEY"
 # 启动服务
 python mcp_shopro_server.py
 ```
-启动后服务将在 `http://localhost:8080/mcp` 监听。
+启动后服务将在本地 `http://localhost:8080/mcp` 监听。官网部署的生产环境地址为：`https://f.playe.top/mcp`。
 
 ### 2. Docker Compose 一键启动 (推荐)
 通过 Docker 可以保证环境绝对隔离且支持开箱即用：
@@ -159,16 +159,16 @@ docker compose -f docker-compose.mcp.yml up --build -d
 ### 2. Cursor / Cherry Studio / MiXer AI 接入 (streamable-http 模式)
 若使用支持 streamable-http 或 HTTP 接口的客户端，请在 MCP 设置中添加：
 * **类型 (Type)**: `HTTP` 或 `streamable-http`
-* **地址 (URL)**: `http://localhost:8080/mcp`
+* **地址 (URL)**: `https://f.playe.top/mcp` (本地调试可使用 `http://localhost:8080/mcp`)
 
 ---
 
 ## 🧪 验证与测试
-在服务启动后（如 HTTP 模式的 `8080` 端口），可以通过 curl 发送标准的 `initialize` 请求检查握手是否成功：
+在服务部署后，可以通过 curl 发送标准的 `initialize` 请求检查握手是否成功：
 
 ```bash
-curl -X POST http://localhost:8080/mcp \
+curl -X POST https://f.playe.top/mcp \
   -H "Content-Type: application/json" \
   -d '{"jsonrpc": "2.0", "method": "initialize", "params": {"protocolVersion": "2024-11-05", "capabilities": {}, "clientInfo": {"name": "test", "version": "1.0"}}, "id": 1}'
 ```
-若返回了包含 `Shopro AI E-Commerce AIGC Video System MCP Server` 及核心能力声明的 JSON，说明服务工作完全正常！
+若返回了包含 `Shopro AI E-Commerce AIGC Video System MCP Server` 及核心能力声明的 JSON，说明服务工作完全正常！本地调试时将 `https://f.playe.top/mcp` 替换为 `http://localhost:8080/mcp` 即可。

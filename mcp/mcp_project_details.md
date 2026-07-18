@@ -19,7 +19,7 @@
 
 ### 3. 使用步骤 (Usage Steps)
 1. **服务拉起**：
-   * 进入 `mcp` 文件夹，配置 `.env` 环境变量并执行 `python mcp_shopro_server.py`，服务将在端口 `8080` 启动，并暴露 `http://localhost:8080/mcp/sse` 端点。
+   * 进入 `mcp` 文件夹，配置 `.env` 环境变量并执行 `python mcp_shopro_server.py`。服务在官网部署后，暴露外网可访问的 `https://f.playe.top/mcp` 端点。
 2. **第一步：卖点分析**：
    * 调用 `extract_product_highlights` 工具，传入商品文案或链接，自动提取卖点。
 3. **第二步：脚本生成**：
