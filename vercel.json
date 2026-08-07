@@ -1,6 +1,14 @@
 {
   "rewrites": [
     {
+      "source": "/dxkp-api/(.*)",
+      "destination": "/api/dxkp"
+    },
+    {
+      "source": "/api/dxkp/(.*)",
+      "destination": "/api/dxkp"
+    },
+    {
       "source": "/mcp",
       "destination": "/api/mcp"
     },

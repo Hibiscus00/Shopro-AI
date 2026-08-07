@@ -1,6 +1,6 @@
 /**
  * Cdance2.0 Official Video Generation Model Integration
- * Base URL: https://ai.dxkp.com/v1 (Proxy: /dxkp-api/v1)
+ * Base URL: https://ai.dxkp.com/v1 (Proxies: /dxkp-api/v1, /api/dxkp/v1)
  * Endpoint: POST /v1/video/generations & GET /v1/video/generations/{task_id}
  */
 
@@ -17,13 +17,14 @@ function getApiKey(): string {
   return apiKey;
 }
 
-function getBaseUrl(): string {
+function getCandidateBaseUrls(): string[] {
   const envUrl = import.meta.env.VITE_CDANCE_BASE_URL;
-  if (envUrl) return envUrl;
-  if (typeof window !== 'undefined') {
-    return '/dxkp-api/v1';
-  }
-  return DEFAULT_CDANCE_BASE_URL;
+  const urls: string[] = [];
+  if (envUrl) urls.push(envUrl);
+  urls.push('/dxkp-api/v1');
+  urls.push('/api/dxkp/v1');
+  urls.push(DEFAULT_CDANCE_BASE_URL);
+  return Array.from(new Set(urls));
 }
 
 export interface VectrustVideoPayload {
@@ -41,11 +42,11 @@ export interface VectrustVideoPayload {
 }
 
 /**
- * Submit video generation task to Cdance2.0 official API
+ * Submit video generation task to Cdance2.0 official API with multi-endpoint fallback
  */
 export async function submitVectrustSeedanceVideo(payload: VectrustVideoPayload): Promise<{ request_id: string }> {
   const apiKey = getApiKey();
-  const baseUrl = getBaseUrl();
+  const candidateUrls = getCandidateBaseUrls();
   const {
     prompt,
     duration = 5,
@@ -130,82 +131,118 @@ export async function submitVectrustSeedanceVideo(payload: VectrustVideoPayload)
     requestBody.metadata.content = contentItems;
   }
 
-  const response = await fetch(`${baseUrl}/video/generations`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify(requestBody),
-  });
+  let lastError: Error | null = null;
 
-  if (!response.ok) {
-    const errText = await response.text().catch(() => 'Unknown error');
-    throw new Error(`Cdance2.0 API HTTP ${response.status}: ${errText}`);
+  for (const baseUrl of candidateUrls) {
+    try {
+      const response = await fetch(`${baseUrl}/video/generations`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      // If HTTP 405 / 404, server doesn't proxy this endpoint, try next candidate URL
+      if ((response.status === 405 || response.status === 404) && candidateUrls.indexOf(baseUrl) < candidateUrls.length - 1) {
+        console.warn(`Base URL ${baseUrl} returned ${response.status}, trying fallback endpoint...`);
+        continue;
+      }
+
+      if (!response.ok) {
+        const errText = await response.text().catch(() => 'Unknown error');
+        throw new Error(`Cdance2.0 API HTTP ${response.status}: ${errText}`);
+      }
+
+      const resData = await response.json();
+      const requestId = resData.task_id || resData.id;
+
+      if (!requestId) {
+        throw new Error(`Invalid response from Cdance2.0 API: ${JSON.stringify(resData)}`);
+      }
+
+      return { request_id: requestId };
+    } catch (err: any) {
+      lastError = err;
+      if (candidateUrls.indexOf(baseUrl) === candidateUrls.length - 1) {
+        throw err;
+      }
+    }
   }
 
-  const resData = await response.json();
-  const requestId = resData.task_id || resData.id;
-
-  if (!requestId) {
-    throw new Error(`Invalid response from Cdance2.0 API: ${JSON.stringify(resData)}`);
-  }
-
-  return { request_id: requestId };
+  throw lastError || new Error('Cdance2.0 video submission failed across all endpoints.');
 }
 
 /**
- * Query task status from Cdance2.0 official API
+ * Query task status from Cdance2.0 official API with multi-endpoint fallback
  */
 export async function queryVectrustSeedanceVideo(requestId: string): Promise<any> {
   const apiKey = getApiKey();
-  const baseUrl = getBaseUrl();
+  const candidateUrls = getCandidateBaseUrls();
 
-  const response = await fetch(`${baseUrl}/video/generations/${requestId}`, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-    },
-  });
+  let lastError: Error | null = null;
 
-  if (!response.ok) {
-    const errText = await response.text().catch(() => 'Unknown error');
-    throw new Error(`Cdance2.0 query error HTTP ${response.status}: ${errText}`);
+  for (const baseUrl of candidateUrls) {
+    try {
+      const response = await fetch(`${baseUrl}/video/generations/${requestId}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+        },
+      });
+
+      if ((response.status === 405 || response.status === 404) && candidateUrls.indexOf(baseUrl) < candidateUrls.length - 1) {
+        console.warn(`Query Base URL ${baseUrl} returned ${response.status}, trying fallback endpoint...`);
+        continue;
+      }
+
+      if (!response.ok) {
+        const errText = await response.text().catch(() => 'Unknown error');
+        throw new Error(`Cdance2.0 query error HTTP ${response.status}: ${errText}`);
+      }
+
+      const resData = await response.json();
+
+      if (resData.code && resData.code !== 'success') {
+        return {
+          status: 'failed',
+          error: resData.message || '查询视频生成状态失败',
+        };
+      }
+
+      const taskData = resData.data || resData;
+      const status = (taskData.status || '').toUpperCase();
+
+      if (status === 'SUCCESS') {
+        const videoUrl = taskData.result_url || taskData.data?.content?.video_url;
+        return {
+          status: 'success',
+          video_url: videoUrl,
+          outcome: {
+            video_url: videoUrl,
+            thumbnail_image_url: `${videoUrl}?vframe/jpg/offset/1`,
+          },
+        };
+      } else if (status === 'FAILED') {
+        return {
+          status: 'failed',
+          error: taskData.fail_reason || '视频生成任务失败',
+        };
+      } else {
+        const progressVal = parseInt(taskData.progress || '0') || 10;
+        return {
+          status: 'processing',
+          progress: progressVal,
+        };
+      }
+    } catch (err: any) {
+      lastError = err;
+      if (candidateUrls.indexOf(baseUrl) === candidateUrls.length - 1) {
+        throw err;
+      }
+    }
   }
 
-  const resData = await response.json();
-
-  if (resData.code && resData.code !== 'success') {
-    return {
-      status: 'failed',
-      error: resData.message || '查询视频生成状态失败',
-    };
-  }
-
-  const taskData = resData.data || resData;
-  const status = (taskData.status || '').toUpperCase();
-
-  if (status === 'SUCCESS') {
-    const videoUrl = taskData.result_url || taskData.data?.content?.video_url;
-    return {
-      status: 'success',
-      video_url: videoUrl,
-      outcome: {
-        video_url: videoUrl,
-        thumbnail_image_url: `${videoUrl}?vframe/jpg/offset/1`,
-      },
-    };
-  } else if (status === 'FAILED') {
-    return {
-      status: 'failed',
-      error: taskData.fail_reason || '视频生成任务失败',
-    };
-  } else {
-    // queued, PROCESSING, NOT_START
-    const progressVal = parseInt(taskData.progress || '0') || 10;
-    return {
-      status: 'processing',
-      progress: progressVal,
-    };
-  }
+  throw lastError || new Error('Cdance2.0 video query failed across all endpoints.');
 }
