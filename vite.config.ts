@@ -30,6 +30,18 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/gmicloud-api/, ''),
         secure: false,
       },
+      '/dxkp-api': {
+        target: 'https://ai.dxkp.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/dxkp-api/, ''),
+        secure: false,
+        configure: (proxy, _options) => {
+          proxy.on('proxyReq', (proxyReq) => {
+            proxyReq.removeHeader('origin');
+            proxyReq.removeHeader('referer');
+          });
+        },
+      },
     },
   },
 });

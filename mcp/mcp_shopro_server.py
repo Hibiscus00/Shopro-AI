@@ -24,12 +24,15 @@ mcp = FastMCP("Shopro AI E-Commerce AIGC Video System MCP Server")
 # Retrieve API Keys from environment
 DEEPSEEK_API_KEY = os.getenv("VITE_DEEPSEEK_API_KEY") or os.getenv("DEEPSEEK_API_KEY")
 STEP_API_KEY = os.getenv("VITE_STEP_API_KEY") or os.getenv("STEP_API_KEY")
-VECTRUST_API_KEY = os.getenv("VITE_VECTRUST_API_KEY") or os.getenv("VECTRUST_API_KEY")
+CDANCE_API_KEY = os.getenv("API_KEY") or os.getenv("VITE_CDANCE_API_KEY") or os.getenv("VITE_VECTRUST_API_KEY") or os.getenv("VECTRUST_API_KEY")
 
 # API Base URLs
 DEEPSEEK_BASE_URL = "https://api.gmi-serving.com/v1"
 STEP_BASE_URL = "https://api.stepfun.com/step_plan/v1"
-VECTRUST_BASE_URL = "https://draw.openai-next.com/v1"
+CDANCE_BASE_URL = os.getenv("VITE_CDANCE_BASE_URL") or "https://ai.dxkp.com/v1"
+
+# In-memory task store for Cdance async completions
+mcp_task_store = {}
 
 # Helper for wrapping tool calls with tracing and structured errors
 async def handle_tool_call(tool_name: str, coro):
@@ -264,54 +267,58 @@ async def enhance_prompt(prompt: str) -> Dict[str, Any]:
 )
 async def submit_video_generation(
     prompt: str,
-    duration: int = 8,
+    duration: int = 5,
     resolution: str = "720p",
     ratio: str = "16:9",
     first_frame_url: Optional[str] = None,
     watermark: bool = False
 ) -> Dict[str, Any]:
     async def _impl():
-        if not VECTRUST_API_KEY:
-            return {"error": "missing_api_key", "message": "Vectrust/Seedance API key (VITE_VECTRUST_API_KEY) is not configured."}
+        if not CDANCE_API_KEY:
+            return {"error": "missing_api_key", "message": "Cdance2.0 API key (API_KEY) is not configured."}
 
-        # Format prompt with parameters per Volcengine Ark requirements
-        final_prompt = prompt
-        if "--resolution" not in final_prompt:
-            final_prompt += f" --resolution {resolution}"
-        if "--duration" not in final_prompt:
-            final_prompt += f" --duration {duration}"
-        if "--aspect_ratio" not in final_prompt and "--ratio" not in final_prompt:
-            final_prompt += f" --aspect_ratio {ratio}"
+        content_items = []
+        if first_frame_url:
+            content_items.append({
+                "type": "image_url",
+                "image_url": {"url": first_frame_url},
+                "role": "first_frame"
+            })
 
         request_body = {
-            "model": "doubao-seedance-2-0-fast-260128",
-            "prompt": final_prompt,
-            "watermark": watermark
+            "model": "Cdance2.0-A",
+            "prompt": prompt,
+            "seconds": str(duration),
+            "metadata": {
+                "generate_audio": True,
+                "resolution": resolution,
+                "ratio": ratio,
+                "watermark": watermark
+            }
         }
-
-        if first_frame_url:
-            request_body["first_frame"] = first_frame_url
+        if content_items:
+            request_body["metadata"]["content"] = content_items
 
         async with httpx.AsyncClient(timeout=30.0) as client:
             response = await client.post(
-                f"{VECTRUST_BASE_URL}/video/generations",
+                f"{CDANCE_BASE_URL}/video/generations",
                 headers={
                     "Content-Type": "application/json",
-                    "Authorization": f"Bearer {VECTRUST_API_KEY}"
+                    "Authorization": f"Bearer {CDANCE_API_KEY}"
                 },
                 json=request_body
             )
             response.raise_for_status()
             res_data = response.json()
 
-            request_id = res_data.get("id") or res_data.get("task_id") or res_data.get("request_id")
+            request_id = res_data.get("task_id") or res_data.get("id")
             if not request_id:
-                return {"error": "invalid_response", "message": "No request_id returned from upstream API.", "raw": res_data}
+                return {"error": "invalid_response", "message": "No task_id returned.", "raw": res_data}
 
             return {
                 "status": "submitted",
                 "request_id": request_id,
-                "prompt": final_prompt
+                "prompt": prompt
             }
 
     return await handle_tool_call("submit_video_generation", _impl())
@@ -322,39 +329,48 @@ async def submit_video_generation(
 )
 async def query_video_status(request_id: str) -> Dict[str, Any]:
     async def _impl():
-        if not VECTRUST_API_KEY:
-            return {"error": "missing_api_key", "message": "Vectrust/Seedance API key (VITE_VECTRUST_API_KEY) is not configured."}
+        if not CDANCE_API_KEY:
+            return {"error": "missing_api_key", "message": "Cdance2.0 API key (API_KEY) is not configured."}
 
         async with httpx.AsyncClient(timeout=30.0) as client:
             response = await client.get(
-                f"{VECTRUST_BASE_URL}/tasks/{request_id}",
+                f"{CDANCE_BASE_URL}/video/generations/{request_id}",
                 headers={
-                    "Authorization": f"Bearer {VECTRUST_API_KEY}"
+                    "Authorization": f"Bearer {CDANCE_API_KEY}"
                 }
             )
             response.raise_for_status()
             res_data = response.json()
 
-            status = res_data.get("status")
-            if status in ["completed", "succeeded", "success"]:
-                video_url = res_data.get("result_url") or res_data.get("result", {}).get("data", {}).get("content", {}).get("video_url") or res_data.get("video_url")
-                thumbnail = res_data.get("result", {}).get("data", {}).get("content", {}).get("thumbnail_image_url") or res_data.get("thumbnail_url") or (f"{video_url}?vframe/jpg/offset/1" if video_url else "")
+            if res_data.get("code") and res_data.get("code") != "success":
+                return {
+                    "status": "failed",
+                    "request_id": request_id,
+                    "error": res_data.get("message") or "Query failed"
+                }
+
+            task_data = res_data.get("data") or res_data
+            status = (task_data.get("status") or "").upper()
+
+            if status == "SUCCESS":
+                video_url = task_data.get("result_url") or task_data.get("data", {}).get("content", {}).get("video_url")
                 return {
                     "status": "success",
                     "request_id": request_id,
                     "video_url": video_url,
-                    "thumbnail_url": thumbnail
+                    "thumbnail_url": f"{video_url}?vframe/jpg/offset/1" if video_url else None
                 }
-            elif status in ["failed", "cancelled"]:
+            elif status == "FAILED":
                 return {
                     "status": "failed",
                     "request_id": request_id,
-                    "error": res_data.get("error_message") or res_data.get("error") or "Generation task failed."
+                    "error": task_data.get("fail_reason") or "Video generation task failed."
                 }
             else:
                 return {
                     "status": "processing",
-                    "request_id": request_id
+                    "request_id": request_id,
+                    "progress": task_data.get("progress", "0%")
                 }
 
     return await handle_tool_call("query_video_status", _impl())

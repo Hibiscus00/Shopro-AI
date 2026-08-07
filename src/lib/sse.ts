@@ -474,51 +474,19 @@ export async function sendStepAudioTTS(options: StepTTSOptions): Promise<string>
 
 export async function submitSeedanceVideo(payload: any): Promise<{ request_id: string }> {
   try {
-    const response = await fetch(`${SUPABASE_URL}/functions/v1/seedance`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-        'apikey': SUPABASE_ANON_KEY,
-      },
-      body: JSON.stringify({
-        action: 'create',
-        ...payload,
-      }),
-    });
-
-    if (!response.ok) throw new Error(`HTTP error ${response.status}`);
-    const resData = await response.json();
-    if (resData.error) throw new Error(resData.error);
-    return resData;
-  } catch (err) {
-    console.warn("Edge function seedance create failed, falling back to Vectrust direct API calling:", err);
     return await submitVectrustSeedanceVideo(payload);
+  } catch (err) {
+    console.error("Direct Cdance video submission error:", err);
+    throw err;
   }
 }
 
 export async function querySeedanceVideo(request_id: string): Promise<any> {
   try {
-    const response = await fetch(`${SUPABASE_URL}/functions/v1/seedance`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-        'apikey': SUPABASE_ANON_KEY,
-      },
-      body: JSON.stringify({
-        action: 'query',
-        request_id,
-      }),
-    });
-
-    if (!response.ok) throw new Error(`HTTP error ${response.status}`);
-    const resData = await response.json();
-    if (resData.error) throw new Error(resData.error);
-    return resData;
-  } catch (err) {
-    console.warn("Edge function seedance query failed, falling back to Vectrust direct API calling:", err);
     return await queryVectrustSeedanceVideo(request_id);
+  } catch (err) {
+    console.error("Direct Cdance video query error:", err);
+    throw err;
   }
 }
 
