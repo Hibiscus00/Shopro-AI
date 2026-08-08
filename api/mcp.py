@@ -21,8 +21,6 @@ mcp_shopro_server.mcp.settings.transport_security.enable_dns_rebinding_protectio
 mcp_app = mcp_shopro_server.mcp.streamable_http_app()
 session_manager = mcp_shopro_server.mcp.session_manager
 
-_global_tg = None
-
 HTML_STATUS_PAGE = """<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -78,11 +76,10 @@ HTML_STATUS_PAGE = """<!DOCTYPE html>
 """
 
 async def app(scope, receive, send):
-    global _global_tg
     if scope["type"] == "http":
         scope["path"] = "/mcp"
         
-        # Check Accept header for direct browser visits
+        # Check Accept header for direct browser visits (humans)
         accept = ""
         for k, v in scope.get("headers", []):
             if k.lower() == b"accept":
@@ -106,11 +103,12 @@ async def app(scope, receive, send):
             })
             return
 
-    # Auto-initialize StreamableHTTP session manager task group for serverless environments
-    if session_manager._task_group is None:
-        if _global_tg is None:
-            tg_ctx = anyio.create_task_group()
-            _global_tg = await tg_ctx.__aenter__()
-        session_manager._task_group = _global_tg
-
-    await mcp_app(scope, receive, send)
+    # Auto-initialize StreamableHTTP session manager task group per-request within current event loop
+    try:
+        async with anyio.create_task_group() as tg:
+            session_manager._task_group = tg
+            await mcp_app(scope, receive, send)
+            tg.cancel_scope.cancel()
+    except Exception:
+        # Prevent task group cancellation exception from bubbling up to ASGI server
+        pass
