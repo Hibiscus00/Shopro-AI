@@ -1,19 +1,20 @@
 import os
 import sys
 import anyio
-from starlette.responses import HTMLResponse
 
 # Add the 'mcp/' subdirectory to sys.path
-mcp_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "mcp")
-if mcp_dir not in sys.path:
-    sys.path.insert(0, mcp_dir)
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+mcp_dir = os.path.join(parent_dir, "mcp")
 
-# Import the local server script directly as a top-level module
+for path in [parent_dir, mcp_dir]:
+    if path not in sys.path:
+        sys.path.insert(0, path)
+
+# Import local MCP server script
 import mcp_shopro_server
 
-# Disable DNS Rebinding Protection for public Vercel production deployment.
-# This prevents "Invalid Host header" (421) and Origin mismatch (403) errors
-# when accessed via custom domains or external AI client integrations (e.g. Cursor, Cherry Studio).
+# Disable DNS Rebinding Protection for public Vercel production deployment
 mcp_shopro_server.mcp.settings.transport_security.enable_dns_rebinding_protection = False
 
 # Expose Starlette app & session manager
@@ -30,7 +31,7 @@ HTML_STATUS_PAGE = """<!DOCTYPE html>
     <title>Shopro AI - MCP Server Status</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #0b0f17; color: #e2e8f0; margin: 0; padding: 2rem; display: flex; justify-content: center; align-items: center; min-height: 80vh; }
-        .card { background: rgba(30, 41, 59, 0.7); border: 1px solid #334155; backdrop-filter: blur(12px); border-radius: 1rem; padding: 2.5rem; max-width: 650px; width: 100%; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); }
+        .card { background: rgba(30, 41, 59, 0.8); border: 1px solid #334155; backdrop-filter: blur(12px); border-radius: 1rem; padding: 2.5rem; max-width: 650px; width: 100%; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); }
         .badge { display: inline-block; background: #064e3b; color: #34d399; font-size: 0.85rem; font-weight: 600; padding: 0.25rem 0.75rem; border-radius: 9999px; margin-bottom: 1rem; border: 1px solid #059669; }
         h1 { font-size: 1.75rem; margin: 0 0 0.5rem 0; color: #f8fafc; }
         p { color: #94a3b8; line-height: 1.6; margin: 0.5rem 0; }
@@ -44,7 +45,7 @@ HTML_STATUS_PAGE = """<!DOCTYPE html>
 <body>
     <div class="card">
         <div class="badge">🟢 MCP Server Running Online</div>
-        <h1>🛒 Shopro AI - MCP 服务可访问</h1>
+        <h1>🛒 Shopro AI - MCP 服务正常在线</h1>
         <p>本项目已成功部署并暴露标准 <strong>Model Context Protocol (MCP) Streamable HTTP</strong> 端点。</p>
         
         <p><strong>服务 URL 地址：</strong> <code>https://f.playe.top/mcp</code></p>
@@ -65,7 +66,7 @@ HTML_STATUS_PAGE = """<!DOCTYPE html>
         </div>
 
         <p style="margin-top: 1.5rem; font-size: 0.9rem; color: #fbbf24;">
-            💡 <strong>说明：</strong> 直接在浏览器打开本页面时会显示此状态面板；当 AI 客户端（如 Cursor、Cherry Studio、MCP Inspector 或赛事评测机）发起 JSON-RPC / SSE 握手时，将自动执行 MCP 初始化与工具调用。
+            💡 <strong>说明：</strong> 直接在浏览器访问此 URL 时会展示此状态页面；当 AI 客户端（如 Cursor、Cherry Studio、MCP Inspector 或赛事评测机）发起 JSON-RPC / SSE 握手时，系统将自动进行 MCP 协议初始化与工具调用。
         </p>
 
         <div class="footer">
@@ -81,20 +82,31 @@ async def app(scope, receive, send):
     if scope["type"] == "http":
         scope["path"] = "/mcp"
         
-        # Check Accept header for direct browser visits (human vs MCP client)
+        # Check Accept header for direct browser visits
         accept = ""
         for k, v in scope.get("headers", []):
             if k.lower() == b"accept":
                 accept = v.decode("utf-8", errors="ignore")
                 break
         
-        # If it's a GET request from a regular Web browser (accepting HTML), return status page
+        # Return pure ASGI HTML response for human browser visits to prevent 500 / 406 error
         if scope["method"] == "GET" and "text/event-stream" not in accept and "application/json" not in accept:
-            response = HTMLResponse(HTML_STATUS_PAGE)
-            await response(scope, receive, send)
+            body = HTML_STATUS_PAGE.encode("utf-8")
+            await send({
+                "type": "http.response.start",
+                "status": 200,
+                "headers": [
+                    [b"content-type", b"text/html; charset=utf-8"],
+                    [b"content-length", str(len(body)).encode("utf-8")],
+                ],
+            })
+            await send({
+                "type": "http.response.body",
+                "body": body,
+            })
             return
 
-    # Auto-initialize StreamableHTTP session manager task group for serverless environments (Vercel)
+    # Auto-initialize StreamableHTTP session manager task group for serverless environments
     if session_manager._task_group is None:
         if _global_tg is None:
             tg_ctx = anyio.create_task_group()
