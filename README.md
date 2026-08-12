@@ -16,8 +16,8 @@
 
 ## 💎 项目简介
 <img width="1884" height="1212" alt="image" src="https://github.com/user-attachments/assets/e8b5767a-6113-4193-af0e-954e29b68f32" />
-<img width="2350" height="1153" alt="image" src="https://github.com/user-attachments/assets/73f7d470-a504-49c1-9057-92cef8135aad" />
-<img width="2507" height="1330" alt="image" src="https://github.com/user-attachments/assets/5c08e561-71b1-4ee0-8913-5d8ee86650ee" />
+<img width="1280" height="705" alt="image" src="https://github.com/user-attachments/assets/d571f049-c3d7-42ab-aec2-0e59554d85c7" />
+<img width="1280" height="679" alt="image" src="https://github.com/user-attachments/assets/7ca80965-6f55-4615-bb84-2bf42d9bb612" />
 **Shopro-电商AIGC带货视频** 是一款面向电商商家（如抖音、TikTok、快手、小红书、Amazon 等）的 SaaS 平台。该系统通过深度融合先进的多模态大模型与全链路智能工作流，解决商家在短视频营销中面临的“文案撰写难、数字人外籍演员贵、剪辑成本高、多语言本地化差、跨平台发布繁琐”等痛点。
 系统支持从「商品信息输入/URL 卖点提取 ➔ AI 智能脚本生成 ➔ 数字人选择与克隆 ➔ 多语言智能翻译 ➔ 分镜编辑 ➔ 素材混剪 ➔ 视频异步合成 ➔ 多平台一键发布」的完整闭环，将传统的五人工作流压缩为“一人 + 浏览器”，帮助商家以极低成本高速量产高转化的爆款短视频。
 
@@ -295,4 +295,5 @@ npm run build
 
 ## 📌 总结
 
-Shopro AI 是一套面向 **带货短视频量产** 领域的一站式 SaaS 系统。项目融合了 DeepSeek-V4-Pro、StepAudio 2.5、Seedance 2.0 等前沿多模态大模型，以极高的工程化完成度打通了“文案-配音-画面-数据回流-团队协作-支付”的商业化完整闭环。具有极高的商业化落地价值和出海想象空间。
+Shopro AI 是一套面向 **带货短视频量产** 领域的一站式 SaaS 系统。项目融合了 DeepSeek-V4-Pro、StepAudio 2.5、Seedance 2.0 等前沿多模态大模型，以极高的工程化完成度打通了“文案-配音-画面-数据回流-团队协作-支付”的商业化完整闭环。具有极高的商业化落地价值和出海想象空间。项目投入很大精力开发，有帮助希望反馈支持一下感谢！<img width="521" height="521" alt="2" src="https://github.com/user-attachments/assets/89a16ac9-3d73-4c0b-a9be-b54ff848a1e1" />
+
