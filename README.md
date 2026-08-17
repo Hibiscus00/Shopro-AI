@@ -18,7 +18,9 @@
 <img width="1884" height="1212" alt="image" src="https://github.com/user-attachments/assets/e8b5767a-6113-4193-af0e-954e29b68f32" />
 <img width="2350" height="1153" alt="image" src="https://github.com/user-attachments/assets/73f7d470-a504-49c1-9057-92cef8135aad" />
 <img width="2507" height="1330" alt="image" src="https://github.com/user-attachments/assets/5c08e561-71b1-4ee0-8913-5d8ee86650ee" />
+
 **Shopro-电商AIGC带货视频** 是一款面向电商商家（如抖音、TikTok、快手、小红书、Amazon 等）的 SaaS 平台。该系统通过深度融合先进的多模态大模型与全链路智能工作流，解决商家在短视频营销中面临的“文案撰写难、数字人外籍演员贵、剪辑成本高、多语言本地化差、跨平台发布繁琐”等痛点。
+
 系统支持从「商品信息输入/URL 卖点提取 ➔ AI 智能脚本生成 ➔ 数字人选择与克隆 ➔ 多语言智能翻译 ➔ 分镜编辑 ➔ 素材混剪 ➔ 视频异步合成 ➔ 多平台一键发布」的完整闭环，将传统的五人工作流压缩为“一人 + 浏览器”，帮助商家以极低成本高速量产高转化的爆款短视频。
 
 ### ⚡ 核心价值
@@ -69,6 +71,7 @@
 | **图像/封面** | **Flux 1.1 Pro** | `ai-assistant` (generate_cover) | 竖版高分辨率带货短视频封面设计及图生图参考 |
 | **备份视频** | Kling / Sora | `/functions/v1/kling-video-create` / `sora` | 备用高端概念短片生成与转场渲染 |
 | **备份对话** | MiniMax-M3 | `/functions/v1/minimax-chat` | 备用聊天模型与目标受众痛点推导 |
+| **百度代理** | 文心一言 (Wenxin) | `/functions/v1/wenxin-text-generation` | 自动后备文本代理生成 |
 | **向量搜索** | OpenAI Text-Embedding-Ada-002 | RAG 向量知识库 / RPC | 将高分脚本与话术进行 Few-shot 匹配增强 |
 
 ---
@@ -108,7 +111,7 @@ Shopro AI/
 │   │   ├── HomePage.tsx           # 视频生成工作流 (包含四步脚本向导及生成配置)
 │   │   ├── VideoCreatePage.tsx    # 视频生成配置中心
 │   │   ├── VideoEditPage.tsx      # 可视化多轨道分镜编辑器 (字幕轨、人像轨、声轨)
-│   │   ├── WorksPage.tsx          # 作品管理，包含合成进度及视频回放
+│   │   ├── WorksPage.tsx          # 作品管理，包含合成进度及视频回流
 │   │   ├── MaterialsPage.tsx      # 素材库管理 (支持分类上传及删除)
 │   │   ├── ProductsPage.tsx       # 商品库，商品新增、URL 自动提取卖点
 │   │   ├── ProductSelectionPage.tsx# 智能选品工坊，分析热门爆款商品
@@ -120,12 +123,14 @@ Shopro AI/
 │   │   ├── CompetitorPage.tsx     # 竞品爆款监控分析
 │   │   ├── LiveHighlightPage.tsx  # 直播高光切片提取器
 │   │   ├── AnalyticsPage.tsx      # 流量漏斗、完播率及 ROI 分析图表
+│   │   ├── DataDashboardPage.tsx  # 商业数据洞察全景看板 (大盘核心指标与趋势图)
 │   │   ├── ProfilePage.tsx        # 个人中心及账号安全设置
 │   │   ├── CreditsPage.tsx        # 积分商城与充值收银台
 │   │   ├── OrderDetailPage.tsx    # 微信支付订单状态页
 │   │   ├── PromptTemplatesPage.tsx# 系统 Prompt 策略管理页
 │   │   ├── ActivitiesPage.tsx     # 操作日志与审计足迹
 │   │   ├── InvitePage.tsx         # 邀请有礼推广页面
+│   │   ├── PublishPage.tsx        # 跨平台多端发布 (抖音/TikTok/小红书/快手/B站排期发布)
 │   │   ├── ABTestPage.tsx         # A/B 测试管理中心 (脚本/封面版本对比)
 │   │   ├── EmotionAnalysisPage.tsx# NLP 情绪分析与时间轴对齐工作区
 │   │   ├── MultiLangPage.tsx      # 多语言翻译控制台
@@ -140,12 +145,13 @@ Shopro AI/
 │   │   ├── BatchCreatePage.tsx    # 批量生成管理器
 │   │   ├── AiToolboxPage.tsx      # 营销 AI 工具箱 (关键词提取、字幕打点等)
 │   │   ├── NotificationsPage.tsx  # 系统通知中心
+│   │   ├── Index.tsx              # 根路径重定向索引页
 │   │   └── NotFound.tsx           # 404 兜底页
 │   └── types/
 │       ├── types.ts               # 数据模型 (Product, Material, Team, Job...)
 │       └── route.ts               # 路由定义
 ├── supabase/
-│   ├── functions/                 # Deno 边缘函数微服务
+│   ├── functions/                 # 16 个 Deno 边缘函数微服务
 │   │   ├── ai-assistant/          # 统一 AI 网关，内置 llm 动作控制
 │   │   ├── deepseek-v4-pro/       # DeepSeek V4 文本生成代理 (带 API Fallback)
 │   │   ├── stepaudio/             # StepAudio 2.5 ASR 和 TTS 物理代理
@@ -161,8 +167,9 @@ Shopro AI/
 │   │   ├── sora-video-query/      # Sora 视频任务查询
 │   │   ├── send-sms-code/         # 验证码发送 (短信服务集成)
 │   │   ├── verify-sms-code/       # 验证码登录验证
+│   │   ├── wenxin-text-generation/# 百度文心代理 Edge Function
 │   │   └── setup-demo/            # 演示数据初始化种子数据
-│   └── migrations/                # 19 个 PostgreSQL 数据库迁移文件 (含 RLS 及防薅 RPC 锁)
+│   └── migrations/                # 21 个 PostgreSQL 数据库迁移文件 (含 RLS 及防薅 RPC 锁)
 ```
 
 ---
@@ -181,9 +188,10 @@ Shopro AI/
 *   **多模态配音**：利用 `stepaudio-2.5-tts` 根据情感标记生成自然拟真的小语种配音。
 *   **多轨道编辑器**：在网页端提供多轨道可视化 Canvas 剪辑面板，直观拖拽分镜卡片、配音音轨、字幕，实现免学习拼积木式合成。
 
-### 3. 💡 流量追踪、A/B测试与广告回流 (`ABTestPage.tsx`, `AnalyticsPage.tsx`, `DataFeedbackPage.tsx`)
+### 3. 💡 流量追踪、A/B测试与广告回流 (`ABTestPage.tsx`, `AnalyticsPage.tsx`, `DataFeedbackPage.tsx`, `PublishPage.tsx`)
 *   **漏斗分析**：展示不同视频版本的转化漏斗图（播放量-完播率-点击率-成交金额），直接计算 ROI。
 *   **A/B测试**：同一商品配置多组脚本/封面，在线追踪测试，智能淘汰低效版本。
+*   **多平台发布**：可将渲染完成的视频直接调度至抖音、TikTok、小红书、快手或 B站，设定排期计划自动定时发布。
 *   **自适应优化**：将真实投放转化差的文案数据回流，自动反馈给 AI 训练，对低分脚本进行“一键调优”重写。
 
 ### 4. 🔗 团队协作与 OpenAPI 开放平台 (`TeamSpacePage.tsx`, `OpenAPIPage.tsx`)
@@ -216,7 +224,7 @@ VITE_SEEDANCE_API_KEY="<your-seedance-key>" # 备用本地 Fallback 调用
 ```
 
 ### 3. 部署数据库迁移
-连接你的 Supabase 项目并应用迁移：
+连接你的 Supabase 项目并应用迁移（包含全部 21 个 SQL 迁移文件）：
 ```bash
 supabase link --project-ref <your-project-ref>
 supabase db push
@@ -240,7 +248,7 @@ supabase secrets set \
   SORA_API_KEY="<sora-key>"
 ```
 
-### 5. 部署边缘函数
+### 5. 部署边缘函数 (部署全部 16 个 Edge Functions)
 ```bash
 supabase functions deploy ai-assistant
 supabase functions deploy deepseek-v4-pro
@@ -257,11 +265,15 @@ supabase functions deploy sora-video-create
 supabase functions deploy sora-video-query
 supabase functions deploy send-sms-code
 supabase functions deploy verify-sms-code
+supabase functions deploy wenxin-text-generation
 supabase functions deploy setup-demo
 ```
 
-### 6. 代码质检与预构建
+### 6. 本地开发与代码质检
 ```bash
+# 启动本地开发服务 (基于 vite.config.dev.ts)
+npm run dev
+
 # 执行类型检查、Biome 格式化、Tailwind 语法校验及测试构建
 npm run lint
 
@@ -281,11 +293,11 @@ npm run build
 
 ## 🧪 常见问题解答 (FAQ)
 
-### 1. 为什么 `npm run dev` 报错/无法启动本地服务？
-为保证大促演示期间的系统稳定性，默认 package.json 禁用了 dev 本地暴露，开发测试时请确保先跑通 `npm run lint` 校验。若需启动本地预览，可与团队开发确认后修改为 `"dev": "vite --host 0.0.0.0"`，并通过控制台接入。
+### 1. 如何启动本地开发服务？
+可以直接运行 `npm run dev`，此命令会自动加载包含专用开发代理及跨域允许的 `vite.config.dev.ts` 配置，并在 `http://0.0.0.0:5173` 监听服务。在进行代码提交前，建议运行 `npm run lint` 进行全量工程质检。
 
 ### 2. 视频异步合成显示“等待中”卡住如何排查？
-*   确认 Supabase Service Role Key 部署正确，以确保 Edge Function 能够安全回写 `video_jobs` 的 `status` 状态。
+*   确认 Supabase Service Role Key 部署正确，以确保 Edge Function 能够安全回写 `video_projects` 的 `status` 状态。
 *   检查 Seedance 任务日志，确定是否因为账户欠费或首尾帧图的分辨率比例不符（推荐使用 9:16 标准比例）导致接口拦截。
 
 ### 3. 如何配置多用户共享团队额度？
@@ -295,4 +307,4 @@ npm run build
 
 ## 📌 总结
 
-Shopro AI 是一套面向 **带货短视频量产** 领域的一站式 SaaS 系统。项目融合了 DeepSeek-V4-Pro、StepAudio 2.5、Seedance 2.0 等前沿多模态大模型，以极高的工程化完成度打通了“文案-配音-画面-数据回流-团队协作-支付”的商业化完整闭环。具有极高的商业化落地价值和出海想象空间。
+Shopro AI 是一套面向 **带货短视频量产** 领域的一站式 SaaS 系统。项目融合了 DeepSeek-V4-Pro、StepAudio 2.5、Seedance 2.0 等前沿多模态大模型，以极高的工程化完成度打通了“文案-配音-画面-数据回流-团队协作-多端发布-支付”的商业化完整闭环。具有极高的商业化落地价值和出海想象空间。
