@@ -7,7 +7,7 @@ import {
 import {
   Wand2, Copy, BarChart3, BookOpen, Users2, Film,
   Zap, Star, ChevronLeft, ChevronRight, Check, ArrowRight,
-  Sparkles, TrendingUp, Shield, Video, Play, Menu, X,
+  Sparkles, TrendingUp, Shield, Video, Play, Pause, Volume2, VolumeX, Maximize, Menu, X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -428,7 +428,7 @@ const personas = [
   },
   {
     emoji: '✨',
-    role: '个人创作者',
+    role: 'OPC带货个体',
     color: '#a78bfa',
     tags: ['个人运营', '零剪辑基础', '学习爆款'],
     needs: '低门槛制作专业视频，快速学习爆款创作技巧',
@@ -444,6 +444,248 @@ const stats = [
   { value: 80, suffix: '%', label: '平均时间节省', icon: Zap },
   { value: 61, suffix: '%', label: '平均完播率提升', icon: TrendingUp },
 ];
+
+// ── 宣传视频播放器组件 ───────────────────────────────────────────────────
+function PromoVideoPlayer() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [currentTimeStr, setCurrentTimeStr] = useState('00:00');
+  const [durationStr, setDurationStr] = useState('00:00');
+  const [showControls, setShowControls] = useState(true);
+  const controlsTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const formatTime = (seconds: number) => {
+    if (isNaN(seconds)) return '00:00';
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60);
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  };
+
+  const togglePlay = () => {
+    if (!videoRef.current) return;
+    if (isPlaying) {
+      videoRef.current.pause();
+    } else {
+      videoRef.current.play();
+    }
+  };
+
+  const toggleMute = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!videoRef.current) return;
+    videoRef.current.muted = !isMuted;
+    setIsMuted(!isMuted);
+  };
+
+  const toggleFullscreen = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!videoRef.current) return;
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    } else {
+      videoRef.current.requestFullscreen();
+    }
+  };
+
+  const handleTimeUpdate = () => {
+    if (!videoRef.current) return;
+    const cur = videoRef.current.currentTime;
+    const dur = videoRef.current.duration;
+    if (dur > 0) {
+      setProgress((cur / dur) * 100);
+      setCurrentTimeStr(formatTime(cur));
+      setDurationStr(formatTime(dur));
+    }
+  };
+
+  const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+    if (!videoRef.current) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const pos = (e.clientX - rect.left) / rect.width;
+    videoRef.current.currentTime = pos * videoRef.current.duration;
+  };
+
+  const handleMouseMove = () => {
+    setShowControls(true);
+    if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
+    if (isPlaying) {
+      controlsTimeoutRef.current = setTimeout(() => {
+        setShowControls(false);
+      }, 3000);
+    }
+  };
+
+  const { ref, inView } = useInView(0.15);
+
+  return (
+    <div
+      ref={ref}
+      className={cn(
+        'w-full max-w-5xl mx-auto mb-16 md:mb-20 transition-all duration-1000',
+        inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
+      )}
+    >
+      {/* 顶部视觉标题标签 */}
+      <div className="flex items-center justify-between mb-4 px-2">
+        <div className="flex items-center gap-2">
+          <span className="flex h-2.5 w-2.5 rounded-full bg-[#FF6B00] animate-ping" />
+          <span className="text-xs font-semibold tracking-wider text-[#FF6B00] uppercase">
+            演示视频 · 核心爆款带货功能拆解
+          </span>
+        </div>
+        <div className="flex items-center gap-2 text-xs text-white/50">
+          <Sparkles className="w-3.5 h-3.5 text-[#00E599]" />
+          <span>Shopro AI 4.0 4K/1080P 超清示范</span>
+        </div>
+      </div>
+
+      {/* 视频主容器卡片 */}
+      <div
+        className="relative rounded-2xl md:rounded-3xl overflow-hidden border border-white/15 bg-[#0b0d12] shadow-[0_20px_80px_rgba(0,0,0,0.8)] group"
+        onMouseMove={handleMouseMove}
+        onMouseLeave={() => isPlaying && setShowControls(false)}
+      >
+        {/* 光晕边缘背景 */}
+        <div
+          className="absolute -inset-1 rounded-3xl opacity-30 blur-2xl pointer-events-none transition-opacity duration-500 group-hover:opacity-60"
+          style={{
+            background: 'radial-gradient(circle at 50% 50%, rgba(255,107,0,0.4), rgba(0,229,153,0.2) 70%, transparent 100%)',
+          }}
+        />
+
+        {/* macOS-style 顶部控制条 */}
+        <div className="relative z-20 flex items-center justify-between px-4 py-3 bg-[#13161f]/90 backdrop-blur-md border-b border-white/10 text-xs text-white/70">
+          <div className="flex items-center gap-2">
+            <span className="w-3 h-3 rounded-full bg-red-500/80 inline-block" />
+            <span className="w-3 h-3 rounded-full bg-yellow-500/80 inline-block" />
+            <span className="w-3 h-3 rounded-full bg-green-500/80 inline-block" />
+            <span className="ml-2 font-mono text-[11px] text-white/40 hidden sm:inline-block">Shopro.mp4</span>
+          </div>
+          <div className="font-medium text-white/90 flex items-center gap-1.5">
+            <Film className="w-3.5 h-3.5 text-[#FF6B00]" />
+            <span>Shopro AI 电商带货视频实操演示</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="px-2 py-0.5 rounded bg-white/10 text-[10px] font-mono text-[#00E599]">
+              HD 1080P
+            </span>
+          </div>
+        </div>
+
+        {/* 视频播放主体 */}
+        <div className="relative aspect-video bg-black cursor-pointer overflow-hidden flex items-center justify-center" onClick={togglePlay}>
+          <video
+            ref={videoRef}
+            src="/Shopro.mp4"
+            className="w-full h-full object-contain"
+            onTimeUpdate={handleTimeUpdate}
+            onPlay={() => setIsPlaying(true)}
+            onPause={() => setIsPlaying(false)}
+            onEnded={() => setIsPlaying(false)}
+            playsInline
+          />
+
+          {/* 播放/暂停大控件遮罩 */}
+          {(!isPlaying || showControls) && (
+            <div className={cn(
+              'absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/35 backdrop-blur-[2px] transition-opacity duration-300',
+              !isPlaying ? 'opacity-100' : showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'
+            )}>
+              <div className="relative group/btn">
+                {!isPlaying && (
+                  <div className="absolute -inset-4 rounded-full bg-[#FF6B00]/40 animate-ping pointer-events-none" />
+                )}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    togglePlay();
+                  }}
+                  className="relative z-10 w-20 h-20 md:w-24 md:h-24 rounded-full flex items-center justify-center text-white shadow-2xl transition-all duration-300 group-hover/btn:scale-110"
+                  style={{
+                    background: 'linear-gradient(135deg, #FF6B00 0%, #ff8c00 100%)',
+                    boxShadow: '0 0 50px rgba(255, 107, 0, 0.6)',
+                  }}
+                  aria-label={isPlaying ? '暂停' : '播放演示视频'}
+                >
+                  {isPlaying ? (
+                    <Pause className="w-8 h-8 md:w-10 md:h-10 fill-current" />
+                  ) : (
+                    <Play className="w-8 h-8 md:w-10 md:h-10 fill-current ml-1" />
+                  )}
+                </button>
+              </div>
+
+              {!isPlaying && (
+                <div className="mt-4 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-semibold text-white tracking-wide shadow-lg animate-bounce">
+                  ✨ 点击播放 3 分钟实操带货视频演示 (1080P)
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* 底部控制栏 */}
+          <div
+            className={cn(
+              'absolute bottom-0 left-0 right-0 z-20 px-4 py-3 bg-gradient-to-t from-black/90 via-black/60 to-transparent transition-opacity duration-300 flex flex-col gap-2',
+              showControls || !isPlaying ? 'opacity-100' : 'opacity-0 pointer-events-none'
+            )}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* 时间进度条 */}
+            <div
+              className="w-full h-2 bg-white/20 hover:h-3 rounded-full cursor-pointer transition-all relative overflow-hidden group/bar"
+              onClick={handleSeek}
+            >
+              <div
+                className="h-full bg-gradient-to-r from-[#FF6B00] to-[#ff9500] rounded-full transition-all relative"
+                style={{ width: `${progress}%` }}
+              >
+                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow opacity-0 group-hover/bar:opacity-100 transition-opacity" />
+              </div>
+            </div>
+
+            {/* 控制按钮与时长 */}
+            <div className="flex items-center justify-between text-xs text-white/90">
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={togglePlay}
+                  className="hover:text-[#FF6B00] transition-colors p-1"
+                  aria-label={isPlaying ? '暂停' : '播放'}
+                >
+                  {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                </button>
+                <button
+                  onClick={toggleMute}
+                  className="hover:text-[#FF6B00] transition-colors p-1"
+                  aria-label={isMuted ? '取消静音' : '静音'}
+                >
+                  {isMuted ? <VolumeX className="w-4 h-4 text-red-400" /> : <Volume2 className="w-4 h-4" />}
+                </button>
+                <span className="font-mono text-[11px] text-white/70">
+                  {currentTimeStr} / {durationStr}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <span className="hidden sm:inline-block text-[11px] text-white/50">Shopro AI 带货短视频引擎</span>
+                <button
+                  onClick={toggleFullscreen}
+                  className="hover:text-[#FF6B00] transition-colors p-1"
+                  aria-label="全屏播放"
+                >
+                  <Maximize className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // ── 主组件 ────────────────────────────────────────────────────────────────
 export default function LandingPage() {
@@ -646,10 +888,14 @@ export default function LandingPage() {
       </section>
 
       {/* ══════════════════════════════════════════════════════
-          用户画像
+          宣传视频与用户画像
       ══════════════════════════════════════════════════════ */}
       <section id="功能" className="py-24 landing-section-dark">
         <div className="max-w-6xl mx-auto px-4 md:px-8">
+          
+          {/* 宣传视频播放组件 */}
+          <PromoVideoPlayer />
+
           <SectionTitle
             tag="用户画像"
             title={<>谁在用 <span style={{ color: '#FF6B00' }}>电商AIGC</span>？</>}

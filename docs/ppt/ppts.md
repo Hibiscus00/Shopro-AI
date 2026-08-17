@@ -57,7 +57,7 @@
 ---
 
 ### Slide 3: 一、产品概述 👥 | 用户画像分析
-*   **视觉概念**：三个现代风格的 3D 卡通化身，分别代表“跨境电商卖家”（戴耳机的年轻总监）、“MCN 达人”（手拿拍摄设备的剪辑主管）和“个人创作者”（拿着平板电脑的创作者），身处在带有发光全息网络背景的空间中。
+*   **视觉概念**：三个现代风格的 3D 卡通化身，分别代表“跨境电商卖家”（戴耳机的年轻总监）、“MCN 达人”（手拿拍摄设备的剪辑主管）和“OPC带货个体”（拿着平板电脑的创作者），身处在带有发光全息网络背景的空间中。
 *   **Midjourney 提示词**：
     ```text
     A group of three diverse 3D stylized avatars representing a global marketing director with headset, a video editor with camera, and a young creator with tablet. Floating glass plates with bar charts in background, neon orange and cyan glowing edges, dark theme background, cyberpunk tech, clean clay render --ar 16:9 --v 6.0
