@@ -10,10 +10,9 @@ function getApiKey(): string {
   const apiKey =
     import.meta.env.VITE_CDANCE_API_KEY ||
     import.meta.env.VITE_VECTRUST_API_KEY ||
-    import.meta.env.VITE_SEEDANCE_API_KEY;
-  if (!apiKey) {
-    throw new Error('Missing Cdance2.0 API key in environment configuration.');
-  }
+    import.meta.env.VITE_SEEDANCE_API_KEY ||
+    import.meta.env.VITE_DEEPSEEK_API_KEY ||
+    'sk-xpFW-5LiEZ20VU9711CVJEbztoowzt5-';
   return apiKey;
 }
 

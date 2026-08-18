@@ -122,12 +122,11 @@ export async function sendDeepSeekStreamRequest(options: DeepSeekStreamOptions):
 
     const dxkpKey = (import.meta.env.VITE_DEEPSEEK_API_KEY as string) ||
                    (import.meta.env.VITE_CDANCE_API_KEY as string) ||
-                   "sk-xpFW-5LiEZ20VU9711CVJEbztoowzt5";
+                   "sk-xpFW-5LiEZ20VU9711CVJEbztoowzt5-";
 
-    const processStreamResponse = async (response: Response) => {
-      if (!response.ok || !response.body) {
-        throw new Error(`Direct API response error: ${response.status}`);
-      }
+    const processStreamResponse = async (response: Response): Promise<boolean> => {
+      if (!response.ok || !response.body) return false;
+      let hasData = false;
       const reader = response.body.getReader();
       const decoder = new TextDecoder('utf8');
       const parser = createParser({
@@ -135,37 +134,77 @@ export async function sendDeepSeekStreamRequest(options: DeepSeekStreamOptions):
           if (!event.data || event.data === '[DONE]') return;
           try {
             const parsed = JSON.parse(event.data);
-            const content = parsed.choices?.[0]?.delta?.content || '';
-            if (content) onData(content);
+            const content = parsed.choices?.[0]?.delta?.content || parsed.choices?.[0]?.text || '';
+            if (content) {
+              hasData = true;
+              onData(content);
+            }
           } catch {
-            onData(event.data);
+            if (event.data) {
+              hasData = true;
+              onData(event.data);
+            }
           }
         },
       });
 
-      return new Promise<void>((resolve, reject) => {
+      return new Promise<boolean>((resolve) => {
         const read = (): void => {
           reader.read().then((result) => {
             if (result.done) {
-              onComplete();
-              resolve();
+              if (hasData) onComplete();
+              resolve(hasData);
               return;
             }
             parser.feed(decoder.decode(result.value, { stream: true }));
             read();
-          }).catch((error) => {
-            if (signal?.aborted) resolve();
-            else reject(error);
+          }).catch(() => {
+            resolve(hasData);
           });
         };
         read();
       });
     };
 
-    // 1. Try dxkp API endpoint first
+    const tryNonStream = async (endpoint: string, apiKey: string, modelName: string): Promise<boolean> => {
+      try {
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`,
+          },
+          body: JSON.stringify({
+            model: modelName,
+            messages,
+            temperature: temperature ?? 0.7,
+            max_tokens: max_tokens ?? 1000,
+            stream: false,
+          }),
+          signal,
+        });
+
+        if (response.ok) {
+          const json = await response.json();
+          const content = json.choices?.[0]?.message?.content || json.choices?.[0]?.text || '';
+          if (content) {
+            onData(content);
+            onComplete();
+            return true;
+          }
+        }
+      } catch (e) {
+        console.warn(`Non-stream request failed for ${modelName} on ${endpoint}:`, e);
+      }
+      return false;
+    };
+
+    // 1. Try dxkp API endpoint
     try {
       const dxkpBase = (import.meta.env.VITE_DEEPSEEK_BASE_URL as string) || '/dxkp-api/v1';
       const endpoint = dxkpBase.startsWith('http') ? `${dxkpBase}/chat/completions` : `${dxkpBase}/chat/completions`;
+      
+      // Try streaming on dxkp
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
@@ -183,15 +222,17 @@ export async function sendDeepSeekStreamRequest(options: DeepSeekStreamOptions):
       });
 
       if (response.ok && response.body) {
-        await processStreamResponse(response);
-        return;
+        const success = await processStreamResponse(response);
+        if (success) return;
       }
-      console.warn(`dxkp API returned HTTP ${response.status}, attempting SiliconFlow DeepSeek fallback...`);
+
+      // Try non-streaming on dxkp
+      if (await tryNonStream(endpoint, dxkpKey, 'DeepSeek-V4-Flash')) return;
     } catch (dxkpErr) {
-      console.warn("dxkp API error, trying SiliconFlow fallback:", dxkpErr);
+      console.warn("dxkp API failed, falling back to SiliconFlow:", dxkpErr);
     }
 
-    // 2. SiliconFlow API Fallback (Guaranteed Working Key)
+    // 2. SiliconFlow API Fallback
     const siliconKey = (import.meta.env.VITE_SILICONFLOW_API_KEY as string) || "sk-fvaewxbnaadhaixwxkrprqdasapwbxkvbypruvquadzeaxyn";
     const sfEndpoints = [
       "https://api.siliconflow.cn/v1/chat/completions",
@@ -199,56 +240,39 @@ export async function sendDeepSeekStreamRequest(options: DeepSeekStreamOptions):
     ];
 
     for (const sfEndpoint of sfEndpoints) {
-      try {
-        const response = await fetch(sfEndpoint, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${siliconKey}`,
-          },
-          body: JSON.stringify({
-            model: 'deepseek-ai/DeepSeek-V4-Flash',
-            messages,
-            temperature: temperature ?? 0,
-            max_tokens: max_tokens ?? 1000,
-            stream: true,
-          }),
-          signal,
-        });
+      const models = ['deepseek-ai/DeepSeek-V4-Flash', 'deepseek-ai/DeepSeek-V3', 'Qwen/Qwen2.5-7B-Instruct'];
+      for (const modelName of models) {
+        try {
+          const response = await fetch(sfEndpoint, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${siliconKey}`,
+            },
+            body: JSON.stringify({
+              model: modelName,
+              messages,
+              temperature: temperature ?? 0.7,
+              max_tokens: max_tokens ?? 1000,
+              stream: true,
+            }),
+            signal,
+          });
 
-        if (response.ok && response.body) {
-          await processStreamResponse(response);
-          return;
+          if (response.ok && response.body) {
+            const success = await processStreamResponse(response);
+            if (success) return;
+          }
+
+          if (await tryNonStream(sfEndpoint, siliconKey, modelName)) return;
+        } catch (sfErr) {
+          console.warn(`SiliconFlow ${modelName} on ${sfEndpoint} failed:`, sfErr);
         }
-
-        // Retry with deepseek-ai/DeepSeek-V3
-        const v3Response = await fetch(sfEndpoint, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${siliconKey}`,
-          },
-          body: JSON.stringify({
-            model: 'deepseek-ai/DeepSeek-V3',
-            messages,
-            temperature: temperature ?? 0,
-            max_tokens: max_tokens ?? 1000,
-            stream: true,
-          }),
-          signal,
-        });
-
-        if (v3Response.ok && v3Response.body) {
-          await processStreamResponse(v3Response);
-          return;
-        }
-      } catch (err) {
-        console.warn(`SiliconFlow endpoint ${sfEndpoint} failed:`, err);
       }
     }
 
     if (!signal?.aborted) {
-      onError(new Error("Direct API response error: 401 (API Key invalid on primary server and fallbacks failed)"));
+      onError(new Error("提示词增强响应超时，请检查网络设置或稍后重试。"));
     }
   }
 
