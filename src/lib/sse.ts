@@ -127,14 +127,16 @@ export async function sendDeepSeekStreamRequest(options: DeepSeekStreamOptions):
     }
 
     try {
-      const response = await fetch('https://api.gmi-serving.com/v1/chat/completions', {
+      const baseUrl = (import.meta.env.VITE_DEEPSEEK_BASE_URL as string) || '/dxkp-api/v1';
+      const endpoint = baseUrl.startsWith('http') ? `${baseUrl}/chat/completions` : `${baseUrl}/chat/completions`;
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          model: 'deepseek-ai/DeepSeek-V4-Pro',
+          model: 'DeepSeek-V4-Flash',
           messages,
           temperature: temperature ?? 0,
           max_tokens: max_tokens ?? 1000,

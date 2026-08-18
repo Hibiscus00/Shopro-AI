@@ -21,7 +21,7 @@ graph TD
         B["爆款竞品视频 (用于DNA复刻)"]:::input
     end
 
-    subgraph TEXT_STAGE ["✍️ 文本与创意模态 (DeepSeek-V4-Pro)"]
+    subgraph TEXT_STAGE ["✍️ 文本与创意模态 (DeepSeek-V4-Flash)"]
         T1["商品卖点提炼与智能去噪"]:::text
         T2["思维链 (CoT) 四层脚本策划"]:::text
         T3["NLP 情感打点与口播翻译"]:::text
@@ -68,7 +68,7 @@ graph TD
 ```
 
 ### 💡 一句话核心流程描述
-> **全链路智能生成与自进化闭环**：系统通过抓取商品链接或分析竞品视频，利用 DeepSeek-V4-Pro 提取卖点并生成四层说服结构脚本，智能对齐 StepAudio 2.5 情感化配音与 Seedance 2.0/happyhorse/wan 多模态画面渲染，最终由本地 XGBoost 流量预测模型和 RAG 知识库驱动内容诊断与自进化改写，实现从商品到高转化带货短视频的极速闭环生成。
+> **全链路智能生成与自进化闭环**：系统通过抓取商品链接或分析竞品视频，利用 DeepSeek-V4-Flash 提取卖点并生成四层说服结构脚本，智能对齐 StepAudio 2.5 情感化配音与 Seedance 2.0/happyhorse/wan 多模态画面渲染，最终由本地 XGBoost 流量预测模型和 RAG 知识库驱动内容诊断与自进化改写，实现从商品到高转化带货短视频的极速闭环生成。
 
 ### 🎨 架构概念图生图提示词 (Prompt)
 ```text
@@ -91,31 +91,31 @@ A futuristic dark-mode tech dashboard visualization representing multi-modal AI 
     <tr>
       <td rowspan="5" valign="top"><b>✍️ 文本语言</b></td>
       <td>商品网页卖点提取</td>
-      <td>DeepSeek-V4-Pro</td>
+      <td>DeepSeek-V4-Flash</td>
       <td>约 ￥0.001 / 千 token</td>
       <td>HTML去噪，限制15字以内JSON输出</td>
     </tr>
     <tr>
       <td>商品基础卖点生成</td>
-      <td>DeepSeek-V4-Pro</td>
+      <td>DeepSeek-V4-Flash</td>
       <td>约 ￥0.001 / 千 token</td>
       <td>多维度价值约束，直击痛点避免空泛</td>
     </tr>
     <tr>
       <td>流式四步脚本生成</td>
-      <td>DeepSeek-V4-Pro</td>
+      <td>DeepSeek-V4-Flash</td>
       <td>约 ￥0.001~0.002 / 千 token</td>
       <td>CoT思维链，四层营销框架 (卖点/痛点/Hook/CTA)</td>
     </tr>
     <tr>
       <td>台词情绪 NLP 分析</td>
-      <td>DeepSeek-V4-Pro</td>
+      <td>DeepSeek-V4-Flash</td>
       <td>约 ￥0.001 / 千 token</td>
       <td>分类标签情感分类器，打出情绪波动分</td>
     </tr>
     <tr>
       <td>多语言口播脚本翻译</td>
-      <td>DeepSeek-V4-Pro</td>
+      <td>DeepSeek-V4-Flash</td>
       <td>约 ￥0.001~0.002 / 千 token</td>
       <td>本地化转译与口语化改写，保持原有行结构</td>
     </tr>
@@ -135,7 +135,7 @@ A futuristic dark-mode tech dashboard visualization representing multi-modal AI 
     <tr>
       <td rowspan="4" valign="top"><b>👁️ 视觉与多模态</b></td>
       <td>视频提示词优化</td>
-      <td>DeepSeek-V4-Pro</td>
+      <td>DeepSeek-V4-Flash</td>
       <td>约 ￥0.001 / 千 token</td>
       <td>镜头、光线与微动效果增强优化</td>
     </tr>
@@ -147,7 +147,7 @@ A futuristic dark-mode tech dashboard visualization representing multi-modal AI 
     </tr>
     <tr>
       <td>竞品视频风格复刻</td>
-      <td>DeepSeek-V4-Pro</td>
+      <td>DeepSeek-V4-Flash</td>
       <td>约 ￥0.001 / 千 token</td>
       <td>解构节奏、配乐、字幕与切片建立竞品DNA</td>
     </tr>
@@ -168,11 +168,11 @@ A futuristic dark-mode tech dashboard visualization representing multi-modal AI 
 
 | 序号 | 核心AI能力需求                                                 | 已对接模型                                            | API 估算价格                                                                                        | 典型输入与输出示例                                                                                                       | 提示词策略与核心 Prompt 设计                                                                                                                                                                                                      |
 | :--: | :------------------------------------------------------------- | :---------------------------------------------------- | :-------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1.1 | **商品网页卖点智能提取**(`extract_url_selling_points`) | **DeepSeek-V4-Pro (已对接)** /GPT-4o-mini       | DeepSeek-V4-Pro: 约 ￥0.001 / 千 tokenGPT-4o-mini: 约 ￥0.001 / 千 token                            | **输入**：抓取的商品详情 HTML 文本**输出**：JSON 格式的 3 条核心卖点                                         | **【限制性结构提示词】**通过 Prompt 约束大模型去除 HTML 杂质。要求输出每条不超过 15 字，符合抖音短视频字幕规范。要求严格输出 JSON 结构且不要包含任何 Markdown 格式以外的废话（`{"selling_points": [...]}`）。                   |
-| 1.2 | **商品基础卖点生成**(`generate_selling_points`)        | **DeepSeek-V4-Pro (已对接)** /Qwen-Turbo        | DeepSeek-V4-Pro: 约 ￥0.001 / 千 tokenQwen-Turbo: ￥0.002 / 千 token                                | **输入**：商品名、类目、简短描述**输出**：3条独特维度的精简卖点                                              | **【多维度价值约束提示词】**约束大模型必须从功能、情感、场景、价格四个独特维度中选择 3 个进行重写。明文禁止“高品质”、“多功能”等空泛词，直击消费者利益。                                                                       |
-| 1.3 | **流式四步脚本生成**(`generate_script_four_layer`)     | **DeepSeek-V4-Pro (已对接)** /Claude 3.5 Sonnet | DeepSeek-V4-Pro: 输入￥0.001，输出￥0.002 / 千 tokenClaude 3.5: 输入￥0.021，输出￥0.105 / 千 token | **输入**：商品卖点、目标受众、痛点、平台、时长**输出**：5个分镜的 JSON 数组（含 Prompt、台词及对应四层标注） | **【角色演化与 CoT 链式提示词】**定义系统角色为“电商带货脚本策划师”，将脚本约束在**四层营销结构**中（卖点层、痛点层、开场钩子层、行动召唤层）。采用 `` ```json `` 块强制输出结构化分镜，并附加英语视频渲染 Prompt。 |
-| 1.4 | **台词情绪 NLP 分析**(`emotion_analysis`)              | **DeepSeek-V4-Pro (已对接)** /GPT-4o-mini       | DeepSeek-V4-Pro: 约 ￥0.001 / 千 tokenGPT-4o-mini: 约 ￥0.001 / 千 token                            | **输入**：单句台词序列**输出**：情绪类型（hook/pain_point/cta等）、情绪强度                                  | **【分类标签情感分类器提示词】**要求大模型作为情绪分析师，对各句台词的情感类别进行归类，并打出 0-100 的情绪波动分，以便前端渲染情绪波形图并控制数字人嘴型及面部表情。                                                             |
-| 1.5 | **多语言口播脚本翻译**(`translate_script`)             | **DeepSeek-V4-Pro (已对接)** /GPT-4o            | DeepSeek-V4-Pro: 输入￥0.001，输出￥0.002 / 千 tokenGPT-4o: 输入￥0.035，输出￥0.105 / 千 token     | **输入**：源脚本、源语言、目标语言**输出**：目标语种的带货营销语气文本                                       | **【本地化改写提示词】**不仅是直接直译，而是要求模型在转译为目标语言（英/日/韩/泰等）时进行“本土化口语改写”。确保台词符合当地消费者的口语习惯，并在翻译后仍保持原有分镜的行结构。                                               |
+| 1.1 | **商品网页卖点智能提取**(`extract_url_selling_points`) | **DeepSeek-V4-Flash (已对接)** /GPT-4o-mini       | DeepSeek-V4-Flash: 约 ￥0.001 / 千 tokenGPT-4o-mini: 约 ￥0.001 / 千 token                            | **输入**：抓取的商品详情 HTML 文本**输出**：JSON 格式的 3 条核心卖点                                         | **【限制性结构提示词】**通过 Prompt 约束大模型去除 HTML 杂质。要求输出每条不超过 15 字，符合抖音短视频字幕规范。要求严格输出 JSON 结构且不要包含任何 Markdown 格式以外的废话（`{"selling_points": [...]}`）。                   |
+| 1.2 | **商品基础卖点生成**(`generate_selling_points`)        | **DeepSeek-V4-Flash (已对接)** /Qwen-Turbo        | DeepSeek-V4-Flash: 约 ￥0.001 / 千 tokenQwen-Turbo: ￥0.002 / 千 token                                | **输入**：商品名、类目、简短描述**输出**：3条独特维度的精简卖点                                              | **【多维度价值约束提示词】**约束大模型必须从功能、情感、场景、价格四个独特维度中选择 3 个进行重写。明文禁止“高品质”、“多功能”等空泛词，直击消费者利益。                                                                       |
+| 1.3 | **流式四步脚本生成**(`generate_script_four_layer`)     | **DeepSeek-V4-Flash (已对接)** /Claude 3.5 Sonnet | DeepSeek-V4-Flash: 输入￥0.001，输出￥0.002 / 千 tokenClaude 3.5: 输入￥0.021，输出￥0.105 / 千 token | **输入**：商品卖点、目标受众、痛点、平台、时长**输出**：5个分镜的 JSON 数组（含 Prompt、台词及对应四层标注） | **【角色演化与 CoT 链式提示词】**定义系统角色为“电商带货脚本策划师”，将脚本约束在**四层营销结构**中（卖点层、痛点层、开场钩子层、行动召唤层）。采用 `` ```json `` 块强制输出结构化分镜，并附加英语视频渲染 Prompt。 |
+| 1.4 | **台词情绪 NLP 分析**(`emotion_analysis`)              | **DeepSeek-V4-Flash (已对接)** /GPT-4o-mini       | DeepSeek-V4-Flash: 约 ￥0.001 / 千 tokenGPT-4o-mini: 约 ￥0.001 / 千 token                            | **输入**：单句台词序列**输出**：情绪类型（hook/pain_point/cta等）、情绪强度                                  | **【分类标签情感分类器提示词】**要求大模型作为情绪分析师，对各句台词的情感类别进行归类，并打出 0-100 的情绪波动分，以便前端渲染情绪波形图并控制数字人嘴型及面部表情。                                                             |
+| 1.5 | **多语言口播脚本翻译**(`translate_script`)             | **DeepSeek-V4-Flash (已对接)** /GPT-4o            | DeepSeek-V4-Flash: 输入￥0.001，输出￥0.002 / 千 tokenGPT-4o: 输入￥0.035，输出￥0.105 / 千 token     | **输入**：源脚本、源语言、目标语言**输出**：目标语种的带货营销语气文本                                       | **【本地化改写提示词】**不仅是直接直译，而是要求模型在转译为目标语言（英/日/韩/泰等）时进行“本土化口语改写”。确保台词符合当地消费者的口语习惯，并在翻译后仍保持原有分镜的行结构。                                               |
 
 ### 2. 🎵 音频与语音识别模态（Audio Modality）
 
@@ -185,9 +185,9 @@ A futuristic dark-mode tech dashboard visualization representing multi-modal AI 
 
 | 序号 | 核心AI能力需求                                                      | 已对接模型                                                                                                              | API 估算价格                                                                          | 典型输入与输出示例                                                                                         | 提示词策略与核心 Prompt 设计                                                                                                                                                                                        |
 | :--: | :--: | :--: | :--: | :--: | :--: |
-| 3.1 | **大模型视频提示词优化**(`optimize_prompt`)                 | **DeepSeek-V4-Pro (已对接)** /GPT-4o                                                                              | DeepSeek-V4-Pro: 约 ￥0.001 / 千 tokenGPT-4o: 输入￥0.035，输出￥0.105 / 千 token     | **输入**：用户原始创意 Prompt、产品、风格**输出**：增强后的专业英文多模态 Prompt               | **【画质与镜头增强提示词】**将用户的简短提示词翻译并扩展为符合视频生成模型的专业 Prompt。加入光线（如 cinematic lighting）、色彩、镜头运动（如 slow zoom-in）、以及比例（9:1 vertical）的精细指令。                 |
+| 3.1 | **大模型视频提示词优化**(`optimize_prompt`)                 | **DeepSeek-V4-Flash (已对接)** /GPT-4o                                                                              | DeepSeek-V4-Flash: 约 ￥0.001 / 千 tokenGPT-4o: 输入￥0.035，输出￥0.105 / 千 token     | **输入**：用户原始创意 Prompt、产品、风格**输出**：增强后的专业英文多模态 Prompt               | **【画质与镜头增强提示词】**将用户的简短提示词翻译并扩展为符合视频生成模型的专业 Prompt。加入光线（如 cinematic lighting）、色彩、镜头运动（如 slow zoom-in）、以及比例（9:1 vertical）的精细指令。                 |
 | 3.2 | **智能高转化封面与图生图**(`generate_cover`)                | **Seedance 2.0 (已对接)**(`seedance-2-0-fast-260128`) /**标准图像生成 (已对接)** /Flux 1.1 Pro            | Flux 1.1 Pro: 约 ￥0.28 / 张Midjourney: 约 ￥0.1 ~ ￥0.3 / 张                         | **输入**：产品名、目标平台、风格主题**输出**：9:16 竖版高像素封面设计图 / 参考图               | **【高对比度视觉提示词】**自动将商品名和风格转化为视觉 Prompts（例如："vibrant colors, bold text overlay, 9:16 vertical, high contrast, professional photography"），确保产品主体在社交媒体推荐流中极具视觉抓取力。 |
-| 3.3 | **竞品视频风格复刻**(`analyze_style` / `_deep`)           | **DeepSeek-V4-Pro (已对接)** /Claude 3.5 Sonnet                                                                   | DeepSeek-V4-Pro: 约 ￥0.001 / 千 tokenClaude 3.5: 输入￥0.021，输出￥0.105 / 千 token | **输入**：竞品视频链接 / 数据参数**输出**：爆款要素分析报告、DNA指纹及复刻建议                 | **【多维解构提示词】**命令 LLM 作为短视频内容分析师，从节奏类型、配乐情绪、字幕描边、镜头切分四个维度建立竞品 DNA。输出包含优势、劣势和一键套用建议的 JSON 报告。                                                   |
+| 3.3 | **竞品视频风格复刻**(`analyze_style` / `_deep`)           | **DeepSeek-V4-Flash (已对接)** /Claude 3.5 Sonnet                                                                   | DeepSeek-V4-Flash: 约 ￥0.001 / 千 tokenClaude 3.5: 输入￥0.021，输出￥0.105 / 千 token | **输入**：竞品视频链接 / 数据参数**输出**：爆款要素分析报告、DNA指纹及复刻建议                 | **【多维解构提示词】**命令 LLM 作为短视频内容分析师，从节奏类型、配乐情绪、字幕描边、镜头切分四个维度建立竞品 DNA。输出包含优势、劣势和一键套用建议的 JSON 报告。                                                   |
 | 3.4 | **视频生成渲染**(`submitSeedanceVideo` / Seedance) | **Seedance 2.0 (已对接)**, **happyhorse 1.0 (已对接)**, **wan2.7 (已对接)**, Kling, Sora-2 | Seedance 2.0: 约 ￥0.15 / 视频秒数<br>happyhorse 1.0 / wan2.7: 模拟生成             | **输入**：Prompt描述、首尾帧参考图、画面宽高比**输出**：高动态、多模态口播与场景对齐的合成视频 | **【影视级场景生成控制】**通过 SSE 和 Supabase Edge Function 代理直接调用视频生成服务，支持传入首帧、尾帧和多参考图。高精度建模物理运动与商品特征，并生成同步的环境音效。                             |
 
 ---

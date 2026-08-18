@@ -27,7 +27,7 @@ STEP_API_KEY = os.getenv("VITE_STEP_API_KEY") or os.getenv("STEP_API_KEY")
 CDANCE_API_KEY = os.getenv("API_KEY") or os.getenv("VITE_CDANCE_API_KEY") or os.getenv("VITE_VECTRUST_API_KEY") or os.getenv("VECTRUST_API_KEY")
 
 # API Base URLs
-DEEPSEEK_BASE_URL = "https://api.gmi-serving.com/v1"
+DEEPSEEK_BASE_URL = os.getenv("DEEPSEEK_BASE_URL") or "https://ai.dxkp.com/v1"
 STEP_BASE_URL = "https://api.stepfun.com/step_plan/v1"
 CDANCE_BASE_URL = os.getenv("VITE_CDANCE_BASE_URL") or "https://ai.dxkp.com/v1"
 
@@ -64,7 +64,7 @@ async def handle_tool_call(tool_name: str, coro):
 
 @mcp.tool(
     name="extract_product_highlights",
-    description="Extracts key selling points, target audience pain points, and core marketing angles from raw product descriptions or URL landing text using DeepSeek-V4-Pro."
+    description="Extracts key selling points, target audience pain points, and core marketing angles from raw product descriptions or URL landing text using DeepSeek-V4-Flash."
 )
 async def extract_product_highlights(product_info: str) -> Dict[str, Any]:
     async def _impl():
@@ -87,7 +87,7 @@ async def extract_product_highlights(product_info: str) -> Dict[str, Any]:
                     "Authorization": f"Bearer {DEEPSEEK_API_KEY}"
                 },
                 json={
-                    "model": "deepseek-ai/DeepSeek-V4-Pro",
+                    "model": "DeepSeek-V4-Flash",
                     "messages": [{"role": "user", "content": prompt}],
                     "temperature": 0.3
                 }
@@ -101,7 +101,7 @@ async def extract_product_highlights(product_info: str) -> Dict[str, Any]:
 
 @mcp.tool(
     name="generate_marketing_script",
-    description="Generates a structured TikTok/Douyin/Shorts style high-converting marketing script with detailed scene instructions (Hook, Pain Point, Solution, Call to Action) and digital human speech texts using DeepSeek-V4-Pro."
+    description="Generates a structured TikTok/Douyin/Shorts style high-converting marketing script with detailed scene instructions (Hook, Pain Point, Solution, Call to Action) and digital human speech texts using DeepSeek-V4-Flash."
 )
 async def generate_marketing_script(
     product_highlights: str,
@@ -129,7 +129,7 @@ async def generate_marketing_script(
                     "Authorization": f"Bearer {DEEPSEEK_API_KEY}"
                 },
                 json={
-                    "model": "deepseek-ai/DeepSeek-V4-Pro",
+                    "model": "DeepSeek-V4-Flash",
                     "messages": [{"role": "user", "content": prompt}],
                     "temperature": 0.7
                 }
@@ -143,7 +143,7 @@ async def generate_marketing_script(
 
 @mcp.tool(
     name="translate_marketing_script",
-    description="Translates the generated marketing script to a target language (e.g. Chinese to English, Spanish, etc.) while preserving scene instructions and placeholders intact using DeepSeek-V4-Pro."
+    description="Translates the generated marketing script to a target language (e.g. Chinese to English, Spanish, etc.) while preserving scene instructions and placeholders intact using DeepSeek-V4-Flash."
 )
 async def translate_marketing_script(script: str, target_language: str) -> Dict[str, Any]:
     async def _impl():
@@ -164,7 +164,7 @@ async def translate_marketing_script(script: str, target_language: str) -> Dict[
                     "Authorization": f"Bearer {DEEPSEEK_API_KEY}"
                 },
                 json={
-                    "model": "deepseek-ai/DeepSeek-V4-Pro",
+                    "model": "DeepSeek-V4-Flash",
                     "messages": [{"role": "user", "content": prompt}],
                     "temperature": 0.2
                 }

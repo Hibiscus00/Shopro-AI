@@ -54,8 +54,9 @@ Deno.serve(async (req: Request): Promise<Response> => {
     );
   }
 
+  const baseUrl = Deno.env.get('DEEPSEEK_BASE_URL') || 'https://ai.dxkp.com/v1';
   const upstream = await fetch(
-    'https://api.gmi-serving.com/v1/chat/completions',
+    `${baseUrl}/chat/completions`,
     {
       method: 'POST',
       headers: {
@@ -63,7 +64,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
         'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'deepseek-ai/DeepSeek-V4-Pro',
+        model: 'DeepSeek-V4-Flash',
         messages,
         temperature,
         max_tokens,

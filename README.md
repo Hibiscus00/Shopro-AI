@@ -7,7 +7,7 @@
   <img alt="TailwindCSS" src="https://img.shields.io/badge/TailwindCSS-3.4.11-06B6D4?logo=tailwindcss&logoColor=white" />
   <img alt="Supabase" src="https://img.shields.io/badge/Supabase-2.103.1-3FCF8E?logo=supabase&logoColor=white" />
   <img alt="Deno" src="https://img.shields.io/badge/Edge_Functions-Deno-000000?logo=deno&logoColor=white" />
-  <img alt="AI" src="https://img.shields.io/badge/AI-DeepSeek_v4_Pro-blue" />
+  <img alt="AI" src="https://img.shields.io/badge/AI-DeepSeek_v4_Flash-blue" />
   <img alt="Audio" src="https://img.shields.io/badge/Audio-StepAudio_2.5-orange" />
   <img alt="Video" src="https://img.shields.io/badge/Video-Seedance_2.0-violet" />
 </p>
@@ -63,7 +63,7 @@
 
 | 模块/能力 | 对接模型 | 调用入口 / SDK | 用途与优势 |
 |---|---|---|---|
-| **文本大模型** | **DeepSeek-V4-Pro** | `/functions/v1/deepseek-v4-pro` | 营销文案、多语种翻译、商品特征解析、NLP情感极值标注 |
+| **文本大模型** | **DeepSeek-V4-Flash** | `/functions/v1/deepseek-v4-pro` | 营销文案、多语种翻译、商品特征解析、NLP情感极值标注 |
 | **语音大模型** | **StepAudio 2.5** | `/functions/v1/stepaudio` (asr/tts) | `stepaudio-2.5-tts` 情感化语音合成，`stepaudio-2.5-asr` 录音ITN规范转录 |
 | **视频生成** | **Seedance 2.0** | `/functions/v1/seedance` (submit/query) | `seedance-2-0-fast-260128` 物理级高画质多模态短视频生成与图生视频 |
 | **图像/封面** | **Flux 1.1 Pro** | `ai-assistant` (generate_cover) | 竖版高分辨率带货短视频封面设计及图生图参考 |
@@ -177,7 +177,7 @@ Shopro AI/
 ### 1. 🧠 AI 脚本生成工作台 (`HomePage.tsx`, `ScriptPage.tsx`)
 *   **入口**：用户在工作台点击“生成视频”或进入“AI智能脚本”。
 *   **动作**：
-    1. 输入商品详情 URL，后端通过 `extract_url_selling_points` 抓取并利用 **DeepSeek-V4-Pro** 提炼卖点。
+    1. 输入商品详情 URL，后端通过 `extract_url_selling_points` 抓取并利用 **DeepSeek-V4-Flash** 提炼卖点。
     2. 基于 CoT（思维链）四层营销架构，流式（SSE）生成分镜脚本：钩子（Hook）➔ 痛点（Pain Point）➔ 产品介绍（Product）➔ 行动召唤（CTA）。
     3. 用户可在时间轴中调整或微调文本，并自动通过 Embedding 写入向量缓存，供下一次 Few-shot 参考进化。
 
@@ -216,9 +216,18 @@ npm install
 ```env
 VITE_SUPABASE_URL="https://<your-project-ref>.supabase.co"
 VITE_SUPABASE_ANON_KEY="<your-supabase-anon-key>"
-VITE_DEEPSEEK_API_KEY="<your-deepseek-key>" # 备用本地 Fallback 调用
+
+# DeepSeek-V4-Flash 模型与代理配置
+API_KEY="sk-xpFW-5LiEZ20VU9711CVJEbztoowzt5"
+DEEPSEEK_API_KEY="sk-xpFW-5LiEZ20VU9711CVJEbztoowzt5"
+VITE_DEEPSEEK_API_KEY="sk-xpFW-5LiEZ20VU9711CVJEbztoowzt5"
+DEEPSEEK_BASE_URL="https://ai.dxkp.com/v1"
+VITE_DEEPSEEK_BASE_URL="/dxkp-api/v1"
+
+# StepAudio & Cdance 核心 API
 VITE_STEP_API_KEY="<your-step-key>" # 备用本地 Fallback 调用
-VITE_SEEDANCE_API_KEY="<your-seedance-key>" # 备用本地 Fallback 调用
+VITE_CDANCE_API_KEY="sk-xpFW-5LiEZ20VU9711CVJEbztoowzt5"
+VITE_CDANCE_BASE_URL="/dxkp-api/v1"
 ```
 
 ### 3. 部署数据库迁移
@@ -233,7 +242,8 @@ supabase db push
 ```bash
 supabase secrets set \
   INTEGRATIONS_API_KEY="<default-ai-gateway-key>" \
-  DEEPSEEK_API_KEY="<deepseek-api-key>" \
+  DEEPSEEK_API_KEY="sk-xpFW-5LiEZ20VU9711CVJEbztoowzt5" \
+  DEEPSEEK_BASE_URL="https://ai.dxkp.com/v1" \
   STEP_API_KEY="<step-api-key>" \
   SEEDANCE_API_KEY="<seedance-api-key>" \
   WECHAT_PAY_APPID="<wechat-app-id>" \
@@ -305,4 +315,4 @@ npm run build
 
 ## 📌 总结
 
-Shopro AI 是一套面向 **带货短视频量产** 领域的一站式 SaaS 系统。项目融合了 DeepSeek-V4-Pro、StepAudio 2.5、Seedance 2.0 等前沿多模态大模型，以极高的工程化完成度打通了“文案-配音-画面-数据回流-团队协作-支付”的商业化完整闭环。具有极高的商业化落地价值和出海想象空间。
+Shopro AI 是一套面向 **带货短视频量产** 领域的一站式 SaaS 系统。项目融合了 DeepSeek-V4-Flash、StepAudio 2.5、Seedance 2.0 等前沿多模态大模型，以极高的工程化完成度打通了“文案-配音-画面-数据回流-团队协作-支付”的商业化完整闭环。具有极高的商业化落地价值和出海想象空间。
