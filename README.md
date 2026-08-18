@@ -111,8 +111,8 @@ Shopro AI/
 │   │   ├── VideoEditPage.tsx      # 可视化多轨道分镜编辑器 (字幕轨、人像轨、声轨)
 │   │   ├── WorksPage.tsx          # 作品管理，包含合成进度及视频回流
 │   │   ├── MaterialsPage.tsx      # 素材库管理 (支持分类上传及删除)
-│   │   ├── ProductsPage.tsx       # 商品库，商品新增、URL 自动提取卖点
-│   │   ├── ProductSelectionPage.tsx# 智能选品工坊，分析热门爆款商品
+│   │   ├── ProductsPage.tsx       # 商品管理，一键 URL/口令多模态解析导入与全属性编辑
+│   │   ├── ProductSelectionPage.tsx# 智能选品工坊，16国真实选品矩阵与第三方数据引擎接入中心
 │   │   ├── AvatarsPage.tsx        # 数字人库，支持上传头像图片及 StepAudio TTS 试听
 │   │   ├── TemplatesPage.tsx      # 视频模板库，一键套用带货模板
 │   │   ├── ScriptPage.tsx         # 脚本管理，可在此独立撰写、导出
@@ -174,25 +174,46 @@ Shopro AI/
 
 ## ⚡ 核心功能模块与工作流
 
-### 1. 🧠 AI 脚本生成工作台 (`HomePage.tsx`, `ScriptPage.tsx`)
-*   **入口**：用户在工作台点击“生成视频”或进入“AI智能脚本”。
-*   **动作**：
-    1. 输入商品详情 URL，后端通过 `extract_url_selling_points` 抓取并利用 **DeepSeek-V4-Flash** 提炼卖点。
-    2. 基于 CoT（思维链）四层营销架构，流式（SSE）生成分镜脚本：钩子（Hook）➔ 痛点（Pain Point）➔ 产品介绍（Product）➔ 行动召唤（CTA）。
-    3. 用户可在时间轴中调整或微调文本，并自动通过 Embedding 写入向量缓存，供下一次 Few-shot 参考进化。
+### 1. 🧠 AI 脚本与提示词增强工作台 (`HomePage.tsx`, `ScriptPage.tsx`)
+*   **低延时中文流式打字机**：工作台“提示词增强”强约束纯中文输出，支持低延时平滑逐字/逐块打字机流式渲染，瞬间提升提示词专业度。
+*   **视频生成模型矩阵**：集成了 7 大业界尖端视频生成模型，并配备厂商专属视觉标识：
+    - ⚡ **Seedance 2.0** (ByteDance)
+    - 💎 **happyhorse 1.0** (HappyHorse AI)
+    - 👾 **Krea** (Krea AI)
+    - ☁️ **wan2.7** (Alibaba Cloud 阿里通义)
+    - 🎬 **Kling** (Kuaishou AI 快手可灵)
+    - 📷 **Luma** (Luma Labs)
+    - 🥞 **pixverse** (PixVerse)
+*   **视频默认画质**：工作台默认配置 `720P · 16:9 · 5s` 标清爆款比例与高清帧率。
+*   **分镜 CoT 架构**：基于思维链（CoT）四层营销架构，流式（SSE）生成分镜脚本：钩子（Hook）➔ 痛点（Pain Point）➔ 产品介绍（Product）➔ 行动召唤（CTA）。
 
-### 2. 👥 数字人情感合成与多轨剪辑 (`AvatarsPage.tsx`, `VideoEditPage.tsx`)
+### 2. 🛍️ 一键 URL / 口令解析商品导入 & 16国选品矩阵 (`ProductsPage.tsx`, `ProductSelectionPage.tsx`)
+*   **一键 URL / 剪贴板口令解析导入**：
+    - 支持抖音 🎵、TikTok 🎶、拼多多 🔴、淘宝 🟠、Shopee 🧡、亚马逊 📦、全网通用 🌐 等平台商品网页链接或分享口令（淘口令/抖音口令）。
+    - 实时调用 **DeepSeek-V4-Flash** 多模态能力，自动提取规范标题、所属分类、原价/折后活动售价、三大 AI 核心卖点、商品实物封面图及详细描述。
+    - 提供高亮亮彩纯白电商风格控制台，支持用户自定义编辑并一键存入 Supabase `products` 数据库。
+*   **第三方数据引擎接入中心 (Data Engine Integration Center)**：
+    - 智能选品支持数据引擎介入（FastData、EchoTik、GoodsFox、Kalodata、TikMeta、Shoplus）。
+    - 默认激活 **FastData** 数据引擎为【已连接】，其余引擎均支持弹窗配置 API Endpoint 与 API Key 自定义介入。
+*   **16 国爆款商品矩阵**：
+    - 涵盖美国、印尼、英国、越南、泰国、马来西亚、菲律宾、西班牙、墨西哥、德国、法国、意大利、巴西、日本、新加坡等 16 个国家/地区，每国包含 5+ 真实实物无人物商品图片数据。
+
+### 3. 🎬 作品素材与首帧封面动态提取 (`WorksPage.tsx`, `src/lib/videoFrame.ts`)
+*   **视频首帧动态截取**：全站 AI 生成视频保存至作品素材库时，自动调用 `extractVideoFirstFrame` 截取对应视频第一帧图片作为真实高保真封面。
+*   **真实提示词绑定**：作品标题自动绑定并保存为用户输入的真实提示词内容（`prompt.trim()`），告别固定模板标题。
+
+### 4. 👥 数字人情感合成与多轨剪辑 (`AvatarsPage.tsx`, `VideoEditPage.tsx`)
 *   **情绪对齐**：系统利用 NLP 分析台词的情感极值，在分镜时间轴上自动映射数字人的面部表情（平和、喜悦、担忧、激动、说服）与语气。
 *   **多模态配音**：利用 `CosyVoice2-0.5B` 根据情感标记生成自然拟真的小语种配音。
 *   **多轨道编辑器**：在网页端提供多轨道可视化 Canvas 剪辑面板，直观拖拽分镜卡片、配音音轨、字幕，实现免学习拼积木式合成。
 
-### 3. 💡 流量追踪、A/B测试与广告回流 (`ABTestPage.tsx`, `AnalyticsPage.tsx`, `DataFeedbackPage.tsx`, `PublishPage.tsx`)
+### 5. 💡 流量追踪、A/B测试与广告回流 (`ABTestPage.tsx`, `AnalyticsPage.tsx`, `DataFeedbackPage.tsx`, `PublishPage.tsx`)
 *   **漏斗分析**：展示不同视频版本的转化漏斗图（播放量-完播率-点击率-成交金额），直接计算 ROI。
 *   **A/B测试**：同一商品配置多组脚本/封面，在线追踪测试，智能淘汰低效版本。
 *   **多平台发布**：可将渲染完成的视频直接调度至抖音、TikTok、小红书、快手或 B站，设定排期计划自动定时发布。
 *   **自适应优化**：将真实投放转化差的文案数据回流，自动反馈给 AI 训练，对低分脚本进行“一键调优”重写。
 
-### 4. 🔗 团队协作与 OpenAPI 开放平台 (`TeamSpacePage.tsx`, `OpenAPIPage.tsx`)
+### 6. 🔗 团队协作与 OpenAPI 开放平台 (`TeamSpacePage.tsx`, `OpenAPIPage.tsx`)
 *   **团队协作**：支持主账号创建团队空间，通过邮箱发送邀请凭证，配置管理员或协作者角色，共享素材库与作品集。
 *   **OpenAPI 调试**：面向大商户或 ERP 系统，提供 `ak_...` 自定义 API 密钥生成、Revoke 控制，并附带在线交互式 API 沙箱调试器。
 
@@ -218,15 +239,15 @@ VITE_SUPABASE_URL="https://<your-project-ref>.supabase.co"
 VITE_SUPABASE_ANON_KEY="<your-supabase-anon-key>"
 
 # DeepSeek-V4-Flash 模型与代理配置
-API_KEY="sk-xpFW-5LiEZ20VU9711CVJEbztoowzt5"
-DEEPSEEK_API_KEY="sk-xpFW-5LiEZ20VU9711CVJEbztoowzt5"
-VITE_DEEPSEEK_API_KEY="sk-xpFW-5LiEZ20VU9711CVJEbztoowzt5"
+API_KEY="sk-Cze3IQFfJMNJ6VlXYGT9WTTz0bJjB4Kz"
+DEEPSEEK_API_KEY="sk-Cze3IQFfJMNJ6VlXYGT9WTTz0bJjB4Kz"
+VITE_DEEPSEEK_API_KEY="sk-Cze3IQFfJMNJ6VlXYGT9WTTz0bJjB4Kz"
 DEEPSEEK_BASE_URL="https://ai.dxkp.com/v1"
 VITE_DEEPSEEK_BASE_URL="/dxkp-api/v1"
 
 # StepAudio & Cdance 核心 API
 VITE_STEP_API_KEY="<your-step-key>" # 备用本地 Fallback 调用
-VITE_CDANCE_API_KEY="sk-xpFW-5LiEZ20VU9711CVJEbztoowzt5"
+VITE_CDANCE_API_KEY="sk-Cze3IQFfJMNJ6VlXYGT9WTTz0bJjB4Kz"
 VITE_CDANCE_BASE_URL="/dxkp-api/v1"
 ```
 
@@ -242,7 +263,7 @@ supabase db push
 ```bash
 supabase secrets set \
   INTEGRATIONS_API_KEY="<default-ai-gateway-key>" \
-  DEEPSEEK_API_KEY="sk-xpFW-5LiEZ20VU9711CVJEbztoowzt5" \
+  DEEPSEEK_API_KEY="sk-Cze3IQFfJMNJ6VlXYGT9WTTz0bJjB4Kz" \
   DEEPSEEK_BASE_URL="https://ai.dxkp.com/v1" \
   STEP_API_KEY="<step-api-key>" \
   SEEDANCE_API_KEY="<seedance-api-key>" \
