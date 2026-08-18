@@ -1654,7 +1654,7 @@ function Step5Generate({ productData, promptConfig, shots, materials, onPrev, on
       const { data: projData, error: projErr } = await supabase.from('video_projects').insert({
         user_id: user.id,
         product_id: prodData?.id ?? null,
-        title: `${productData.name ?? '带货视频'} - ${new Date().toLocaleDateString('zh-CN')}`,
+        title: promptConfig.prompt_text?.trim() || productData.name?.trim() || '带货视频',
         status: 'processing',
         video_style: promptConfig.video_style,
         duration: promptConfig.duration ?? 30,

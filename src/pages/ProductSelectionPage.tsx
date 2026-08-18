@@ -56,64 +56,6 @@ interface SelectableProduct {
 const MOCK_SELECTION_POOL: SelectableProduct[] = [
   // 马来西亚 🇲🇾 (5 items)
   {
-    id: "sp-my-1",
-    name: "[SOCKS HOUSE] MEGA SALE Men's Cotton Socks (10 Pairs Pack)",
-    category: "男装与男士内衣",
-    original_price: 15.00,
-    sale_price: 2.13,
-    currency: "RM",
-    country: "马来西亚",
-    country_flag: "🇲🇾",
-    rating: 4.7,
-    commission_rate: 5,
-    stock: 24500,
-    cover_image: "https://images.unsplash.com/photo-1582966772680-860e372bb558?w=200",
-    shop_name: "SOCKS HOUSE",
-    shop_logo: "https://images.unsplash.com/photo-1590156221122-c7b3cd6d21a0?w=50",
-    shop_sales: "755.73万",
-    influencer_rate: "100%",
-    trend_data: [120, 115, 125, 130, 128, 145, 139],
-    sales_7d: "13.96万",
-    sales_7d_raw: 139600,
-    revenue_7d: "RM14.65万 ($3.18万)",
-    total_sales: "490.97万",
-    total_sales_raw: 4909700,
-    total_revenue: "RM612.95万 ($132.96万)",
-    associated_influencers: 4399,
-    shop_type: "crossborder",
-    product_type: "hot",
-    status: "active"
-  },
-  {
-    id: "sp-my-2",
-    name: "[Bioaqua] Salicylic Acid Acne Treatment Mask (120g)",
-    category: "美妆个护",
-    original_price: 19.99,
-    sale_price: 8.99,
-    currency: "RM",
-    country: "马来西亚",
-    country_flag: "🇲🇾",
-    rating: 4.6,
-    commission_rate: 12,
-    stock: 35000,
-    cover_image: "https://images.unsplash.com/photo-1567894340315-735d7c361db0?w=200",
-    shop_name: "Bioaqua Mall",
-    shop_logo: "https://images.unsplash.com/photo-1612817288484-6f916006741a?w=50",
-    shop_sales: "985.20万",
-    influencer_rate: "95%",
-    trend_data: [150, 160, 155, 175, 180, 192, 186],
-    sales_7d: "18.60万",
-    sales_7d_raw: 186000,
-    revenue_7d: "RM167.21万 ($36.35万)",
-    total_sales: "1240.50万",
-    total_sales_raw: 12405000,
-    total_revenue: "RM1.11亿 ($2413.04万)",
-    associated_influencers: 8900,
-    shop_type: "crossborder",
-    product_type: "hot",
-    status: "active"
-  },
-  {
     id: "sp-my-3",
     name: "[NIVEA] Extra Bright C&E Vitamin Lotion 320ml",
     category: "美妆个护",
@@ -2323,13 +2265,18 @@ export default function ProductSelectionPage() {
   const [showDataEngineModal, setShowDataEngineModal] = useState(false);
   const [syncingEngine, setSyncingEngine] = useState(false);
   const [dataPlatforms, setDataPlatforms] = useState([
-    { id: 'fastdata', name: 'FastData', desc: 'TikTok 全球电商数据大盘', status: 'active', latency: '12ms', lastSync: '10秒前' },
-    { id: 'echotik', name: 'EchoTik', desc: 'TikTok 爆款视频与达人带货数据', status: 'active', latency: '24ms', lastSync: '1分钟前' },
-    { id: 'goodsfox', name: 'GoodsFox', desc: '跨境广告及全球选品情报引擎', status: 'active', latency: '18ms', lastSync: '实时 API' },
-    { id: 'kalodata', name: 'Kalodata', desc: 'TikTok Shop 销量与类目大盘分析', status: 'active', latency: '30ms', lastSync: '2分钟前' },
-    { id: 'tikmeta', name: 'TikMeta', desc: 'TikTok 达人带货及短视频出单监测', status: 'active', latency: '15ms', lastSync: '实时' },
-    { id: 'shoplus', name: 'Shoplus', desc: 'TikTok 小店直播与商品实时监控', status: 'active', latency: '22ms', lastSync: '3分钟前' },
+    { id: 'fastdata', name: 'FastData', desc: 'TikTok 全球电商数据大盘', status: 'active', latency: '12ms', lastSync: '10秒前', endpoint: 'https://api.fastdata.top/v1', apiKey: 'fd_live_sk_8f9a2b' },
+    { id: 'echotik', name: 'EchoTik', desc: 'TikTok 爆款视频与达人带货数据', status: 'inactive', latency: '--', lastSync: '未连接', endpoint: '', apiKey: '' },
+    { id: 'goodsfox', name: 'GoodsFox', desc: '跨境广告及全球选品情报引擎', status: 'inactive', latency: '--', lastSync: '未连接', endpoint: '', apiKey: '' },
+    { id: 'kalodata', name: 'Kalodata', desc: 'TikTok Shop 销量与类目大盘分析', status: 'inactive', latency: '--', lastSync: '未连接', endpoint: '', apiKey: '' },
+    { id: 'tikmeta', name: 'TikMeta', desc: 'TikTok 达人带货及短视频出单监测', status: 'inactive', latency: '--', lastSync: '未连接', endpoint: '', apiKey: '' },
+    { id: 'shoplus', name: 'Shoplus', desc: 'TikTok 小店直播与商品实时监控', status: 'inactive', latency: '--', lastSync: '未连接', endpoint: '', apiKey: '' },
   ]);
+
+  const [configuringPlatform, setConfiguringPlatform] = useState<any | null>(null);
+  const [configEndpoint, setConfigEndpoint] = useState('');
+  const [configApiKey, setConfigApiKey] = useState('');
+  const [configInterval, setConfigInterval] = useState('5m');
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -3247,7 +3194,7 @@ export default function ProductSelectionPage() {
               第三方数据引擎接入中心
             </DialogTitle>
             <p className="text-xs text-zinc-400">
-              集成 FastData、EchoTik、GoodsFox 等 6 大跨境数据引擎，实时同步全球商品销量与爆款趋势
+              集成 FastData、EchoTik、GoodsFox 等 6 大跨境数据引擎。仅第一个节点默认连接，其它点击配置 API Key 即可接入
             </p>
           </DialogHeader>
 
@@ -3257,7 +3204,7 @@ export default function ProductSelectionPage() {
                 <Radio className="w-4 h-4 text-emerald-400 animate-pulse" />
                 <span className="text-xs font-semibold text-zinc-200">数据源接入状态</span>
                 <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-[10px]">
-                  6/6 节点已就绪
+                  {dataPlatforms.filter(p => p.status === 'active').length}/6 节点已连接
                 </Badge>
               </div>
               <Button
@@ -3266,16 +3213,16 @@ export default function ProductSelectionPage() {
                 disabled={syncingEngine}
                 onClick={() => {
                   setSyncingEngine(true);
-                  const toastId = toast.loading('正在同步全球 16 国 75 万+ 电商大盘实时数据...');
+                  const toastId = toast.loading('正在同步全网电商大盘数据...');
                   setTimeout(() => {
                     setSyncingEngine(false);
-                    toast.success('🎉 全网数据同步完成！已更新最新商品趋势', { id: toastId });
+                    toast.success('🎉 已接入节点的电商数据同步完成！', { id: toastId });
                   }, 1200);
                 }}
                 className="h-7 text-xs gap-1.5 border-rose-500/40 text-rose-400 hover:bg-rose-950/50"
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${syncingEngine ? 'animate-spin' : ''}`} />
-                {syncingEngine ? '同步中...' : '立即增量同步'}
+                {syncingEngine ? '同步中...' : '增量同步数据'}
               </Button>
             </div>
 
@@ -3289,32 +3236,43 @@ export default function ProductSelectionPage() {
                     <div>
                       <div className="flex items-center gap-2">
                         <span className="font-bold text-sm text-zinc-100">{platform.name}</span>
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800/60 font-medium">
-                          {platform.latency}
-                        </span>
+                        {platform.status === 'active' ? (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800/60 font-medium">
+                            {platform.latency}
+                          </span>
+                        ) : (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 border border-zinc-700 font-medium">
+                            未配置
+                          </span>
+                        )}
                       </div>
                       <p className="text-[11px] text-zinc-400 mt-1">{platform.desc}</p>
                     </div>
                     <button
                       onClick={() => {
-                        setDataPlatforms(prev => prev.map(p => p.id === platform.id ? { ...p, status: p.status === 'active' ? 'inactive' : 'active' } : p));
-                        toast.success(`${platform.name} API 节点授权已更新`);
+                        setConfiguringPlatform(platform);
+                        setConfigEndpoint(platform.endpoint || `https://api.${platform.id.toLowerCase()}.com/v1`);
+                        setConfigApiKey(platform.apiKey || '');
                       }}
-                      className={`px-2 py-1 text-[10px] font-semibold rounded-md transition-colors ${
+                      className={`px-2.5 py-1 text-[10px] font-semibold rounded-md transition-colors ${
                         platform.status === 'active'
-                          ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                          : 'bg-zinc-800 text-zinc-400 border border-zinc-700'
+                          ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/30'
+                          : 'bg-rose-500/20 text-rose-300 border border-rose-500/40 hover:bg-rose-500/30'
                       }`}
                     >
-                      {platform.status === 'active' ? '● 已连接' : '○ 暂停接入'}
+                      {platform.status === 'active' ? '● 已连接 (配置)' : '⚙️ 配置 API'}
                     </button>
                   </div>
 
                   <div className="flex items-center justify-between text-[10px] text-zinc-500 border-t border-zinc-800/60 pt-2">
                     <span className="flex items-center gap-1">
-                      <ShieldCheck className="w-3 h-3 text-emerald-400" /> API 密钥已校验
+                      {platform.status === 'active' ? (
+                        <><ShieldCheck className="w-3 h-3 text-emerald-400" /> API 已授权</>
+                      ) : (
+                        <><Info className="w-3 h-3 text-zinc-500" /> 需配置 API Key</>
+                      )}
                     </span>
-                    <span>上一次更新: {platform.lastSync}</span>
+                    <span>状态: {platform.lastSync}</span>
                   </div>
                 </div>
               ))}
@@ -3328,7 +3286,84 @@ export default function ProductSelectionPage() {
               onClick={() => setShowDataEngineModal(false)}
               className="bg-rose-600 hover:bg-rose-700 text-white text-xs px-6 rounded-xl"
             >
-              完成配置
+              关闭
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── 平台 API Key 配置小弹窗 ─────────────────────────────────────────── */}
+      <Dialog open={!!configuringPlatform} onOpenChange={(open) => { if (!open) setConfiguringPlatform(null); }}>
+        <DialogContent className="sm:max-w-md bg-zinc-950 border-zinc-800 text-zinc-100 p-5 rounded-2xl shadow-2xl z-50">
+          <DialogHeader>
+            <DialogTitle className="text-base font-bold flex items-center gap-2 text-rose-400">
+              <Zap className="w-4 h-4 text-rose-500" />
+              配置 {configuringPlatform?.name} 数据接口 API
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-3 my-2 text-xs">
+            <div className="space-y-1">
+              <label className="text-zinc-300 font-medium">API Base Endpoint (接口地址)</label>
+              <Input
+                value={configEndpoint}
+                onChange={(e) => setConfigEndpoint(e.target.value)}
+                placeholder="https://api.example.com/v1"
+                className="h-9 text-xs bg-zinc-900 border-zinc-800 text-zinc-200"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-zinc-300 font-medium">API Key (密钥授权码)</label>
+              <Input
+                type="password"
+                value={configApiKey}
+                onChange={(e) => setConfigApiKey(e.target.value)}
+                placeholder="请输入您在第三方平台的 API Secret Key"
+                className="h-9 text-xs bg-zinc-900 border-zinc-800 text-zinc-200"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-zinc-300 font-medium">数据同步频率</label>
+              <Select value={configInterval} onValueChange={setConfigInterval}>
+                <SelectTrigger className="h-9 text-xs bg-zinc-900 border-zinc-800 text-zinc-200">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-zinc-900 border-zinc-800 text-zinc-200">
+                  <SelectItem value="1m">1 分钟 (实时最高优先级)</SelectItem>
+                  <SelectItem value="5m">5 分钟 (推荐标准频率)</SelectItem>
+                  <SelectItem value="15m">15 分钟 (低频防限流)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <DialogFooter className="pt-2 flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setConfiguringPlatform(null)}
+              className="h-8 text-xs border-zinc-800 text-zinc-400 hover:bg-zinc-900"
+            >
+              取消
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => {
+                if (!configApiKey.trim()) {
+                  toast.error('请先输入 API Key 授权码');
+                  return;
+                }
+                setDataPlatforms(prev => prev.map(p =>
+                  p.id === configuringPlatform.id
+                    ? { ...p, status: 'active', latency: '15ms', lastSync: '刚才', endpoint: configEndpoint, apiKey: configApiKey }
+                    : p
+                ));
+                toast.success(`🎉 ${configuringPlatform.name} API 接口配置成功并上线连接！`);
+                setConfiguringPlatform(null);
+              }}
+              className="h-8 text-xs bg-rose-600 hover:bg-rose-700 text-white"
+            >
+              保存并开启连接
             </Button>
           </DialogFooter>
         </DialogContent>

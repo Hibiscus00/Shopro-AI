@@ -650,7 +650,7 @@ export default function HomePage() {
           try {
             const { data: projData, error: projErr } = await supabase.from('video_projects').insert({
               user_id: user.id,
-              title: `${model.label} 视频 - ${new Date().toLocaleDateString('zh-CN')}`,
+              title: prompt.trim() || `${model.label} 视频`,
               status: 'processing',
               video_style: model.label,
               duration: Number(activeDuration) || 8,
@@ -705,7 +705,7 @@ export default function HomePage() {
           try {
             const { data: projData, error: projErr } = await supabase.from('video_projects').insert({
               user_id: user.id,
-              title: `${model.label} 视频 - ${new Date().toLocaleDateString('zh-CN')}`,
+              title: prompt.trim() || `${model.label} 视频`,
               status: 'processing',
               video_style: model.label,
               duration: Number(activeDuration) || 8,
@@ -756,7 +756,7 @@ export default function HomePage() {
           try {
             const { data: projData, error: projErr } = await supabase.from('video_projects').insert({
               user_id: user.id,
-              title: `${model.label} 视频 - ${new Date().toLocaleDateString('zh-CN')}`,
+              title: prompt.trim() || `${model.label} 视频`,
               status: 'processing',
               video_style: model.label,
               duration: Number(activeDuration) || 8,
@@ -822,7 +822,7 @@ export default function HomePage() {
     }
   };
 
-  // DeepSeek-V4-Flash 提示词增强 (流式打字机效果)
+  // DeepSeek-V4-Flash 提示词增强 (全中文 5s 打字机效果)
   const handleEnhancePrompt = async () => {
     if (!prompt.trim()) { toast.error('请先输入基础描述'); return; }
     setEnhancing(true);
@@ -832,13 +832,24 @@ export default function HomePage() {
     let fullText = '';
     let isFirstChunk = true;
 
+    // 5 秒强超时控制
+    const timerId = setTimeout(() => {
+      if (abortRef.current && !abortRef.current.signal.aborted) {
+        abortRef.current.abort();
+        if (fullText.trim()) {
+          toast.success('提示词已增强');
+        }
+        setEnhancing(false);
+      }
+    }, 5000);
+
     try {
       await sendDeepSeekStreamRequest({
         messages: [{
           role: 'user',
-          content: `请对以下视频描述进行提示词优化与增强，使其更具视觉表现力和AI生成效果。请直接输出优化后的提示词，不要包含任何中文或英文的解释、前缀或引导语。原描述：${originalPrompt}`,
+          content: `请对以下描述进行视频提示词优化与增强，扩写为一段细节丰富、视觉表现力强的中文AI视频生成提示词。必须完全使用中文输出，严禁包含任何英文、解释、前缀或引导语，直接输出优化后的中文提示词。原描述：${originalPrompt}`,
         }],
-        max_tokens: 1000,
+        max_tokens: 300,
         onData: (data) => {
           if (!data || data === '[DONE]') return;
           let chunk = data;
@@ -858,10 +869,12 @@ export default function HomePage() {
           }
         },
         onComplete: () => {
+          clearTimeout(timerId);
           toast.success('提示词已增强');
           setEnhancing(false);
         },
         onError: (err) => {
+          clearTimeout(timerId);
           if (!abortRef.current?.signal.aborted) {
             toast.error(`增强失败：${err.message}`);
             if (isFirstChunk) {
@@ -873,6 +886,7 @@ export default function HomePage() {
         signal: abortRef.current.signal,
       });
     } catch (e: unknown) {
+      clearTimeout(timerId);
       if (!abortRef.current?.signal.aborted) {
         toast.error(`增强失败：${(e as Error).message}`);
         if (isFirstChunk) {
