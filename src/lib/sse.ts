@@ -122,7 +122,7 @@ export async function sendDeepSeekStreamRequest(options: DeepSeekStreamOptions):
 
     const dxkpKey = (import.meta.env.VITE_DEEPSEEK_API_KEY as string) ||
                    (import.meta.env.VITE_CDANCE_API_KEY as string) ||
-                   "sk-xpFW-5LiEZ20VU9711CVJEbztoowzt5-";
+                   "sk-Cze3IQFfJMNJ6VlXYGT9WTTz0bJjB4Kz";
 
     const processStreamResponse = async (response: Response): Promise<boolean> => {
       if (!response.ok || !response.body) return false;

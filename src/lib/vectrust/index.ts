@@ -12,7 +12,7 @@ function getApiKey(): string {
     import.meta.env.VITE_VECTRUST_API_KEY ||
     import.meta.env.VITE_SEEDANCE_API_KEY ||
     import.meta.env.VITE_DEEPSEEK_API_KEY ||
-    'sk-xpFW-5LiEZ20VU9711CVJEbztoowzt5-';
+    'sk-Cze3IQFfJMNJ6VlXYGT9WTTz0bJjB4Kz';
   return apiKey;
 }
 

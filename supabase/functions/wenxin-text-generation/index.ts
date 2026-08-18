@@ -37,64 +37,83 @@ Deno.serve(async (req: Request): Promise<Response> => {
     );
   }
 
-  let apiKey = Deno.env.get('DEEPSEEK_API_KEY');
-  if (!apiKey) {
-    try {
-      const keyUrl = new URL('./key.txt', import.meta.url);
-      apiKey = (await Deno.readTextFile(keyUrl)).trim();
-    } catch (err) {
-      console.error('Failed to read key.txt:', err);
-    }
-  }
-
-  if (!apiKey) {
-    return new Response(
-      JSON.stringify({ error: 'Server configuration error: missing DEEPSEEK_API_KEY' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
-  }
-
+  let apiKey = Deno.env.get('DEEPSEEK_API_KEY') || 'sk-Cze3IQFfJMNJ6VlXYGT9WTTz0bJjB4Kz';
   const baseUrl = Deno.env.get('DEEPSEEK_BASE_URL') || 'https://ai.dxkp.com/v1';
-  const upstream = await fetch(
-    `${baseUrl}/chat/completions`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: 'DeepSeek-V4-Flash',
-        messages,
-        temperature,
-        max_tokens,
-        stream: true,
-      }),
-    }
-  );
 
-  if (upstream.status === 429 || upstream.status === 402) {
-    const errText = await upstream.text();
-    return new Response(errText, {
-      status: upstream.status,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
-  }
-
-  if (!upstream.ok || !upstream.body) {
-    return new Response(
-      JSON.stringify({ error: `Upstream error: ${upstream.status}` }),
-      { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+  // 1. Try dxkp endpoint first
+  try {
+    const upstream = await fetch(
+      `${baseUrl}/chat/completions`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: 'DeepSeek-V4-Flash',
+          messages,
+          temperature,
+          max_tokens,
+          stream: true,
+        }),
+      }
     );
+
+    if (upstream.ok && upstream.body) {
+      return new Response(upstream.body, {
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+          'Connection': 'keep-alive',
+          'X-Content-Type-Options': 'nosniff',
+        },
+      });
+    }
+  } catch (dxkpErr) {
+    console.warn('dxkp fetch error:', dxkpErr);
   }
 
-  return new Response(upstream.body, {
-    headers: {
-      ...corsHeaders,
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
-      'Connection': 'keep-alive',
-      'X-Content-Type-Options': 'nosniff',
-    },
-  });
+  // 2. SiliconFlow Fallback (High Availability Node)
+  let siliconKey = Deno.env.get('SILICONFLOW_API_KEY') || 'sk-fvaewxbnaadhaixwxkrprqdasapwbxkvbypruvquadzeaxyn';
+  const siliconModels = ['deepseek-ai/DeepSeek-V4-Flash', 'deepseek-ai/DeepSeek-V3', 'Qwen/Qwen2.5-7B-Instruct'];
+
+  for (const modelName of siliconModels) {
+    try {
+      const sfUpstream = await fetch('https://api.siliconflow.cn/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${siliconKey}`,
+        },
+        body: JSON.stringify({
+          model: modelName,
+          messages,
+          temperature,
+          max_tokens,
+          stream: true,
+        }),
+      });
+
+      if (sfUpstream.ok && sfUpstream.body) {
+        return new Response(sfUpstream.body, {
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive',
+            'X-Content-Type-Options': 'nosniff',
+          },
+        });
+      }
+    } catch (sfErr) {
+      console.warn(`SiliconFlow model ${modelName} error:`, sfErr);
+    }
+  }
+
+  return new Response(
+    JSON.stringify({ error: 'DeepSeek text generation service unavailable.' }),
+    { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+  );
 });
