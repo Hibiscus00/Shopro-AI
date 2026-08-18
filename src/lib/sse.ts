@@ -119,8 +119,9 @@ export async function sendDeepSeekStreamRequest(options: DeepSeekStreamOptions):
     if (fallbackTriggered) return;
     fallbackTriggered = true;
 
-    console.log("Edge Function deepseek-v4-pro returned error, trying direct API fallback...");
-    const apiKey = import.meta.env.VITE_DEEPSEEK_API_KEY as string;
+    const apiKey = (import.meta.env.VITE_DEEPSEEK_API_KEY as string) ||
+                   (import.meta.env.VITE_CDANCE_API_KEY as string) ||
+                   "sk-xpFW-5LiEZ20VU9711CVJEbztoowzt5";
     if (!apiKey) {
       onError(new Error("Missing VITE_DEEPSEEK_API_KEY in environment configuration."));
       return;
