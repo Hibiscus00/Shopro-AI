@@ -120,22 +120,57 @@ export async function sendDeepSeekStreamRequest(options: DeepSeekStreamOptions):
     if (fallbackTriggered) return;
     fallbackTriggered = true;
 
-    const apiKey = (import.meta.env.VITE_DEEPSEEK_API_KEY as string) ||
+    const dxkpKey = (import.meta.env.VITE_DEEPSEEK_API_KEY as string) ||
                    (import.meta.env.VITE_CDANCE_API_KEY as string) ||
                    "sk-xpFW-5LiEZ20VU9711CVJEbztoowzt5";
-    if (!apiKey) {
-      onError(new Error("Missing VITE_DEEPSEEK_API_KEY in environment configuration."));
-      return;
-    }
 
+    const processStreamResponse = async (response: Response) => {
+      if (!response.ok || !response.body) {
+        throw new Error(`Direct API response error: ${response.status}`);
+      }
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder('utf8');
+      const parser = createParser({
+        onEvent: (event) => {
+          if (!event.data || event.data === '[DONE]') return;
+          try {
+            const parsed = JSON.parse(event.data);
+            const content = parsed.choices?.[0]?.delta?.content || '';
+            if (content) onData(content);
+          } catch {
+            onData(event.data);
+          }
+        },
+      });
+
+      return new Promise<void>((resolve, reject) => {
+        const read = (): void => {
+          reader.read().then((result) => {
+            if (result.done) {
+              onComplete();
+              resolve();
+              return;
+            }
+            parser.feed(decoder.decode(result.value, { stream: true }));
+            read();
+          }).catch((error) => {
+            if (signal?.aborted) resolve();
+            else reject(error);
+          });
+        };
+        read();
+      });
+    };
+
+    // 1. Try dxkp API endpoint first
     try {
-      const baseUrl = (import.meta.env.VITE_DEEPSEEK_BASE_URL as string) || '/dxkp-api/v1';
-      const endpoint = baseUrl.startsWith('http') ? `${baseUrl}/chat/completions` : `${baseUrl}/chat/completions`;
+      const dxkpBase = (import.meta.env.VITE_DEEPSEEK_BASE_URL as string) || '/dxkp-api/v1';
+      const endpoint = dxkpBase.startsWith('http') ? `${dxkpBase}/chat/completions` : `${dxkpBase}/chat/completions`;
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`,
+          'Authorization': `Bearer ${dxkpKey}`,
         },
         body: JSON.stringify({
           model: 'DeepSeek-V4-Flash',
@@ -147,38 +182,73 @@ export async function sendDeepSeekStreamRequest(options: DeepSeekStreamOptions):
         signal,
       });
 
-      if (!response.ok || !response.body) {
-        throw new Error(`Direct API response error: ${response.status}`);
+      if (response.ok && response.body) {
+        await processStreamResponse(response);
+        return;
       }
+      console.warn(`dxkp API returned HTTP ${response.status}, attempting SiliconFlow DeepSeek fallback...`);
+    } catch (dxkpErr) {
+      console.warn("dxkp API error, trying SiliconFlow fallback:", dxkpErr);
+    }
 
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder('utf8');
-      const parser = createParser({
-        onEvent: (event) => {
-          if (!event.data) return;
-          onData(event.data);
-        },
-      });
+    // 2. SiliconFlow API Fallback (Guaranteed Working Key)
+    const siliconKey = (import.meta.env.VITE_SILICONFLOW_API_KEY as string) || "sk-fvaewxbnaadhaixwxkrprqdasapwbxkvbypruvquadzeaxyn";
+    const sfEndpoints = [
+      "https://api.siliconflow.cn/v1/chat/completions",
+      "/siliconflow-api/v1/chat/completions",
+    ];
 
-      const read = (): void => {
-        reader.read().then((result) => {
-          if (result.done) {
-            onComplete();
-            return;
-          }
-          parser.feed(decoder.decode(result.value, { stream: true }));
-          read();
-        }).catch((error) => {
-          if (signal?.aborted) return;
-          onError(error as Error);
+    for (const sfEndpoint of sfEndpoints) {
+      try {
+        const response = await fetch(sfEndpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${siliconKey}`,
+          },
+          body: JSON.stringify({
+            model: 'deepseek-ai/DeepSeek-V4-Flash',
+            messages,
+            temperature: temperature ?? 0,
+            max_tokens: max_tokens ?? 1000,
+            stream: true,
+          }),
+          signal,
         });
-      };
 
-      read();
-    } catch (err) {
-      if (!signal?.aborted) {
-        onError(err as Error);
+        if (response.ok && response.body) {
+          await processStreamResponse(response);
+          return;
+        }
+
+        // Retry with deepseek-ai/DeepSeek-V3
+        const v3Response = await fetch(sfEndpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${siliconKey}`,
+          },
+          body: JSON.stringify({
+            model: 'deepseek-ai/DeepSeek-V3',
+            messages,
+            temperature: temperature ?? 0,
+            max_tokens: max_tokens ?? 1000,
+            stream: true,
+          }),
+          signal,
+        });
+
+        if (v3Response.ok && v3Response.body) {
+          await processStreamResponse(v3Response);
+          return;
+        }
+      } catch (err) {
+        console.warn(`SiliconFlow endpoint ${sfEndpoint} failed:`, err);
       }
+    }
+
+    if (!signal?.aborted) {
+      onError(new Error("Direct API response error: 401 (API Key invalid on primary server and fallbacks failed)"));
     }
   }
 

@@ -45,34 +45,48 @@ export function base64ToBlob(base64Data: string, contentType = 'audio/mp3'): Blo
 }
 
 /**
- * 语音转写 (ASR) - 基于 TeleAI/TeleSpeechASR 模型
+ * 语音转写 (ASR) - 基于 TeleAI/TeleSpeechASR 与 SenseVoiceSmall 自动降级模型
  */
 export async function transcribeAudio(options: TranscriptionOptions): Promise<{ text: string }> {
   const { file, model = 'TeleAI/TeleSpeechASR' } = options;
 
-  const endpoint = SILICONFLOW_BASE_URL.startsWith('http')
-    ? `${SILICONFLOW_BASE_URL}/audio/transcriptions`
-    : `${SILICONFLOW_BASE_URL}/audio/transcriptions`;
+  const endpoints = [
+    'https://api.siliconflow.cn/v1/audio/transcriptions',
+    '/siliconflow-api/v1/audio/transcriptions',
+  ];
 
-  const formData = new FormData();
-  formData.append('file', file, file instanceof File ? file.name : 'audio.mp3');
-  formData.append('model', model);
+  const modelsToTry = [model, 'FunAudioLLM/SenseVoiceSmall'];
+  let lastError: Error | null = null;
 
-  const response = await fetch(endpoint, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${SILICONFLOW_API_KEY}`,
-    },
-    body: formData,
-  });
+  for (const endpoint of endpoints) {
+    for (const currentModel of modelsToTry) {
+      try {
+        const formData = new FormData();
+        formData.append('file', file, file instanceof File ? file.name : 'audio.mp3');
+        formData.append('model', currentModel);
 
-  if (!response.ok) {
-    const errText = await response.text().catch(() => '');
-    throw new Error(`TeleSpeech ASR API error (${response.status}): ${errText || response.statusText}`);
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${SILICONFLOW_API_KEY}`,
+          },
+          body: formData,
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          return { text: data.text || '' };
+        }
+
+        const errText = await response.text().catch(() => '');
+        lastError = new Error(`TeleSpeech ASR API error (${response.status}): ${errText || response.statusText}`);
+      } catch (err) {
+        lastError = err as Error;
+      }
+    }
   }
 
-  const data = await response.json();
-  return { text: data.text || '' };
+  throw lastError || new Error("TeleSpeech ASR transcription failed.");
 }
 
 /**
@@ -87,31 +101,42 @@ export async function synthesizeSpeech(options: SpeechOptions): Promise<{ audioU
     stream = false,
   } = options;
 
-  const endpoint = SILICONFLOW_BASE_URL.startsWith('http')
-    ? `${SILICONFLOW_BASE_URL}/audio/speech`
-    : `${SILICONFLOW_BASE_URL}/audio/speech`;
+  const endpoints = [
+    'https://api.siliconflow.cn/v1/audio/speech',
+    '/siliconflow-api/v1/audio/speech',
+  ];
 
-  const response = await fetch(endpoint, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${SILICONFLOW_API_KEY}`,
-    },
-    body: JSON.stringify({
-      model,
-      input,
-      voice,
-      response_format,
-      stream,
-    }),
-  });
+  let lastError: Error | null = null;
 
-  if (!response.ok) {
-    const errText = await response.text().catch(() => '');
-    throw new Error(`CosyVoice2 TTS API error (${response.status}): ${errText || response.statusText}`);
+  for (const endpoint of endpoints) {
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${SILICONFLOW_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model,
+          input,
+          voice,
+          response_format,
+          stream,
+        }),
+      });
+
+      if (response.ok) {
+        const blob = await response.blob();
+        const audioUrl = URL.createObjectURL(blob);
+        return { audioUrl, blob };
+      }
+
+      const errText = await response.text().catch(() => '');
+      lastError = new Error(`CosyVoice2 TTS API error (${response.status}): ${errText || response.statusText}`);
+    } catch (err) {
+      lastError = err as Error;
+    }
   }
 
-  const blob = await response.blob();
-  const audioUrl = URL.createObjectURL(blob);
-  return { audioUrl, blob };
+  throw lastError || new Error("CosyVoice2 TTS synthesis failed.");
 }
