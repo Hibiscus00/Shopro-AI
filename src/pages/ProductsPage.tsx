@@ -27,7 +27,7 @@ import {
 } from '@/components/ui/table';
 import {
   Package, Plus, Search, LayoutGrid, List, Edit2, Trash2, X,
-  Upload, ChevronDown, ImageIcon, Filter, Loader2, Check,
+  Upload, ChevronDown, ImageIcon, Filter, Loader2, Check, CheckCircle2,
   Download, FileSpreadsheet, AlertCircle, Star, ChevronRight,
   Info, Image, GripVertical, PlusCircle, Sparkles, Link, Wand2, Globe,
   ShieldCheck, ExternalLink, Zap
