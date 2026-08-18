@@ -818,7 +818,7 @@ export default function HomePage() {
     }
   };
 
-  // step-3.7-flash 提示词增强 (流式打字机效果)
+  // DeepSeek-V4-Flash 提示词增强 (流式打字机效果)
   const handleEnhancePrompt = async () => {
     if (!prompt.trim()) { toast.error('请先输入基础描述'); return; }
     setEnhancing(true);
@@ -829,7 +829,7 @@ export default function HomePage() {
     let isFirstChunk = true;
 
     try {
-      await sendStepFlashStreamRequest({
+      await sendDeepSeekStreamRequest({
         messages: [{
           role: 'user',
           content: `请对以下视频描述进行提示词优化与增强，使其更具视觉表现力和AI生成效果。请直接输出优化后的提示词，不要包含任何中文或英文的解释、前缀或引导语。原描述：${originalPrompt}`,

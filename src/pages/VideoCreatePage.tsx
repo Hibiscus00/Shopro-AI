@@ -26,7 +26,7 @@ import {
 import { cn } from '@/lib/utils';
 import { DouyinIcon, TikTokIcon, XiaohongshuIcon } from '@/components/ui/platform-icons';
 import type { ProductFormData, PromptConfig, Shot, MaterialItem, VideoProject } from '@/types/types';
-import { sendStepFlashStreamRequest } from '@/lib/sse';
+import { sendDeepSeekStreamRequest } from '@/lib/sse';
 
 // ── CR-05 跨平台适配配置 ────────────────────────────────────────────────────
 const PLATFORM_CONFIGS = [
@@ -785,7 +785,7 @@ function Step2Prompt({ data, onChange, onNext, onPrev, productData }: {
     let isFirstChunk = true;
 
     try {
-      await sendStepFlashStreamRequest({
+      await sendDeepSeekStreamRequest({
         messages: [{
           role: 'user',
           content: `请优化以下AI视频生成 Prompt，将其扩展为一段专业的英文AI视频生成提示词。要求：画面细节丰富、镜头语言清晰、色彩与构图精美、适合带货电商场景。请直接输出优化后的英文Prompt，不要包含任何中文或多余的解释。原文：${originalPrompt}`,

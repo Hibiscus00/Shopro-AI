@@ -202,75 +202,10 @@ export async function sendDeepSeekStreamRequest(options: DeepSeekStreamOptions):
   }
 }
 
-export interface StepFlashStreamOptions {
-  messages: Array<{ role: string; content: string }>;
-  max_tokens?: number;
-  temperature?: number;
-  onData: (data: string) => void;
-  onComplete: () => void;
-  onError: (error: Error) => void;
-  signal?: AbortSignal;
-}
+export type StepFlashStreamOptions = DeepSeekStreamOptions;
 
 export async function sendStepFlashStreamRequest(options: StepFlashStreamOptions): Promise<void> {
-  const { messages, max_tokens, temperature, onData, onComplete, onError, signal } = options;
-
-  const apiKey = import.meta.env.VITE_STEP_API_KEY as string;
-  if (!apiKey) {
-    onError(new Error("Missing VITE_STEP_API_KEY in environment configuration."));
-    return;
-  }
-
-  try {
-    const response = await fetch('https://api.stepfun.com/step_plan/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: 'step-3.7-flash',
-        messages,
-        temperature: temperature ?? 0.7,
-        max_tokens: max_tokens ?? 1000,
-        stream: true,
-      }),
-      signal,
-    });
-
-    if (!response.ok || !response.body) {
-      throw new Error(`StepFun API response error: ${response.status}`);
-    }
-
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder('utf8');
-    const parser = createParser({
-      onEvent: (event) => {
-        if (!event.data) return;
-        onData(event.data);
-      },
-    });
-
-    const read = (): void => {
-      reader.read().then((result) => {
-        if (result.done) {
-          onComplete();
-          return;
-        }
-        parser.feed(decoder.decode(result.value, { stream: true }));
-        read();
-      }).catch((error) => {
-        if (signal?.aborted) return;
-        onError(error as Error);
-      });
-    };
-
-    read();
-  } catch (err) {
-    if (!signal?.aborted) {
-      onError(err as Error);
-    }
-  }
+  return sendDeepSeekStreamRequest(options);
 }
 
 export interface StepASROptions {
