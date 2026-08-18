@@ -564,40 +564,48 @@ export default function WorksPage() {
     if (abTickRef.current) { clearInterval(abTickRef.current); abTickRef.current = null; }
   }, []);
 
+const UNIQUE_THUMBNAILS: Record<string, string> = {
+  '/Video/CreatOK_2.mp4': 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&q=80',
+  '/Video/CreatOK_5.mp4': 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&q=80',
+  '/Video/CreatOK_8.mp4': 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&q=80',
+  '/Video/CreatOK_10.mp4': 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=600&q=80',
+  '/Video/CreatOK_11.mp4': 'https://images.unsplash.com/photo-1541167760496-1628856ab772?w=600&q=80',
+};
+
 async function seedTestUserVideos(userId: string) {
   const testVideos = [
     {
       title: '时尚秋季外套女款展示',
       video_url: '/Video/CreatOK_2.mp4',
-      thumbnail_url: null,
+      thumbnail_url: UNIQUE_THUMBNAILS['/Video/CreatOK_2.mp4'],
       duration: 5,
       video_style: '服装',
     },
     {
       title: '智能手表旋转展示',
       video_url: '/Video/CreatOK_5.mp4',
-      thumbnail_url: null,
+      thumbnail_url: UNIQUE_THUMBNAILS['/Video/CreatOK_5.mp4'],
       duration: 10,
       video_style: '数码',
     },
     {
       title: '运动女鞋减震底测试',
       video_url: '/Video/CreatOK_8.mp4',
-      thumbnail_url: null,
+      thumbnail_url: UNIQUE_THUMBNAILS['/Video/CreatOK_8.mp4'],
       duration: 5,
       video_style: '服装',
     },
     {
       title: '无线耳机落水测试',
       video_url: '/Video/CreatOK_10.mp4',
-      thumbnail_url: null,
+      thumbnail_url: UNIQUE_THUMBNAILS['/Video/CreatOK_10.mp4'],
       duration: 8,
       video_style: '数码',
     },
     {
       title: '咖啡拿铁拉花艺术过程',
       video_url: '/Video/CreatOK_11.mp4',
-      thumbnail_url: null,
+      thumbnail_url: UNIQUE_THUMBNAILS['/Video/CreatOK_11.mp4'],
       duration: 6,
       video_style: '食品',
     }
@@ -606,7 +614,7 @@ async function seedTestUserVideos(userId: string) {
   for (const v of testVideos) {
     const { data: existingProj } = await supabase
       .from('video_projects')
-      .select('id')
+      .select('id, thumbnail_url')
       .eq('user_id', userId)
       .eq('video_url', v.video_url)
       .maybeSingle();
@@ -628,7 +636,6 @@ async function seedTestUserVideos(userId: string) {
         .single();
 
       if (insertedProj) {
-        // Also insert to materials table so it's visible in Materials library
         await supabase.from('materials').insert({
           user_id: userId,
           name: v.title,
@@ -637,6 +644,8 @@ async function seedTestUserVideos(userId: string) {
           size: 1024 * 1024 * 5,
         });
       }
+    } else if (!existingProj.thumbnail_url || existingProj.thumbnail_url.includes('photo-1618005182384-a83a8bd57fbe')) {
+      await supabase.from('video_projects').update({ thumbnail_url: v.thumbnail_url }).eq('id', existingProj.id);
     }
   }
 }
@@ -647,7 +656,25 @@ async function seedTestUserVideos(userId: string) {
       await seedTestUserVideos(user.id);
     }
     const { data } = await supabase.from('video_projects').select('*').order('created_at', { ascending: false });
-    setProjects((data ?? []) as VideoProject[]);
+    const formattedData = (data ?? []).map((p: any, idx: number) => {
+      let thumb = p.thumbnail_url;
+      if (!thumb || thumb.includes('photo-1618005182384-a83a8bd57fbe')) {
+        if (p.video_url && UNIQUE_THUMBNAILS[p.video_url]) {
+          thumb = UNIQUE_THUMBNAILS[p.video_url];
+        } else {
+          const defaultPool = [
+            'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&q=80',
+            'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&q=80',
+            'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&q=80',
+            'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=600&q=80',
+            'https://images.unsplash.com/photo-1541167760496-1628856ab772?w=600&q=80',
+          ];
+          thumb = defaultPool[idx % defaultPool.length];
+        }
+      }
+      return { ...p, thumbnail_url: thumb };
+    });
+    setProjects(formattedData as VideoProject[]);
     setLoading(false);
   };
 

@@ -27,6 +27,7 @@ import { cn } from '@/lib/utils';
 import { DouyinIcon, TikTokIcon, XiaohongshuIcon } from '@/components/ui/platform-icons';
 import type { ProductFormData, PromptConfig, Shot, MaterialItem, VideoProject } from '@/types/types';
 import { sendDeepSeekStreamRequest } from '@/lib/sse';
+import { extractVideoFirstFrame } from '@/lib/videoFrame';
 
 // ── CR-05 跨平台适配配置 ────────────────────────────────────────────────────
 const PLATFORM_CONFIGS = [
@@ -792,19 +793,22 @@ function Step2Prompt({ data, onChange, onNext, onPrev, productData }: {
         }],
         max_tokens: 1000,
         onData: (chunkData) => {
-          if (chunkData === '[DONE]') return;
+          if (!chunkData || chunkData === '[DONE]') return;
+          let chunk = chunkData;
           try {
             const parsed = JSON.parse(chunkData);
-            const chunk = parsed.choices?.[0]?.delta?.content ?? '';
-            if (chunk) {
-              if (isFirstChunk) {
-                onChange({ ...data, prompt_text: '' });
-                isFirstChunk = false;
-              }
-              fullText += chunk;
-              onChange({ ...data, prompt_text: fullText });
+            chunk = parsed.choices?.[0]?.delta?.content ?? parsed.choices?.[0]?.text ?? chunkData;
+          } catch {
+            // chunkData is already a plain text chunk
+          }
+          if (chunk) {
+            if (isFirstChunk) {
+              onChange({ ...data, prompt_text: '' });
+              isFirstChunk = false;
             }
-          } catch { /* skip */ }
+            fullText += chunk;
+            onChange({ ...data, prompt_text: fullText });
+          }
         },
         onComplete: () => {
           toast.success('Prompt已优化');
@@ -1576,12 +1580,14 @@ function Step5Generate({ productData, promptConfig, shots, materials, onPrev, on
       stageIdx++;
       if (stageIdx >= PROGRESS_STAGES.length) {
         clearInterval(interval);
+        const resultVideoUrl = 'https://www.w3schools.com/html/mov_bbb.mp4';
+        const coverFrame = (await extractVideoFirstFrame(resultVideoUrl)) || resultVideoUrl;
         const { data } = await supabase.from('video_projects')
           .update({
             status: 'completed',
             progress: 100,
-            video_url: 'https://www.w3schools.com/html/mov_bbb.mp4',
-            thumbnail_url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=640&h=360&fit=crop'
+            video_url: resultVideoUrl,
+            thumbnail_url: coverFrame
           })
           .eq('id', projectId).select().maybeSingle();
         setProgress(100);

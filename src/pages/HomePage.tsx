@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import ProductVideoWizard from './VideoCreatePage';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { sendDeepSeekStreamRequest, sendStepAudioASR, submitSeedanceVideo, querySeedanceVideo, sendStepFlashStreamRequest } from '@/lib/sse';
+import { extractVideoFirstFrame } from '@/lib/videoFrame';
 import { audioRecorder } from '@/lib/audioRecorder';
 
 
@@ -552,11 +553,12 @@ export default function HomePage() {
             setResultVideo(videoUrl);
             toast.success('Seedance 视频生成完成！');
             if (dbProjectId) {
+              const coverFrame = (await extractVideoFirstFrame(videoUrl)) || videoUrl;
               await supabase.from('video_projects').update({
                 status: 'completed',
                 progress: 100,
                 video_url: videoUrl,
-                thumbnail_url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=640&h=360&fit=crop',
+                thumbnail_url: coverFrame,
               }).eq('id', dbProjectId);
               loadGeneratedVideos();
             }
@@ -607,11 +609,12 @@ export default function HomePage() {
             setResultVideo(videoUrl);
             toast.success('Kling 视频生成完成！');
             if (dbProjectId) {
+              const coverFrame = (await extractVideoFirstFrame(videoUrl)) || videoUrl;
               await supabase.from('video_projects').update({
                 status: 'completed',
                 progress: 100,
                 video_url: videoUrl,
-                thumbnail_url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=640&h=360&fit=crop',
+                thumbnail_url: coverFrame,
               }).eq('id', dbProjectId);
               loadGeneratedVideos();
             }
@@ -793,11 +796,12 @@ export default function HomePage() {
             toast.success(`${model.label} 视频生成完成！`);
 
             if (dbProjectId) {
+              const coverFrame = (await extractVideoFirstFrame(randomVideo)) || randomVideo;
               await supabase.from('video_projects').update({
                 status: 'completed',
                 progress: 100,
                 video_url: randomVideo,
-                thumbnail_url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=640&h=360&fit=crop',
+                thumbnail_url: coverFrame,
               }).eq('id', dbProjectId);
               loadGeneratedVideos();
             }
@@ -836,19 +840,22 @@ export default function HomePage() {
         }],
         max_tokens: 1000,
         onData: (data) => {
-          if (data === '[DONE]') return;
+          if (!data || data === '[DONE]') return;
+          let chunk = data;
           try {
             const parsed = JSON.parse(data);
-            const chunk = parsed.choices?.[0]?.delta?.content ?? '';
-            if (chunk) {
-              if (isFirstChunk) {
-                setPrompt('');
-                isFirstChunk = false;
-              }
-              fullText += chunk;
-              setPrompt(fullText);
+            chunk = parsed.choices?.[0]?.delta?.content ?? parsed.choices?.[0]?.text ?? data;
+          } catch {
+            // data is already a plain text chunk
+          }
+          if (chunk) {
+            if (isFirstChunk) {
+              setPrompt('');
+              isFirstChunk = false;
             }
-          } catch { /* skip */ }
+            fullText += chunk;
+            setPrompt(fullText);
+          }
         },
         onComplete: () => {
           toast.success('提示词已增强');
