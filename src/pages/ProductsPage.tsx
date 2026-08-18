@@ -99,51 +99,53 @@ function StepIndicator({ currentStep, totalSteps }: { currentStep: number; total
     
       
 
-      {/* ── 一键 URL / 口令解析商品导入弹窗 (电商清爽风格) ───────────────────────────────────────────── */}
+      
+
+      {/* ── 一键 URL / 口令解析商品导入弹窗 (高亮亮彩电商风格) ───────────────────────────────────────────── */}
       <Dialog open={urlParseOpen} onOpenChange={setUrlParseOpen}>
-        <DialogContent className="sm:max-w-2xl bg-white dark:bg-zinc-900 border-rose-100 dark:border-zinc-800 text-foreground p-6 rounded-3xl shadow-2xl">
-          <DialogHeader className="space-y-1.5 border-b border-rose-100/60 dark:border-zinc-800/80 pb-3">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center shrink-0">
-                <Sparkles className="w-4 h-4 text-rose-500 animate-pulse" />
+        <DialogContent className="sm:max-w-2xl bg-white text-slate-900 border-slate-200/90 p-6 rounded-3xl shadow-[0_25px_70px_-15px_rgba(0,0,0,0.35)] z-50 overflow-hidden">
+          <DialogHeader className="space-y-1.5 border-b border-slate-100 pb-3">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-rose-500 to-purple-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-rose-500/20">
+                <Sparkles className="w-4 h-4 text-white animate-pulse" />
               </div>
-              <DialogTitle className="text-lg font-bold flex items-center gap-2 text-foreground">
+              <DialogTitle className="text-xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
                 一键 URL / 剪贴板口令解析商品导入
-                <Badge className="bg-rose-100 text-rose-600 dark:bg-rose-950/60 dark:text-rose-300 border-rose-200 dark:border-rose-800 text-[10px] font-normal">
+                <Badge className="bg-rose-50 text-rose-600 border border-rose-200/80 font-semibold text-[11px] rounded-full px-2.5 py-0.5">
                   DeepSeek-V4-Flash
                 </Badge>
               </DialogTitle>
             </div>
-            <p className="text-xs text-muted-foreground pl-10">
+            <p className="text-xs text-slate-500 pl-11 font-medium">
               支持抖音、TikTok、拼多多、淘宝全网平台。粘贴商品链接自动智能提炼标题、分类、活动售价与 3 大 AI 核心卖点
             </p>
           </DialogHeader>
 
           <div className="space-y-4 my-2">
             {/* 1. 目标平台选择 */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                <span className="w-4 h-4 rounded-full bg-rose-500 text-white flex items-center justify-center text-[10px] font-bold">1</span>
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                <span className="w-4 h-4 rounded-full bg-rose-500 text-white flex items-center justify-center text-[10px] font-extrabold shadow-xs">1</span>
                 选择目标电商平台
               </label>
               <div className="flex flex-wrap gap-1.5">
                 {[
-                  { id: 'douyin', label: '抖音 🎵', activeCls: 'bg-pink-500 text-white border-pink-500' },
-                  { id: 'tiktok', label: 'TikTok 🎶', activeCls: 'bg-zinc-900 text-white border-zinc-900 dark:bg-zinc-100 dark:text-zinc-900' },
-                  { id: 'pinduoduo', label: '拼多多 🔴', activeCls: 'bg-red-500 text-white border-red-500' },
-                  { id: 'taobao', label: '淘宝 🟠', activeCls: 'bg-orange-500 text-white border-orange-500' },
-                  { id: 'shopee', label: 'Shopee 🧡', activeCls: 'bg-amber-500 text-white border-amber-500' },
-                  { id: 'amazon', label: '亚马逊 📦', activeCls: 'bg-yellow-600 text-white border-yellow-600' },
-                  { id: 'general', label: '全网通用 🌐', activeCls: 'bg-blue-600 text-white border-blue-600' },
+                  { id: 'douyin', label: '抖音 🎵', activeCls: 'bg-gradient-to-r from-pink-500 to-rose-600 text-white font-bold border-transparent shadow-md shadow-pink-500/25' },
+                  { id: 'tiktok', label: 'TikTok 🎶', activeCls: 'bg-slate-900 text-white font-bold border-transparent shadow-md shadow-slate-900/25' },
+                  { id: 'pinduoduo', label: '拼多多 🔴', activeCls: 'bg-gradient-to-r from-red-500 to-rose-600 text-white font-bold border-transparent shadow-md shadow-red-500/25' },
+                  { id: 'taobao', label: '淘宝 🟠', activeCls: 'bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold border-transparent shadow-md shadow-orange-500/25' },
+                  { id: 'shopee', label: 'Shopee 🧡', activeCls: 'bg-gradient-to-r from-amber-500 to-orange-600 text-white font-bold border-transparent shadow-md shadow-amber-500/25' },
+                  { id: 'amazon', label: '亚马逊 📦', activeCls: 'bg-gradient-to-r from-yellow-500 to-amber-600 text-white font-bold border-transparent shadow-md shadow-yellow-500/25' },
+                  { id: 'general', label: '全网通用 🌐', activeCls: 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold border-transparent shadow-md shadow-blue-500/25' },
                 ].map(p => (
                   <button
                     key={p.id}
                     onClick={() => setParsePlatform(p.id)}
                     className={cn(
-                      "px-3 py-1.5 rounded-xl text-xs font-semibold transition-all border shadow-xs",
+                      "px-3 py-1.5 rounded-xl text-xs transition-all border",
                       parsePlatform === p.id
-                        ? p.activeCls + " shadow-sm font-bold"
-                        : "bg-slate-50 dark:bg-zinc-800/80 text-muted-foreground border-slate-200 dark:border-zinc-700 hover:bg-slate-100 hover:text-foreground"
+                        ? p.activeCls
+                        : "bg-slate-100/90 text-slate-700 border-slate-200/80 font-medium hover:bg-slate-200/80 hover:text-slate-900"
                     )}
                   >
                     {p.label}
@@ -155,24 +157,24 @@ function StepIndicator({ currentStep, totalSteps }: { currentStep: number; total
             {/* 2. 输入链接/口令 */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                  <span className="w-4 h-4 rounded-full bg-rose-500 text-white flex items-center justify-center text-[10px] font-bold">2</span>
+                <label className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                  <span className="w-4 h-4 rounded-full bg-rose-500 text-white flex items-center justify-center text-[10px] font-extrabold shadow-xs">2</span>
                   粘贴商品详情 URL 或口令分享文本
                 </label>
-                <span className="text-[10px] text-muted-foreground">自动提取淘口令/抖音推荐符</span>
+                <span className="text-[11px] text-slate-400 font-medium">自动提取淘口令/抖音推荐符</span>
               </div>
               <Textarea
                 rows={3}
                 value={inputUrl}
                 onChange={(e) => setInputUrl(e.target.value)}
                 placeholder="例如: https://v.douyin.com/iLeXa1/ 或 8.99 复制打开抖音看详情...【爆款90鹅绒连帽加厚羽绒服】"
-                className="bg-slate-50 dark:bg-zinc-800/80 border-slate-200 dark:border-zinc-700 text-xs text-foreground placeholder:text-muted-foreground/60 rounded-2xl resize-none p-3"
+                className="bg-slate-50 border-slate-200 text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-rose-400 focus:ring-2 focus:ring-rose-400/20 rounded-2xl resize-none p-3 font-normal shadow-inner"
               />
             </div>
 
             {/* 快捷测试示例 */}
             <div className="flex items-center gap-2 pt-0.5 flex-wrap">
-              <span className="text-[11px] text-muted-foreground shrink-0 font-medium">快捷示例:</span>
+              <span className="text-[11px] text-slate-500 shrink-0 font-semibold">快捷示例:</span>
               <button
                 onClick={() => {
                   setParsePlatform('douyin');
@@ -180,7 +182,7 @@ function StepIndicator({ currentStep, totalSteps }: { currentStep: number; total
                   setInputUrl(sample);
                   handleAIParseUrl(sample);
                 }}
-                className="text-[11px] px-2.5 py-1 rounded-lg bg-pink-50 dark:bg-pink-950/40 border border-pink-200 dark:border-pink-800/50 text-pink-600 dark:text-pink-300 hover:bg-pink-100 transition-colors truncate max-w-[170px]"
+                className="text-[11px] px-2.5 py-1 rounded-xl bg-pink-50 border border-pink-200 text-pink-700 hover:bg-pink-100 transition-colors font-medium truncate max-w-[170px]"
               >
                 🎵 抖音90鹅绒羽绒服
               </button>
@@ -191,7 +193,7 @@ function StepIndicator({ currentStep, totalSteps }: { currentStep: number; total
                   setInputUrl(sample);
                   handleAIParseUrl(sample);
                 }}
-                className="text-[11px] px-2.5 py-1 rounded-lg bg-teal-50 dark:bg-teal-950/40 border border-teal-200 dark:border-teal-800/50 text-teal-600 dark:text-teal-300 hover:bg-teal-100 transition-colors truncate max-w-[170px]"
+                className="text-[11px] px-2.5 py-1 rounded-xl bg-teal-50 border border-teal-200 text-teal-700 hover:bg-teal-100 transition-colors font-medium truncate max-w-[170px]"
               >
                 🎶 TikTok 鱼腥草爽肤水
               </button>
@@ -202,7 +204,7 @@ function StepIndicator({ currentStep, totalSteps }: { currentStep: number; total
                   setInputUrl(sample);
                   handleAIParseUrl(sample);
                 }}
-                className="text-[11px] px-2.5 py-1 rounded-lg bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-800/50 text-orange-600 dark:text-orange-300 hover:bg-orange-100 transition-colors truncate max-w-[170px]"
+                className="text-[11px] px-2.5 py-1 rounded-xl bg-orange-50 border border-orange-200 text-orange-700 hover:bg-orange-100 transition-colors font-medium truncate max-w-[170px]"
               >
                 🟠 淘宝烟酰胺精华
               </button>
@@ -210,27 +212,27 @@ function StepIndicator({ currentStep, totalSteps }: { currentStep: number; total
 
             {/* AI 智能解析进度条 */}
             {parsing && (
-              <div className="p-4 rounded-2xl bg-rose-50/80 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800/50 space-y-2 animate-in fade-in">
-                <div className="flex items-center justify-between text-xs font-semibold text-rose-600 dark:text-rose-300">
+              <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 space-y-2 animate-in fade-in">
+                <div className="flex items-center justify-between text-xs font-bold text-rose-700">
                   <span className="flex items-center gap-2">
-                    <Loader2 className="w-4 h-4 animate-spin text-rose-500" />
+                    <Loader2 className="w-4 h-4 animate-spin text-rose-600" />
                     DeepSeek-V4-Flash 多模态正在智能提炼商品属性与卖点...
                   </span>
-                  <span className="font-mono text-rose-500 font-bold">{parseProgress}%</span>
+                  <span className="font-mono text-rose-600 font-extrabold">{parseProgress}%</span>
                 </div>
-                <Progress value={parseProgress} className="h-1.5 bg-rose-100 dark:bg-zinc-800" />
+                <Progress value={parseProgress} className="h-1.5 bg-rose-100" />
               </div>
             )}
 
             {/* 3. 解析结果预览与自定义编辑区域 */}
             {parsedResult && !parsing && (
-              <div className="p-4 rounded-2xl bg-slate-50/90 dark:bg-zinc-800/50 border border-slate-200 dark:border-zinc-700/80 space-y-3 max-h-[320px] overflow-y-auto pr-1">
-                <div className="flex items-center justify-between border-b border-slate-200 dark:border-zinc-700 pb-2">
-                  <span className="text-xs font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1.5">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 max-h-[320px] overflow-y-auto pr-1">
+                <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                  <span className="text-xs font-bold text-rose-600 flex items-center gap-1.5">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                     解析完成！核对并自定义修改商品数据
                   </span>
-                  <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800 text-[10px]">
+                  <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold text-[10px]">
                     DeepSeek 提取完成
                   </Badge>
                 </div>
@@ -238,86 +240,86 @@ function StepIndicator({ currentStep, totalSteps }: { currentStep: number; total
                 <div className="flex gap-4 items-start">
                   {/* 封面预估 */}
                   <div className="w-24 shrink-0 space-y-1.5">
-                    <div className="aspect-square rounded-xl overflow-hidden border border-slate-200 dark:border-zinc-700 bg-background shadow-xs">
+                    <div className="aspect-square rounded-xl overflow-hidden border border-slate-200 bg-white shadow-sm">
                       <img src={parsedResult.cover_image} alt="" className="w-full h-full object-cover" />
                     </div>
                     <Input
                       value={parsedResult.cover_image}
                       onChange={(e) => setParsedResult({ ...parsedResult, cover_image: e.target.value })}
                       placeholder="封面图 URL"
-                      className="h-7 text-[10px] bg-background border-slate-200 dark:border-zinc-700 text-foreground"
+                      className="h-7 text-[10px] bg-white border-slate-200 text-slate-800"
                     />
                   </div>
 
                   {/* 信息字段编辑 */}
                   <div className="flex-1 space-y-2.5 text-xs">
                     <div className="space-y-1">
-                      <label className="text-muted-foreground text-[11px] font-medium">商品标题</label>
+                      <label className="text-slate-600 text-[11px] font-bold">商品标题</label>
                       <Input
                         value={parsedResult.name}
                         onChange={(e) => setParsedResult({ ...parsedResult, name: e.target.value })}
-                        className="h-8 bg-background border-slate-200 dark:border-zinc-700 text-foreground font-semibold"
+                        className="h-8 bg-white border-slate-200 text-slate-900 font-bold"
                       />
                     </div>
 
                     <div className="grid grid-cols-2 gap-2">
                       <div className="space-y-1">
-                        <label className="text-muted-foreground text-[11px] font-medium">所属分类</label>
+                        <label className="text-slate-600 text-[11px] font-bold">所属分类</label>
                         <Select
                           value={parsedResult.category}
                           onValueChange={(val) => setParsedResult({ ...parsedResult, category: val })}
                         >
-                          <SelectTrigger className="h-8 bg-background border-slate-200 dark:border-zinc-700 text-foreground">
+                          <SelectTrigger className="h-8 bg-white border-slate-200 text-slate-900 font-semibold">
                             <SelectValue />
                           </SelectTrigger>
-                          <SelectContent className="bg-background border-slate-200 dark:border-zinc-700 text-foreground">
+                          <SelectContent className="bg-white border-slate-200 text-slate-900">
                             {CATEGORIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                           </SelectContent>
                         </Select>
                       </div>
                       <div className="space-y-1">
-                        <label className="text-muted-foreground text-[11px] font-medium">子分类</label>
+                        <label className="text-slate-600 text-[11px] font-bold">子分类</label>
                         <Input
                           value={parsedResult.sub_category || ''}
                           onChange={(e) => setParsedResult({ ...parsedResult, sub_category: e.target.value })}
-                          className="h-8 bg-background border-slate-200 dark:border-zinc-700 text-foreground"
+                          className="h-8 bg-white border-slate-200 text-slate-900"
                         />
                       </div>
                     </div>
 
                     <div className="grid grid-cols-3 gap-2">
                       <div className="space-y-1">
-                        <label className="text-muted-foreground text-[11px] font-medium">原价 (¥/$)</label>
+                        <label className="text-slate-600 text-[11px] font-bold">原价 (¥/$)</label>
                         <Input
                           type="number"
                           value={parsedResult.original_price}
                           onChange={(e) => setParsedResult({ ...parsedResult, original_price: e.target.value })}
-                          className="h-8 bg-background border-slate-200 dark:border-zinc-700 text-foreground"
+                          className="h-8 bg-white border-slate-200 text-slate-900"
                         />
                       </div>
                       <div className="space-y-1">
-                        <label className="text-rose-600 dark:text-rose-400 text-[11px] font-bold">活动售价 (¥/$)</label>
+                        <label className="text-rose-600 text-[11px] font-bold">活动售价 (¥/$)</label>
                         <Input
                           type="number"
                           value={parsedResult.sale_price}
                           onChange={(e) => setParsedResult({ ...parsedResult, sale_price: e.target.value })}
-                          className="h-8 bg-background border-rose-300 dark:border-rose-700/60 text-rose-600 dark:text-rose-400 font-bold"
+                          className="h-8 bg-rose-50 border-rose-300 text-rose-600 font-extrabold"
                         />
                       </div>
                       <div className="space-y-1">
-                        <label className="text-muted-foreground text-[11px] font-medium">初始库存</label>
+                        <label className="text-slate-600 text-[11px] font-bold">初始库存</label>
                         <Input
                           type="number"
                           value={parsedResult.stock}
                           onChange={(e) => setParsedResult({ ...parsedResult, stock: e.target.value })}
-                          className="h-8 bg-background border-slate-200 dark:border-zinc-700 text-foreground"
+                          className="h-8 bg-white border-slate-200 text-slate-900"
                         />
                       </div>
                     </div>
 
                     {/* AI 核心卖点 */}
                     <div className="space-y-1.5">
-                      <label className="text-muted-foreground text-[11px] font-medium">AI 提取核心卖点 (应用于脚本创作)</label>
+                      <label className="text-slate-600 text-[11px] font-bold">AI 提取核心卖点 (应用于脚本创作)</label>
                       {parsedResult.selling_points?.map((sp: string, idx: number) => (
                         <Input
                           key={idx}
@@ -327,19 +329,19 @@ function StepIndicator({ currentStep, totalSteps }: { currentStep: number; total
                             newSps[idx] = e.target.value;
                             setParsedResult({ ...parsedResult, selling_points: newSps });
                           }}
-                          className="h-7 text-xs bg-background border-slate-200 dark:border-zinc-700 text-foreground"
+                          className="h-7 text-xs bg-white border-slate-200 text-slate-900 font-medium"
                         />
                       ))}
                     </div>
 
                     {/* 商品简述 */}
                     <div className="space-y-1">
-                      <label className="text-muted-foreground text-[11px] font-medium">商品描述与功能点说明</label>
+                      <label className="text-slate-600 text-[11px] font-bold">商品描述与功能点说明</label>
                       <Textarea
                         rows={2}
                         value={parsedResult.description}
                         onChange={(e) => setParsedResult({ ...parsedResult, description: e.target.value })}
-                        className="bg-background border-slate-200 dark:border-zinc-700 text-xs text-foreground rounded-lg resize-none"
+                        className="bg-white border-slate-200 text-xs text-slate-900 rounded-lg resize-none font-medium"
                       />
                     </div>
                   </div>
@@ -348,12 +350,12 @@ function StepIndicator({ currentStep, totalSteps }: { currentStep: number; total
             )}
           </div>
 
-          <DialogFooter className="border-t border-slate-100 dark:border-zinc-800 pt-3 flex items-center justify-between">
+          <DialogFooter className="border-t border-slate-100 pt-3 flex items-center justify-between">
             <Button
               variant="outline"
               size="sm"
               onClick={() => setUrlParseOpen(false)}
-              className="h-9 text-xs rounded-xl border-slate-200 dark:border-zinc-700 text-muted-foreground hover:bg-slate-100"
+              className="h-9 text-xs rounded-xl border-slate-200 text-slate-700 hover:bg-slate-100 font-semibold"
             >
               取消
             </Button>
@@ -364,7 +366,7 @@ function StepIndicator({ currentStep, totalSteps }: { currentStep: number; total
                 variant="outline"
                 disabled={parsing || !inputUrl.trim()}
                 onClick={() => handleAIParseUrl()}
-                className="h-9 text-xs rounded-xl gap-1.5 border-rose-200 dark:border-rose-800/60 text-rose-600 dark:text-rose-300 hover:bg-rose-50"
+                className="h-9 text-xs rounded-xl gap-1.5 border-rose-200 text-rose-600 hover:bg-rose-50 font-semibold"
               >
                 <Wand2 className="w-3.5 h-3.5" />
                 {parsing ? '解析中...' : '重新解析'}
@@ -375,7 +377,7 @@ function StepIndicator({ currentStep, totalSteps }: { currentStep: number; total
                   size="sm"
                   disabled={savingParsed}
                   onClick={handleSaveParsedProduct}
-                  className="h-9 text-xs rounded-xl bg-gradient-to-r from-rose-600 to-purple-600 hover:from-rose-700 hover:to-purple-700 text-white font-semibold gap-1.5 shadow-md"
+                  className="h-9 text-xs rounded-xl bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 hover:from-rose-600 hover:to-purple-700 text-white font-bold gap-1.5 shadow-md shadow-rose-500/20"
                 >
                   {savingParsed ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
                   确认并导入商品管理
@@ -385,9 +387,9 @@ function StepIndicator({ currentStep, totalSteps }: { currentStep: number; total
                   size="sm"
                   disabled={parsing || !inputUrl.trim()}
                   onClick={() => handleAIParseUrl()}
-                  className="h-9 text-xs rounded-xl bg-gradient-to-r from-rose-600 to-purple-600 hover:from-rose-700 hover:to-purple-700 text-white font-semibold gap-1.5 shadow-md"
+                  className="h-9 text-xs rounded-xl bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 hover:from-rose-600 hover:to-purple-700 text-white font-bold gap-1.5 shadow-md shadow-rose-500/20"
                 >
-                  {parsing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                  {parsing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 text-amber-300" />}
                   🚀 AI 智能解析商品
                 </Button>
               )}
@@ -469,51 +471,53 @@ function SectionTitle({ icon: Icon, label }: { icon: typeof Package; label: stri
     
       
 
-      {/* ── 一键 URL / 口令解析商品导入弹窗 (电商清爽风格) ───────────────────────────────────────────── */}
+      
+
+      {/* ── 一键 URL / 口令解析商品导入弹窗 (高亮亮彩电商风格) ───────────────────────────────────────────── */}
       <Dialog open={urlParseOpen} onOpenChange={setUrlParseOpen}>
-        <DialogContent className="sm:max-w-2xl bg-white dark:bg-zinc-900 border-rose-100 dark:border-zinc-800 text-foreground p-6 rounded-3xl shadow-2xl">
-          <DialogHeader className="space-y-1.5 border-b border-rose-100/60 dark:border-zinc-800/80 pb-3">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center shrink-0">
-                <Sparkles className="w-4 h-4 text-rose-500 animate-pulse" />
+        <DialogContent className="sm:max-w-2xl bg-white text-slate-900 border-slate-200/90 p-6 rounded-3xl shadow-[0_25px_70px_-15px_rgba(0,0,0,0.35)] z-50 overflow-hidden">
+          <DialogHeader className="space-y-1.5 border-b border-slate-100 pb-3">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-rose-500 to-purple-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-rose-500/20">
+                <Sparkles className="w-4 h-4 text-white animate-pulse" />
               </div>
-              <DialogTitle className="text-lg font-bold flex items-center gap-2 text-foreground">
+              <DialogTitle className="text-xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
                 一键 URL / 剪贴板口令解析商品导入
-                <Badge className="bg-rose-100 text-rose-600 dark:bg-rose-950/60 dark:text-rose-300 border-rose-200 dark:border-rose-800 text-[10px] font-normal">
+                <Badge className="bg-rose-50 text-rose-600 border border-rose-200/80 font-semibold text-[11px] rounded-full px-2.5 py-0.5">
                   DeepSeek-V4-Flash
                 </Badge>
               </DialogTitle>
             </div>
-            <p className="text-xs text-muted-foreground pl-10">
+            <p className="text-xs text-slate-500 pl-11 font-medium">
               支持抖音、TikTok、拼多多、淘宝全网平台。粘贴商品链接自动智能提炼标题、分类、活动售价与 3 大 AI 核心卖点
             </p>
           </DialogHeader>
 
           <div className="space-y-4 my-2">
             {/* 1. 目标平台选择 */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                <span className="w-4 h-4 rounded-full bg-rose-500 text-white flex items-center justify-center text-[10px] font-bold">1</span>
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                <span className="w-4 h-4 rounded-full bg-rose-500 text-white flex items-center justify-center text-[10px] font-extrabold shadow-xs">1</span>
                 选择目标电商平台
               </label>
               <div className="flex flex-wrap gap-1.5">
                 {[
-                  { id: 'douyin', label: '抖音 🎵', activeCls: 'bg-pink-500 text-white border-pink-500' },
-                  { id: 'tiktok', label: 'TikTok 🎶', activeCls: 'bg-zinc-900 text-white border-zinc-900 dark:bg-zinc-100 dark:text-zinc-900' },
-                  { id: 'pinduoduo', label: '拼多多 🔴', activeCls: 'bg-red-500 text-white border-red-500' },
-                  { id: 'taobao', label: '淘宝 🟠', activeCls: 'bg-orange-500 text-white border-orange-500' },
-                  { id: 'shopee', label: 'Shopee 🧡', activeCls: 'bg-amber-500 text-white border-amber-500' },
-                  { id: 'amazon', label: '亚马逊 📦', activeCls: 'bg-yellow-600 text-white border-yellow-600' },
-                  { id: 'general', label: '全网通用 🌐', activeCls: 'bg-blue-600 text-white border-blue-600' },
+                  { id: 'douyin', label: '抖音 🎵', activeCls: 'bg-gradient-to-r from-pink-500 to-rose-600 text-white font-bold border-transparent shadow-md shadow-pink-500/25' },
+                  { id: 'tiktok', label: 'TikTok 🎶', activeCls: 'bg-slate-900 text-white font-bold border-transparent shadow-md shadow-slate-900/25' },
+                  { id: 'pinduoduo', label: '拼多多 🔴', activeCls: 'bg-gradient-to-r from-red-500 to-rose-600 text-white font-bold border-transparent shadow-md shadow-red-500/25' },
+                  { id: 'taobao', label: '淘宝 🟠', activeCls: 'bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold border-transparent shadow-md shadow-orange-500/25' },
+                  { id: 'shopee', label: 'Shopee 🧡', activeCls: 'bg-gradient-to-r from-amber-500 to-orange-600 text-white font-bold border-transparent shadow-md shadow-amber-500/25' },
+                  { id: 'amazon', label: '亚马逊 📦', activeCls: 'bg-gradient-to-r from-yellow-500 to-amber-600 text-white font-bold border-transparent shadow-md shadow-yellow-500/25' },
+                  { id: 'general', label: '全网通用 🌐', activeCls: 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold border-transparent shadow-md shadow-blue-500/25' },
                 ].map(p => (
                   <button
                     key={p.id}
                     onClick={() => setParsePlatform(p.id)}
                     className={cn(
-                      "px-3 py-1.5 rounded-xl text-xs font-semibold transition-all border shadow-xs",
+                      "px-3 py-1.5 rounded-xl text-xs transition-all border",
                       parsePlatform === p.id
-                        ? p.activeCls + " shadow-sm font-bold"
-                        : "bg-slate-50 dark:bg-zinc-800/80 text-muted-foreground border-slate-200 dark:border-zinc-700 hover:bg-slate-100 hover:text-foreground"
+                        ? p.activeCls
+                        : "bg-slate-100/90 text-slate-700 border-slate-200/80 font-medium hover:bg-slate-200/80 hover:text-slate-900"
                     )}
                   >
                     {p.label}
@@ -525,24 +529,24 @@ function SectionTitle({ icon: Icon, label }: { icon: typeof Package; label: stri
             {/* 2. 输入链接/口令 */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                  <span className="w-4 h-4 rounded-full bg-rose-500 text-white flex items-center justify-center text-[10px] font-bold">2</span>
+                <label className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                  <span className="w-4 h-4 rounded-full bg-rose-500 text-white flex items-center justify-center text-[10px] font-extrabold shadow-xs">2</span>
                   粘贴商品详情 URL 或口令分享文本
                 </label>
-                <span className="text-[10px] text-muted-foreground">自动提取淘口令/抖音推荐符</span>
+                <span className="text-[11px] text-slate-400 font-medium">自动提取淘口令/抖音推荐符</span>
               </div>
               <Textarea
                 rows={3}
                 value={inputUrl}
                 onChange={(e) => setInputUrl(e.target.value)}
                 placeholder="例如: https://v.douyin.com/iLeXa1/ 或 8.99 复制打开抖音看详情...【爆款90鹅绒连帽加厚羽绒服】"
-                className="bg-slate-50 dark:bg-zinc-800/80 border-slate-200 dark:border-zinc-700 text-xs text-foreground placeholder:text-muted-foreground/60 rounded-2xl resize-none p-3"
+                className="bg-slate-50 border-slate-200 text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-rose-400 focus:ring-2 focus:ring-rose-400/20 rounded-2xl resize-none p-3 font-normal shadow-inner"
               />
             </div>
 
             {/* 快捷测试示例 */}
             <div className="flex items-center gap-2 pt-0.5 flex-wrap">
-              <span className="text-[11px] text-muted-foreground shrink-0 font-medium">快捷示例:</span>
+              <span className="text-[11px] text-slate-500 shrink-0 font-semibold">快捷示例:</span>
               <button
                 onClick={() => {
                   setParsePlatform('douyin');
@@ -550,7 +554,7 @@ function SectionTitle({ icon: Icon, label }: { icon: typeof Package; label: stri
                   setInputUrl(sample);
                   handleAIParseUrl(sample);
                 }}
-                className="text-[11px] px-2.5 py-1 rounded-lg bg-pink-50 dark:bg-pink-950/40 border border-pink-200 dark:border-pink-800/50 text-pink-600 dark:text-pink-300 hover:bg-pink-100 transition-colors truncate max-w-[170px]"
+                className="text-[11px] px-2.5 py-1 rounded-xl bg-pink-50 border border-pink-200 text-pink-700 hover:bg-pink-100 transition-colors font-medium truncate max-w-[170px]"
               >
                 🎵 抖音90鹅绒羽绒服
               </button>
@@ -561,7 +565,7 @@ function SectionTitle({ icon: Icon, label }: { icon: typeof Package; label: stri
                   setInputUrl(sample);
                   handleAIParseUrl(sample);
                 }}
-                className="text-[11px] px-2.5 py-1 rounded-lg bg-teal-50 dark:bg-teal-950/40 border border-teal-200 dark:border-teal-800/50 text-teal-600 dark:text-teal-300 hover:bg-teal-100 transition-colors truncate max-w-[170px]"
+                className="text-[11px] px-2.5 py-1 rounded-xl bg-teal-50 border border-teal-200 text-teal-700 hover:bg-teal-100 transition-colors font-medium truncate max-w-[170px]"
               >
                 🎶 TikTok 鱼腥草爽肤水
               </button>
@@ -572,7 +576,7 @@ function SectionTitle({ icon: Icon, label }: { icon: typeof Package; label: stri
                   setInputUrl(sample);
                   handleAIParseUrl(sample);
                 }}
-                className="text-[11px] px-2.5 py-1 rounded-lg bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-800/50 text-orange-600 dark:text-orange-300 hover:bg-orange-100 transition-colors truncate max-w-[170px]"
+                className="text-[11px] px-2.5 py-1 rounded-xl bg-orange-50 border border-orange-200 text-orange-700 hover:bg-orange-100 transition-colors font-medium truncate max-w-[170px]"
               >
                 🟠 淘宝烟酰胺精华
               </button>
@@ -580,27 +584,27 @@ function SectionTitle({ icon: Icon, label }: { icon: typeof Package; label: stri
 
             {/* AI 智能解析进度条 */}
             {parsing && (
-              <div className="p-4 rounded-2xl bg-rose-50/80 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800/50 space-y-2 animate-in fade-in">
-                <div className="flex items-center justify-between text-xs font-semibold text-rose-600 dark:text-rose-300">
+              <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 space-y-2 animate-in fade-in">
+                <div className="flex items-center justify-between text-xs font-bold text-rose-700">
                   <span className="flex items-center gap-2">
-                    <Loader2 className="w-4 h-4 animate-spin text-rose-500" />
+                    <Loader2 className="w-4 h-4 animate-spin text-rose-600" />
                     DeepSeek-V4-Flash 多模态正在智能提炼商品属性与卖点...
                   </span>
-                  <span className="font-mono text-rose-500 font-bold">{parseProgress}%</span>
+                  <span className="font-mono text-rose-600 font-extrabold">{parseProgress}%</span>
                 </div>
-                <Progress value={parseProgress} className="h-1.5 bg-rose-100 dark:bg-zinc-800" />
+                <Progress value={parseProgress} className="h-1.5 bg-rose-100" />
               </div>
             )}
 
             {/* 3. 解析结果预览与自定义编辑区域 */}
             {parsedResult && !parsing && (
-              <div className="p-4 rounded-2xl bg-slate-50/90 dark:bg-zinc-800/50 border border-slate-200 dark:border-zinc-700/80 space-y-3 max-h-[320px] overflow-y-auto pr-1">
-                <div className="flex items-center justify-between border-b border-slate-200 dark:border-zinc-700 pb-2">
-                  <span className="text-xs font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1.5">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 max-h-[320px] overflow-y-auto pr-1">
+                <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                  <span className="text-xs font-bold text-rose-600 flex items-center gap-1.5">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                     解析完成！核对并自定义修改商品数据
                   </span>
-                  <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800 text-[10px]">
+                  <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold text-[10px]">
                     DeepSeek 提取完成
                   </Badge>
                 </div>
@@ -608,86 +612,86 @@ function SectionTitle({ icon: Icon, label }: { icon: typeof Package; label: stri
                 <div className="flex gap-4 items-start">
                   {/* 封面预估 */}
                   <div className="w-24 shrink-0 space-y-1.5">
-                    <div className="aspect-square rounded-xl overflow-hidden border border-slate-200 dark:border-zinc-700 bg-background shadow-xs">
+                    <div className="aspect-square rounded-xl overflow-hidden border border-slate-200 bg-white shadow-sm">
                       <img src={parsedResult.cover_image} alt="" className="w-full h-full object-cover" />
                     </div>
                     <Input
                       value={parsedResult.cover_image}
                       onChange={(e) => setParsedResult({ ...parsedResult, cover_image: e.target.value })}
                       placeholder="封面图 URL"
-                      className="h-7 text-[10px] bg-background border-slate-200 dark:border-zinc-700 text-foreground"
+                      className="h-7 text-[10px] bg-white border-slate-200 text-slate-800"
                     />
                   </div>
 
                   {/* 信息字段编辑 */}
                   <div className="flex-1 space-y-2.5 text-xs">
                     <div className="space-y-1">
-                      <label className="text-muted-foreground text-[11px] font-medium">商品标题</label>
+                      <label className="text-slate-600 text-[11px] font-bold">商品标题</label>
                       <Input
                         value={parsedResult.name}
                         onChange={(e) => setParsedResult({ ...parsedResult, name: e.target.value })}
-                        className="h-8 bg-background border-slate-200 dark:border-zinc-700 text-foreground font-semibold"
+                        className="h-8 bg-white border-slate-200 text-slate-900 font-bold"
                       />
                     </div>
 
                     <div className="grid grid-cols-2 gap-2">
                       <div className="space-y-1">
-                        <label className="text-muted-foreground text-[11px] font-medium">所属分类</label>
+                        <label className="text-slate-600 text-[11px] font-bold">所属分类</label>
                         <Select
                           value={parsedResult.category}
                           onValueChange={(val) => setParsedResult({ ...parsedResult, category: val })}
                         >
-                          <SelectTrigger className="h-8 bg-background border-slate-200 dark:border-zinc-700 text-foreground">
+                          <SelectTrigger className="h-8 bg-white border-slate-200 text-slate-900 font-semibold">
                             <SelectValue />
                           </SelectTrigger>
-                          <SelectContent className="bg-background border-slate-200 dark:border-zinc-700 text-foreground">
+                          <SelectContent className="bg-white border-slate-200 text-slate-900">
                             {CATEGORIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                           </SelectContent>
                         </Select>
                       </div>
                       <div className="space-y-1">
-                        <label className="text-muted-foreground text-[11px] font-medium">子分类</label>
+                        <label className="text-slate-600 text-[11px] font-bold">子分类</label>
                         <Input
                           value={parsedResult.sub_category || ''}
                           onChange={(e) => setParsedResult({ ...parsedResult, sub_category: e.target.value })}
-                          className="h-8 bg-background border-slate-200 dark:border-zinc-700 text-foreground"
+                          className="h-8 bg-white border-slate-200 text-slate-900"
                         />
                       </div>
                     </div>
 
                     <div className="grid grid-cols-3 gap-2">
                       <div className="space-y-1">
-                        <label className="text-muted-foreground text-[11px] font-medium">原价 (¥/$)</label>
+                        <label className="text-slate-600 text-[11px] font-bold">原价 (¥/$)</label>
                         <Input
                           type="number"
                           value={parsedResult.original_price}
                           onChange={(e) => setParsedResult({ ...parsedResult, original_price: e.target.value })}
-                          className="h-8 bg-background border-slate-200 dark:border-zinc-700 text-foreground"
+                          className="h-8 bg-white border-slate-200 text-slate-900"
                         />
                       </div>
                       <div className="space-y-1">
-                        <label className="text-rose-600 dark:text-rose-400 text-[11px] font-bold">活动售价 (¥/$)</label>
+                        <label className="text-rose-600 text-[11px] font-bold">活动售价 (¥/$)</label>
                         <Input
                           type="number"
                           value={parsedResult.sale_price}
                           onChange={(e) => setParsedResult({ ...parsedResult, sale_price: e.target.value })}
-                          className="h-8 bg-background border-rose-300 dark:border-rose-700/60 text-rose-600 dark:text-rose-400 font-bold"
+                          className="h-8 bg-rose-50 border-rose-300 text-rose-600 font-extrabold"
                         />
                       </div>
                       <div className="space-y-1">
-                        <label className="text-muted-foreground text-[11px] font-medium">初始库存</label>
+                        <label className="text-slate-600 text-[11px] font-bold">初始库存</label>
                         <Input
                           type="number"
                           value={parsedResult.stock}
                           onChange={(e) => setParsedResult({ ...parsedResult, stock: e.target.value })}
-                          className="h-8 bg-background border-slate-200 dark:border-zinc-700 text-foreground"
+                          className="h-8 bg-white border-slate-200 text-slate-900"
                         />
                       </div>
                     </div>
 
                     {/* AI 核心卖点 */}
                     <div className="space-y-1.5">
-                      <label className="text-muted-foreground text-[11px] font-medium">AI 提取核心卖点 (应用于脚本创作)</label>
+                      <label className="text-slate-600 text-[11px] font-bold">AI 提取核心卖点 (应用于脚本创作)</label>
                       {parsedResult.selling_points?.map((sp: string, idx: number) => (
                         <Input
                           key={idx}
@@ -697,19 +701,19 @@ function SectionTitle({ icon: Icon, label }: { icon: typeof Package; label: stri
                             newSps[idx] = e.target.value;
                             setParsedResult({ ...parsedResult, selling_points: newSps });
                           }}
-                          className="h-7 text-xs bg-background border-slate-200 dark:border-zinc-700 text-foreground"
+                          className="h-7 text-xs bg-white border-slate-200 text-slate-900 font-medium"
                         />
                       ))}
                     </div>
 
                     {/* 商品简述 */}
                     <div className="space-y-1">
-                      <label className="text-muted-foreground text-[11px] font-medium">商品描述与功能点说明</label>
+                      <label className="text-slate-600 text-[11px] font-bold">商品描述与功能点说明</label>
                       <Textarea
                         rows={2}
                         value={parsedResult.description}
                         onChange={(e) => setParsedResult({ ...parsedResult, description: e.target.value })}
-                        className="bg-background border-slate-200 dark:border-zinc-700 text-xs text-foreground rounded-lg resize-none"
+                        className="bg-white border-slate-200 text-xs text-slate-900 rounded-lg resize-none font-medium"
                       />
                     </div>
                   </div>
@@ -718,12 +722,12 @@ function SectionTitle({ icon: Icon, label }: { icon: typeof Package; label: stri
             )}
           </div>
 
-          <DialogFooter className="border-t border-slate-100 dark:border-zinc-800 pt-3 flex items-center justify-between">
+          <DialogFooter className="border-t border-slate-100 pt-3 flex items-center justify-between">
             <Button
               variant="outline"
               size="sm"
               onClick={() => setUrlParseOpen(false)}
-              className="h-9 text-xs rounded-xl border-slate-200 dark:border-zinc-700 text-muted-foreground hover:bg-slate-100"
+              className="h-9 text-xs rounded-xl border-slate-200 text-slate-700 hover:bg-slate-100 font-semibold"
             >
               取消
             </Button>
@@ -734,7 +738,7 @@ function SectionTitle({ icon: Icon, label }: { icon: typeof Package; label: stri
                 variant="outline"
                 disabled={parsing || !inputUrl.trim()}
                 onClick={() => handleAIParseUrl()}
-                className="h-9 text-xs rounded-xl gap-1.5 border-rose-200 dark:border-rose-800/60 text-rose-600 dark:text-rose-300 hover:bg-rose-50"
+                className="h-9 text-xs rounded-xl gap-1.5 border-rose-200 text-rose-600 hover:bg-rose-50 font-semibold"
               >
                 <Wand2 className="w-3.5 h-3.5" />
                 {parsing ? '解析中...' : '重新解析'}
@@ -745,7 +749,7 @@ function SectionTitle({ icon: Icon, label }: { icon: typeof Package; label: stri
                   size="sm"
                   disabled={savingParsed}
                   onClick={handleSaveParsedProduct}
-                  className="h-9 text-xs rounded-xl bg-gradient-to-r from-rose-600 to-purple-600 hover:from-rose-700 hover:to-purple-700 text-white font-semibold gap-1.5 shadow-md"
+                  className="h-9 text-xs rounded-xl bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 hover:from-rose-600 hover:to-purple-700 text-white font-bold gap-1.5 shadow-md shadow-rose-500/20"
                 >
                   {savingParsed ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
                   确认并导入商品管理
@@ -755,9 +759,9 @@ function SectionTitle({ icon: Icon, label }: { icon: typeof Package; label: stri
                   size="sm"
                   disabled={parsing || !inputUrl.trim()}
                   onClick={() => handleAIParseUrl()}
-                  className="h-9 text-xs rounded-xl bg-gradient-to-r from-rose-600 to-purple-600 hover:from-rose-700 hover:to-purple-700 text-white font-semibold gap-1.5 shadow-md"
+                  className="h-9 text-xs rounded-xl bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 hover:from-rose-600 hover:to-purple-700 text-white font-bold gap-1.5 shadow-md shadow-rose-500/20"
                 >
-                  {parsing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                  {parsing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 text-amber-300" />}
                   🚀 AI 智能解析商品
                 </Button>
               )}
@@ -807,51 +811,53 @@ function SellingPointsSection({ form, updateSP, addSP, removeSP }: {
     
       
 
-      {/* ── 一键 URL / 口令解析商品导入弹窗 (电商清爽风格) ───────────────────────────────────────────── */}
+      
+
+      {/* ── 一键 URL / 口令解析商品导入弹窗 (高亮亮彩电商风格) ───────────────────────────────────────────── */}
       <Dialog open={urlParseOpen} onOpenChange={setUrlParseOpen}>
-        <DialogContent className="sm:max-w-2xl bg-white dark:bg-zinc-900 border-rose-100 dark:border-zinc-800 text-foreground p-6 rounded-3xl shadow-2xl">
-          <DialogHeader className="space-y-1.5 border-b border-rose-100/60 dark:border-zinc-800/80 pb-3">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center shrink-0">
-                <Sparkles className="w-4 h-4 text-rose-500 animate-pulse" />
+        <DialogContent className="sm:max-w-2xl bg-white text-slate-900 border-slate-200/90 p-6 rounded-3xl shadow-[0_25px_70px_-15px_rgba(0,0,0,0.35)] z-50 overflow-hidden">
+          <DialogHeader className="space-y-1.5 border-b border-slate-100 pb-3">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-rose-500 to-purple-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-rose-500/20">
+                <Sparkles className="w-4 h-4 text-white animate-pulse" />
               </div>
-              <DialogTitle className="text-lg font-bold flex items-center gap-2 text-foreground">
+              <DialogTitle className="text-xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
                 一键 URL / 剪贴板口令解析商品导入
-                <Badge className="bg-rose-100 text-rose-600 dark:bg-rose-950/60 dark:text-rose-300 border-rose-200 dark:border-rose-800 text-[10px] font-normal">
+                <Badge className="bg-rose-50 text-rose-600 border border-rose-200/80 font-semibold text-[11px] rounded-full px-2.5 py-0.5">
                   DeepSeek-V4-Flash
                 </Badge>
               </DialogTitle>
             </div>
-            <p className="text-xs text-muted-foreground pl-10">
+            <p className="text-xs text-slate-500 pl-11 font-medium">
               支持抖音、TikTok、拼多多、淘宝全网平台。粘贴商品链接自动智能提炼标题、分类、活动售价与 3 大 AI 核心卖点
             </p>
           </DialogHeader>
 
           <div className="space-y-4 my-2">
             {/* 1. 目标平台选择 */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                <span className="w-4 h-4 rounded-full bg-rose-500 text-white flex items-center justify-center text-[10px] font-bold">1</span>
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                <span className="w-4 h-4 rounded-full bg-rose-500 text-white flex items-center justify-center text-[10px] font-extrabold shadow-xs">1</span>
                 选择目标电商平台
               </label>
               <div className="flex flex-wrap gap-1.5">
                 {[
-                  { id: 'douyin', label: '抖音 🎵', activeCls: 'bg-pink-500 text-white border-pink-500' },
-                  { id: 'tiktok', label: 'TikTok 🎶', activeCls: 'bg-zinc-900 text-white border-zinc-900 dark:bg-zinc-100 dark:text-zinc-900' },
-                  { id: 'pinduoduo', label: '拼多多 🔴', activeCls: 'bg-red-500 text-white border-red-500' },
-                  { id: 'taobao', label: '淘宝 🟠', activeCls: 'bg-orange-500 text-white border-orange-500' },
-                  { id: 'shopee', label: 'Shopee 🧡', activeCls: 'bg-amber-500 text-white border-amber-500' },
-                  { id: 'amazon', label: '亚马逊 📦', activeCls: 'bg-yellow-600 text-white border-yellow-600' },
-                  { id: 'general', label: '全网通用 🌐', activeCls: 'bg-blue-600 text-white border-blue-600' },
+                  { id: 'douyin', label: '抖音 🎵', activeCls: 'bg-gradient-to-r from-pink-500 to-rose-600 text-white font-bold border-transparent shadow-md shadow-pink-500/25' },
+                  { id: 'tiktok', label: 'TikTok 🎶', activeCls: 'bg-slate-900 text-white font-bold border-transparent shadow-md shadow-slate-900/25' },
+                  { id: 'pinduoduo', label: '拼多多 🔴', activeCls: 'bg-gradient-to-r from-red-500 to-rose-600 text-white font-bold border-transparent shadow-md shadow-red-500/25' },
+                  { id: 'taobao', label: '淘宝 🟠', activeCls: 'bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold border-transparent shadow-md shadow-orange-500/25' },
+                  { id: 'shopee', label: 'Shopee 🧡', activeCls: 'bg-gradient-to-r from-amber-500 to-orange-600 text-white font-bold border-transparent shadow-md shadow-amber-500/25' },
+                  { id: 'amazon', label: '亚马逊 📦', activeCls: 'bg-gradient-to-r from-yellow-500 to-amber-600 text-white font-bold border-transparent shadow-md shadow-yellow-500/25' },
+                  { id: 'general', label: '全网通用 🌐', activeCls: 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold border-transparent shadow-md shadow-blue-500/25' },
                 ].map(p => (
                   <button
                     key={p.id}
                     onClick={() => setParsePlatform(p.id)}
                     className={cn(
-                      "px-3 py-1.5 rounded-xl text-xs font-semibold transition-all border shadow-xs",
+                      "px-3 py-1.5 rounded-xl text-xs transition-all border",
                       parsePlatform === p.id
-                        ? p.activeCls + " shadow-sm font-bold"
-                        : "bg-slate-50 dark:bg-zinc-800/80 text-muted-foreground border-slate-200 dark:border-zinc-700 hover:bg-slate-100 hover:text-foreground"
+                        ? p.activeCls
+                        : "bg-slate-100/90 text-slate-700 border-slate-200/80 font-medium hover:bg-slate-200/80 hover:text-slate-900"
                     )}
                   >
                     {p.label}
@@ -863,24 +869,24 @@ function SellingPointsSection({ form, updateSP, addSP, removeSP }: {
             {/* 2. 输入链接/口令 */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                  <span className="w-4 h-4 rounded-full bg-rose-500 text-white flex items-center justify-center text-[10px] font-bold">2</span>
+                <label className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                  <span className="w-4 h-4 rounded-full bg-rose-500 text-white flex items-center justify-center text-[10px] font-extrabold shadow-xs">2</span>
                   粘贴商品详情 URL 或口令分享文本
                 </label>
-                <span className="text-[10px] text-muted-foreground">自动提取淘口令/抖音推荐符</span>
+                <span className="text-[11px] text-slate-400 font-medium">自动提取淘口令/抖音推荐符</span>
               </div>
               <Textarea
                 rows={3}
                 value={inputUrl}
                 onChange={(e) => setInputUrl(e.target.value)}
                 placeholder="例如: https://v.douyin.com/iLeXa1/ 或 8.99 复制打开抖音看详情...【爆款90鹅绒连帽加厚羽绒服】"
-                className="bg-slate-50 dark:bg-zinc-800/80 border-slate-200 dark:border-zinc-700 text-xs text-foreground placeholder:text-muted-foreground/60 rounded-2xl resize-none p-3"
+                className="bg-slate-50 border-slate-200 text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-rose-400 focus:ring-2 focus:ring-rose-400/20 rounded-2xl resize-none p-3 font-normal shadow-inner"
               />
             </div>
 
             {/* 快捷测试示例 */}
             <div className="flex items-center gap-2 pt-0.5 flex-wrap">
-              <span className="text-[11px] text-muted-foreground shrink-0 font-medium">快捷示例:</span>
+              <span className="text-[11px] text-slate-500 shrink-0 font-semibold">快捷示例:</span>
               <button
                 onClick={() => {
                   setParsePlatform('douyin');
@@ -888,7 +894,7 @@ function SellingPointsSection({ form, updateSP, addSP, removeSP }: {
                   setInputUrl(sample);
                   handleAIParseUrl(sample);
                 }}
-                className="text-[11px] px-2.5 py-1 rounded-lg bg-pink-50 dark:bg-pink-950/40 border border-pink-200 dark:border-pink-800/50 text-pink-600 dark:text-pink-300 hover:bg-pink-100 transition-colors truncate max-w-[170px]"
+                className="text-[11px] px-2.5 py-1 rounded-xl bg-pink-50 border border-pink-200 text-pink-700 hover:bg-pink-100 transition-colors font-medium truncate max-w-[170px]"
               >
                 🎵 抖音90鹅绒羽绒服
               </button>
@@ -899,7 +905,7 @@ function SellingPointsSection({ form, updateSP, addSP, removeSP }: {
                   setInputUrl(sample);
                   handleAIParseUrl(sample);
                 }}
-                className="text-[11px] px-2.5 py-1 rounded-lg bg-teal-50 dark:bg-teal-950/40 border border-teal-200 dark:border-teal-800/50 text-teal-600 dark:text-teal-300 hover:bg-teal-100 transition-colors truncate max-w-[170px]"
+                className="text-[11px] px-2.5 py-1 rounded-xl bg-teal-50 border border-teal-200 text-teal-700 hover:bg-teal-100 transition-colors font-medium truncate max-w-[170px]"
               >
                 🎶 TikTok 鱼腥草爽肤水
               </button>
@@ -910,7 +916,7 @@ function SellingPointsSection({ form, updateSP, addSP, removeSP }: {
                   setInputUrl(sample);
                   handleAIParseUrl(sample);
                 }}
-                className="text-[11px] px-2.5 py-1 rounded-lg bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-800/50 text-orange-600 dark:text-orange-300 hover:bg-orange-100 transition-colors truncate max-w-[170px]"
+                className="text-[11px] px-2.5 py-1 rounded-xl bg-orange-50 border border-orange-200 text-orange-700 hover:bg-orange-100 transition-colors font-medium truncate max-w-[170px]"
               >
                 🟠 淘宝烟酰胺精华
               </button>
@@ -918,27 +924,27 @@ function SellingPointsSection({ form, updateSP, addSP, removeSP }: {
 
             {/* AI 智能解析进度条 */}
             {parsing && (
-              <div className="p-4 rounded-2xl bg-rose-50/80 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800/50 space-y-2 animate-in fade-in">
-                <div className="flex items-center justify-between text-xs font-semibold text-rose-600 dark:text-rose-300">
+              <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 space-y-2 animate-in fade-in">
+                <div className="flex items-center justify-between text-xs font-bold text-rose-700">
                   <span className="flex items-center gap-2">
-                    <Loader2 className="w-4 h-4 animate-spin text-rose-500" />
+                    <Loader2 className="w-4 h-4 animate-spin text-rose-600" />
                     DeepSeek-V4-Flash 多模态正在智能提炼商品属性与卖点...
                   </span>
-                  <span className="font-mono text-rose-500 font-bold">{parseProgress}%</span>
+                  <span className="font-mono text-rose-600 font-extrabold">{parseProgress}%</span>
                 </div>
-                <Progress value={parseProgress} className="h-1.5 bg-rose-100 dark:bg-zinc-800" />
+                <Progress value={parseProgress} className="h-1.5 bg-rose-100" />
               </div>
             )}
 
             {/* 3. 解析结果预览与自定义编辑区域 */}
             {parsedResult && !parsing && (
-              <div className="p-4 rounded-2xl bg-slate-50/90 dark:bg-zinc-800/50 border border-slate-200 dark:border-zinc-700/80 space-y-3 max-h-[320px] overflow-y-auto pr-1">
-                <div className="flex items-center justify-between border-b border-slate-200 dark:border-zinc-700 pb-2">
-                  <span className="text-xs font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1.5">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 max-h-[320px] overflow-y-auto pr-1">
+                <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                  <span className="text-xs font-bold text-rose-600 flex items-center gap-1.5">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                     解析完成！核对并自定义修改商品数据
                   </span>
-                  <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800 text-[10px]">
+                  <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold text-[10px]">
                     DeepSeek 提取完成
                   </Badge>
                 </div>
@@ -946,86 +952,86 @@ function SellingPointsSection({ form, updateSP, addSP, removeSP }: {
                 <div className="flex gap-4 items-start">
                   {/* 封面预估 */}
                   <div className="w-24 shrink-0 space-y-1.5">
-                    <div className="aspect-square rounded-xl overflow-hidden border border-slate-200 dark:border-zinc-700 bg-background shadow-xs">
+                    <div className="aspect-square rounded-xl overflow-hidden border border-slate-200 bg-white shadow-sm">
                       <img src={parsedResult.cover_image} alt="" className="w-full h-full object-cover" />
                     </div>
                     <Input
                       value={parsedResult.cover_image}
                       onChange={(e) => setParsedResult({ ...parsedResult, cover_image: e.target.value })}
                       placeholder="封面图 URL"
-                      className="h-7 text-[10px] bg-background border-slate-200 dark:border-zinc-700 text-foreground"
+                      className="h-7 text-[10px] bg-white border-slate-200 text-slate-800"
                     />
                   </div>
 
                   {/* 信息字段编辑 */}
                   <div className="flex-1 space-y-2.5 text-xs">
                     <div className="space-y-1">
-                      <label className="text-muted-foreground text-[11px] font-medium">商品标题</label>
+                      <label className="text-slate-600 text-[11px] font-bold">商品标题</label>
                       <Input
                         value={parsedResult.name}
                         onChange={(e) => setParsedResult({ ...parsedResult, name: e.target.value })}
-                        className="h-8 bg-background border-slate-200 dark:border-zinc-700 text-foreground font-semibold"
+                        className="h-8 bg-white border-slate-200 text-slate-900 font-bold"
                       />
                     </div>
 
                     <div className="grid grid-cols-2 gap-2">
                       <div className="space-y-1">
-                        <label className="text-muted-foreground text-[11px] font-medium">所属分类</label>
+                        <label className="text-slate-600 text-[11px] font-bold">所属分类</label>
                         <Select
                           value={parsedResult.category}
                           onValueChange={(val) => setParsedResult({ ...parsedResult, category: val })}
                         >
-                          <SelectTrigger className="h-8 bg-background border-slate-200 dark:border-zinc-700 text-foreground">
+                          <SelectTrigger className="h-8 bg-white border-slate-200 text-slate-900 font-semibold">
                             <SelectValue />
                           </SelectTrigger>
-                          <SelectContent className="bg-background border-slate-200 dark:border-zinc-700 text-foreground">
+                          <SelectContent className="bg-white border-slate-200 text-slate-900">
                             {CATEGORIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                           </SelectContent>
                         </Select>
                       </div>
                       <div className="space-y-1">
-                        <label className="text-muted-foreground text-[11px] font-medium">子分类</label>
+                        <label className="text-slate-600 text-[11px] font-bold">子分类</label>
                         <Input
                           value={parsedResult.sub_category || ''}
                           onChange={(e) => setParsedResult({ ...parsedResult, sub_category: e.target.value })}
-                          className="h-8 bg-background border-slate-200 dark:border-zinc-700 text-foreground"
+                          className="h-8 bg-white border-slate-200 text-slate-900"
                         />
                       </div>
                     </div>
 
                     <div className="grid grid-cols-3 gap-2">
                       <div className="space-y-1">
-                        <label className="text-muted-foreground text-[11px] font-medium">原价 (¥/$)</label>
+                        <label className="text-slate-600 text-[11px] font-bold">原价 (¥/$)</label>
                         <Input
                           type="number"
                           value={parsedResult.original_price}
                           onChange={(e) => setParsedResult({ ...parsedResult, original_price: e.target.value })}
-                          className="h-8 bg-background border-slate-200 dark:border-zinc-700 text-foreground"
+                          className="h-8 bg-white border-slate-200 text-slate-900"
                         />
                       </div>
                       <div className="space-y-1">
-                        <label className="text-rose-600 dark:text-rose-400 text-[11px] font-bold">活动售价 (¥/$)</label>
+                        <label className="text-rose-600 text-[11px] font-bold">活动售价 (¥/$)</label>
                         <Input
                           type="number"
                           value={parsedResult.sale_price}
                           onChange={(e) => setParsedResult({ ...parsedResult, sale_price: e.target.value })}
-                          className="h-8 bg-background border-rose-300 dark:border-rose-700/60 text-rose-600 dark:text-rose-400 font-bold"
+                          className="h-8 bg-rose-50 border-rose-300 text-rose-600 font-extrabold"
                         />
                       </div>
                       <div className="space-y-1">
-                        <label className="text-muted-foreground text-[11px] font-medium">初始库存</label>
+                        <label className="text-slate-600 text-[11px] font-bold">初始库存</label>
                         <Input
                           type="number"
                           value={parsedResult.stock}
                           onChange={(e) => setParsedResult({ ...parsedResult, stock: e.target.value })}
-                          className="h-8 bg-background border-slate-200 dark:border-zinc-700 text-foreground"
+                          className="h-8 bg-white border-slate-200 text-slate-900"
                         />
                       </div>
                     </div>
 
                     {/* AI 核心卖点 */}
                     <div className="space-y-1.5">
-                      <label className="text-muted-foreground text-[11px] font-medium">AI 提取核心卖点 (应用于脚本创作)</label>
+                      <label className="text-slate-600 text-[11px] font-bold">AI 提取核心卖点 (应用于脚本创作)</label>
                       {parsedResult.selling_points?.map((sp: string, idx: number) => (
                         <Input
                           key={idx}
@@ -1035,19 +1041,19 @@ function SellingPointsSection({ form, updateSP, addSP, removeSP }: {
                             newSps[idx] = e.target.value;
                             setParsedResult({ ...parsedResult, selling_points: newSps });
                           }}
-                          className="h-7 text-xs bg-background border-slate-200 dark:border-zinc-700 text-foreground"
+                          className="h-7 text-xs bg-white border-slate-200 text-slate-900 font-medium"
                         />
                       ))}
                     </div>
 
                     {/* 商品简述 */}
                     <div className="space-y-1">
-                      <label className="text-muted-foreground text-[11px] font-medium">商品描述与功能点说明</label>
+                      <label className="text-slate-600 text-[11px] font-bold">商品描述与功能点说明</label>
                       <Textarea
                         rows={2}
                         value={parsedResult.description}
                         onChange={(e) => setParsedResult({ ...parsedResult, description: e.target.value })}
-                        className="bg-background border-slate-200 dark:border-zinc-700 text-xs text-foreground rounded-lg resize-none"
+                        className="bg-white border-slate-200 text-xs text-slate-900 rounded-lg resize-none font-medium"
                       />
                     </div>
                   </div>
@@ -1056,12 +1062,12 @@ function SellingPointsSection({ form, updateSP, addSP, removeSP }: {
             )}
           </div>
 
-          <DialogFooter className="border-t border-slate-100 dark:border-zinc-800 pt-3 flex items-center justify-between">
+          <DialogFooter className="border-t border-slate-100 pt-3 flex items-center justify-between">
             <Button
               variant="outline"
               size="sm"
               onClick={() => setUrlParseOpen(false)}
-              className="h-9 text-xs rounded-xl border-slate-200 dark:border-zinc-700 text-muted-foreground hover:bg-slate-100"
+              className="h-9 text-xs rounded-xl border-slate-200 text-slate-700 hover:bg-slate-100 font-semibold"
             >
               取消
             </Button>
@@ -1072,7 +1078,7 @@ function SellingPointsSection({ form, updateSP, addSP, removeSP }: {
                 variant="outline"
                 disabled={parsing || !inputUrl.trim()}
                 onClick={() => handleAIParseUrl()}
-                className="h-9 text-xs rounded-xl gap-1.5 border-rose-200 dark:border-rose-800/60 text-rose-600 dark:text-rose-300 hover:bg-rose-50"
+                className="h-9 text-xs rounded-xl gap-1.5 border-rose-200 text-rose-600 hover:bg-rose-50 font-semibold"
               >
                 <Wand2 className="w-3.5 h-3.5" />
                 {parsing ? '解析中...' : '重新解析'}
@@ -1083,7 +1089,7 @@ function SellingPointsSection({ form, updateSP, addSP, removeSP }: {
                   size="sm"
                   disabled={savingParsed}
                   onClick={handleSaveParsedProduct}
-                  className="h-9 text-xs rounded-xl bg-gradient-to-r from-rose-600 to-purple-600 hover:from-rose-700 hover:to-purple-700 text-white font-semibold gap-1.5 shadow-md"
+                  className="h-9 text-xs rounded-xl bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 hover:from-rose-600 hover:to-purple-700 text-white font-bold gap-1.5 shadow-md shadow-rose-500/20"
                 >
                   {savingParsed ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
                   确认并导入商品管理
@@ -1093,9 +1099,9 @@ function SellingPointsSection({ form, updateSP, addSP, removeSP }: {
                   size="sm"
                   disabled={parsing || !inputUrl.trim()}
                   onClick={() => handleAIParseUrl()}
-                  className="h-9 text-xs rounded-xl bg-gradient-to-r from-rose-600 to-purple-600 hover:from-rose-700 hover:to-purple-700 text-white font-semibold gap-1.5 shadow-md"
+                  className="h-9 text-xs rounded-xl bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 hover:from-rose-600 hover:to-purple-700 text-white font-bold gap-1.5 shadow-md shadow-rose-500/20"
                 >
-                  {parsing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                  {parsing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 text-amber-300" />}
                   🚀 AI 智能解析商品
                 </Button>
               )}
@@ -1150,51 +1156,53 @@ function PriceStockSection({ form, setForm }: { form: FormState; setForm: React.
     
       
 
-      {/* ── 一键 URL / 口令解析商品导入弹窗 (电商清爽风格) ───────────────────────────────────────────── */}
+      
+
+      {/* ── 一键 URL / 口令解析商品导入弹窗 (高亮亮彩电商风格) ───────────────────────────────────────────── */}
       <Dialog open={urlParseOpen} onOpenChange={setUrlParseOpen}>
-        <DialogContent className="sm:max-w-2xl bg-white dark:bg-zinc-900 border-rose-100 dark:border-zinc-800 text-foreground p-6 rounded-3xl shadow-2xl">
-          <DialogHeader className="space-y-1.5 border-b border-rose-100/60 dark:border-zinc-800/80 pb-3">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center shrink-0">
-                <Sparkles className="w-4 h-4 text-rose-500 animate-pulse" />
+        <DialogContent className="sm:max-w-2xl bg-white text-slate-900 border-slate-200/90 p-6 rounded-3xl shadow-[0_25px_70px_-15px_rgba(0,0,0,0.35)] z-50 overflow-hidden">
+          <DialogHeader className="space-y-1.5 border-b border-slate-100 pb-3">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-rose-500 to-purple-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-rose-500/20">
+                <Sparkles className="w-4 h-4 text-white animate-pulse" />
               </div>
-              <DialogTitle className="text-lg font-bold flex items-center gap-2 text-foreground">
+              <DialogTitle className="text-xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
                 一键 URL / 剪贴板口令解析商品导入
-                <Badge className="bg-rose-100 text-rose-600 dark:bg-rose-950/60 dark:text-rose-300 border-rose-200 dark:border-rose-800 text-[10px] font-normal">
+                <Badge className="bg-rose-50 text-rose-600 border border-rose-200/80 font-semibold text-[11px] rounded-full px-2.5 py-0.5">
                   DeepSeek-V4-Flash
                 </Badge>
               </DialogTitle>
             </div>
-            <p className="text-xs text-muted-foreground pl-10">
+            <p className="text-xs text-slate-500 pl-11 font-medium">
               支持抖音、TikTok、拼多多、淘宝全网平台。粘贴商品链接自动智能提炼标题、分类、活动售价与 3 大 AI 核心卖点
             </p>
           </DialogHeader>
 
           <div className="space-y-4 my-2">
             {/* 1. 目标平台选择 */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                <span className="w-4 h-4 rounded-full bg-rose-500 text-white flex items-center justify-center text-[10px] font-bold">1</span>
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                <span className="w-4 h-4 rounded-full bg-rose-500 text-white flex items-center justify-center text-[10px] font-extrabold shadow-xs">1</span>
                 选择目标电商平台
               </label>
               <div className="flex flex-wrap gap-1.5">
                 {[
-                  { id: 'douyin', label: '抖音 🎵', activeCls: 'bg-pink-500 text-white border-pink-500' },
-                  { id: 'tiktok', label: 'TikTok 🎶', activeCls: 'bg-zinc-900 text-white border-zinc-900 dark:bg-zinc-100 dark:text-zinc-900' },
-                  { id: 'pinduoduo', label: '拼多多 🔴', activeCls: 'bg-red-500 text-white border-red-500' },
-                  { id: 'taobao', label: '淘宝 🟠', activeCls: 'bg-orange-500 text-white border-orange-500' },
-                  { id: 'shopee', label: 'Shopee 🧡', activeCls: 'bg-amber-500 text-white border-amber-500' },
-                  { id: 'amazon', label: '亚马逊 📦', activeCls: 'bg-yellow-600 text-white border-yellow-600' },
-                  { id: 'general', label: '全网通用 🌐', activeCls: 'bg-blue-600 text-white border-blue-600' },
+                  { id: 'douyin', label: '抖音 🎵', activeCls: 'bg-gradient-to-r from-pink-500 to-rose-600 text-white font-bold border-transparent shadow-md shadow-pink-500/25' },
+                  { id: 'tiktok', label: 'TikTok 🎶', activeCls: 'bg-slate-900 text-white font-bold border-transparent shadow-md shadow-slate-900/25' },
+                  { id: 'pinduoduo', label: '拼多多 🔴', activeCls: 'bg-gradient-to-r from-red-500 to-rose-600 text-white font-bold border-transparent shadow-md shadow-red-500/25' },
+                  { id: 'taobao', label: '淘宝 🟠', activeCls: 'bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold border-transparent shadow-md shadow-orange-500/25' },
+                  { id: 'shopee', label: 'Shopee 🧡', activeCls: 'bg-gradient-to-r from-amber-500 to-orange-600 text-white font-bold border-transparent shadow-md shadow-amber-500/25' },
+                  { id: 'amazon', label: '亚马逊 📦', activeCls: 'bg-gradient-to-r from-yellow-500 to-amber-600 text-white font-bold border-transparent shadow-md shadow-yellow-500/25' },
+                  { id: 'general', label: '全网通用 🌐', activeCls: 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold border-transparent shadow-md shadow-blue-500/25' },
                 ].map(p => (
                   <button
                     key={p.id}
                     onClick={() => setParsePlatform(p.id)}
                     className={cn(
-                      "px-3 py-1.5 rounded-xl text-xs font-semibold transition-all border shadow-xs",
+                      "px-3 py-1.5 rounded-xl text-xs transition-all border",
                       parsePlatform === p.id
-                        ? p.activeCls + " shadow-sm font-bold"
-                        : "bg-slate-50 dark:bg-zinc-800/80 text-muted-foreground border-slate-200 dark:border-zinc-700 hover:bg-slate-100 hover:text-foreground"
+                        ? p.activeCls
+                        : "bg-slate-100/90 text-slate-700 border-slate-200/80 font-medium hover:bg-slate-200/80 hover:text-slate-900"
                     )}
                   >
                     {p.label}
@@ -1206,24 +1214,24 @@ function PriceStockSection({ form, setForm }: { form: FormState; setForm: React.
             {/* 2. 输入链接/口令 */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                  <span className="w-4 h-4 rounded-full bg-rose-500 text-white flex items-center justify-center text-[10px] font-bold">2</span>
+                <label className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                  <span className="w-4 h-4 rounded-full bg-rose-500 text-white flex items-center justify-center text-[10px] font-extrabold shadow-xs">2</span>
                   粘贴商品详情 URL 或口令分享文本
                 </label>
-                <span className="text-[10px] text-muted-foreground">自动提取淘口令/抖音推荐符</span>
+                <span className="text-[11px] text-slate-400 font-medium">自动提取淘口令/抖音推荐符</span>
               </div>
               <Textarea
                 rows={3}
                 value={inputUrl}
                 onChange={(e) => setInputUrl(e.target.value)}
                 placeholder="例如: https://v.douyin.com/iLeXa1/ 或 8.99 复制打开抖音看详情...【爆款90鹅绒连帽加厚羽绒服】"
-                className="bg-slate-50 dark:bg-zinc-800/80 border-slate-200 dark:border-zinc-700 text-xs text-foreground placeholder:text-muted-foreground/60 rounded-2xl resize-none p-3"
+                className="bg-slate-50 border-slate-200 text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-rose-400 focus:ring-2 focus:ring-rose-400/20 rounded-2xl resize-none p-3 font-normal shadow-inner"
               />
             </div>
 
             {/* 快捷测试示例 */}
             <div className="flex items-center gap-2 pt-0.5 flex-wrap">
-              <span className="text-[11px] text-muted-foreground shrink-0 font-medium">快捷示例:</span>
+              <span className="text-[11px] text-slate-500 shrink-0 font-semibold">快捷示例:</span>
               <button
                 onClick={() => {
                   setParsePlatform('douyin');
@@ -1231,7 +1239,7 @@ function PriceStockSection({ form, setForm }: { form: FormState; setForm: React.
                   setInputUrl(sample);
                   handleAIParseUrl(sample);
                 }}
-                className="text-[11px] px-2.5 py-1 rounded-lg bg-pink-50 dark:bg-pink-950/40 border border-pink-200 dark:border-pink-800/50 text-pink-600 dark:text-pink-300 hover:bg-pink-100 transition-colors truncate max-w-[170px]"
+                className="text-[11px] px-2.5 py-1 rounded-xl bg-pink-50 border border-pink-200 text-pink-700 hover:bg-pink-100 transition-colors font-medium truncate max-w-[170px]"
               >
                 🎵 抖音90鹅绒羽绒服
               </button>
@@ -1242,7 +1250,7 @@ function PriceStockSection({ form, setForm }: { form: FormState; setForm: React.
                   setInputUrl(sample);
                   handleAIParseUrl(sample);
                 }}
-                className="text-[11px] px-2.5 py-1 rounded-lg bg-teal-50 dark:bg-teal-950/40 border border-teal-200 dark:border-teal-800/50 text-teal-600 dark:text-teal-300 hover:bg-teal-100 transition-colors truncate max-w-[170px]"
+                className="text-[11px] px-2.5 py-1 rounded-xl bg-teal-50 border border-teal-200 text-teal-700 hover:bg-teal-100 transition-colors font-medium truncate max-w-[170px]"
               >
                 🎶 TikTok 鱼腥草爽肤水
               </button>
@@ -1253,7 +1261,7 @@ function PriceStockSection({ form, setForm }: { form: FormState; setForm: React.
                   setInputUrl(sample);
                   handleAIParseUrl(sample);
                 }}
-                className="text-[11px] px-2.5 py-1 rounded-lg bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-800/50 text-orange-600 dark:text-orange-300 hover:bg-orange-100 transition-colors truncate max-w-[170px]"
+                className="text-[11px] px-2.5 py-1 rounded-xl bg-orange-50 border border-orange-200 text-orange-700 hover:bg-orange-100 transition-colors font-medium truncate max-w-[170px]"
               >
                 🟠 淘宝烟酰胺精华
               </button>
@@ -1261,27 +1269,27 @@ function PriceStockSection({ form, setForm }: { form: FormState; setForm: React.
 
             {/* AI 智能解析进度条 */}
             {parsing && (
-              <div className="p-4 rounded-2xl bg-rose-50/80 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800/50 space-y-2 animate-in fade-in">
-                <div className="flex items-center justify-between text-xs font-semibold text-rose-600 dark:text-rose-300">
+              <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 space-y-2 animate-in fade-in">
+                <div className="flex items-center justify-between text-xs font-bold text-rose-700">
                   <span className="flex items-center gap-2">
-                    <Loader2 className="w-4 h-4 animate-spin text-rose-500" />
+                    <Loader2 className="w-4 h-4 animate-spin text-rose-600" />
                     DeepSeek-V4-Flash 多模态正在智能提炼商品属性与卖点...
                   </span>
-                  <span className="font-mono text-rose-500 font-bold">{parseProgress}%</span>
+                  <span className="font-mono text-rose-600 font-extrabold">{parseProgress}%</span>
                 </div>
-                <Progress value={parseProgress} className="h-1.5 bg-rose-100 dark:bg-zinc-800" />
+                <Progress value={parseProgress} className="h-1.5 bg-rose-100" />
               </div>
             )}
 
             {/* 3. 解析结果预览与自定义编辑区域 */}
             {parsedResult && !parsing && (
-              <div className="p-4 rounded-2xl bg-slate-50/90 dark:bg-zinc-800/50 border border-slate-200 dark:border-zinc-700/80 space-y-3 max-h-[320px] overflow-y-auto pr-1">
-                <div className="flex items-center justify-between border-b border-slate-200 dark:border-zinc-700 pb-2">
-                  <span className="text-xs font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1.5">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 max-h-[320px] overflow-y-auto pr-1">
+                <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                  <span className="text-xs font-bold text-rose-600 flex items-center gap-1.5">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                     解析完成！核对并自定义修改商品数据
                   </span>
-                  <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800 text-[10px]">
+                  <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold text-[10px]">
                     DeepSeek 提取完成
                   </Badge>
                 </div>
@@ -1289,86 +1297,86 @@ function PriceStockSection({ form, setForm }: { form: FormState; setForm: React.
                 <div className="flex gap-4 items-start">
                   {/* 封面预估 */}
                   <div className="w-24 shrink-0 space-y-1.5">
-                    <div className="aspect-square rounded-xl overflow-hidden border border-slate-200 dark:border-zinc-700 bg-background shadow-xs">
+                    <div className="aspect-square rounded-xl overflow-hidden border border-slate-200 bg-white shadow-sm">
                       <img src={parsedResult.cover_image} alt="" className="w-full h-full object-cover" />
                     </div>
                     <Input
                       value={parsedResult.cover_image}
                       onChange={(e) => setParsedResult({ ...parsedResult, cover_image: e.target.value })}
                       placeholder="封面图 URL"
-                      className="h-7 text-[10px] bg-background border-slate-200 dark:border-zinc-700 text-foreground"
+                      className="h-7 text-[10px] bg-white border-slate-200 text-slate-800"
                     />
                   </div>
 
                   {/* 信息字段编辑 */}
                   <div className="flex-1 space-y-2.5 text-xs">
                     <div className="space-y-1">
-                      <label className="text-muted-foreground text-[11px] font-medium">商品标题</label>
+                      <label className="text-slate-600 text-[11px] font-bold">商品标题</label>
                       <Input
                         value={parsedResult.name}
                         onChange={(e) => setParsedResult({ ...parsedResult, name: e.target.value })}
-                        className="h-8 bg-background border-slate-200 dark:border-zinc-700 text-foreground font-semibold"
+                        className="h-8 bg-white border-slate-200 text-slate-900 font-bold"
                       />
                     </div>
 
                     <div className="grid grid-cols-2 gap-2">
                       <div className="space-y-1">
-                        <label className="text-muted-foreground text-[11px] font-medium">所属分类</label>
+                        <label className="text-slate-600 text-[11px] font-bold">所属分类</label>
                         <Select
                           value={parsedResult.category}
                           onValueChange={(val) => setParsedResult({ ...parsedResult, category: val })}
                         >
-                          <SelectTrigger className="h-8 bg-background border-slate-200 dark:border-zinc-700 text-foreground">
+                          <SelectTrigger className="h-8 bg-white border-slate-200 text-slate-900 font-semibold">
                             <SelectValue />
                           </SelectTrigger>
-                          <SelectContent className="bg-background border-slate-200 dark:border-zinc-700 text-foreground">
+                          <SelectContent className="bg-white border-slate-200 text-slate-900">
                             {CATEGORIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                           </SelectContent>
                         </Select>
                       </div>
                       <div className="space-y-1">
-                        <label className="text-muted-foreground text-[11px] font-medium">子分类</label>
+                        <label className="text-slate-600 text-[11px] font-bold">子分类</label>
                         <Input
                           value={parsedResult.sub_category || ''}
                           onChange={(e) => setParsedResult({ ...parsedResult, sub_category: e.target.value })}
-                          className="h-8 bg-background border-slate-200 dark:border-zinc-700 text-foreground"
+                          className="h-8 bg-white border-slate-200 text-slate-900"
                         />
                       </div>
                     </div>
 
                     <div className="grid grid-cols-3 gap-2">
                       <div className="space-y-1">
-                        <label className="text-muted-foreground text-[11px] font-medium">原价 (¥/$)</label>
+                        <label className="text-slate-600 text-[11px] font-bold">原价 (¥/$)</label>
                         <Input
                           type="number"
                           value={parsedResult.original_price}
                           onChange={(e) => setParsedResult({ ...parsedResult, original_price: e.target.value })}
-                          className="h-8 bg-background border-slate-200 dark:border-zinc-700 text-foreground"
+                          className="h-8 bg-white border-slate-200 text-slate-900"
                         />
                       </div>
                       <div className="space-y-1">
-                        <label className="text-rose-600 dark:text-rose-400 text-[11px] font-bold">活动售价 (¥/$)</label>
+                        <label className="text-rose-600 text-[11px] font-bold">活动售价 (¥/$)</label>
                         <Input
                           type="number"
                           value={parsedResult.sale_price}
                           onChange={(e) => setParsedResult({ ...parsedResult, sale_price: e.target.value })}
-                          className="h-8 bg-background border-rose-300 dark:border-rose-700/60 text-rose-600 dark:text-rose-400 font-bold"
+                          className="h-8 bg-rose-50 border-rose-300 text-rose-600 font-extrabold"
                         />
                       </div>
                       <div className="space-y-1">
-                        <label className="text-muted-foreground text-[11px] font-medium">初始库存</label>
+                        <label className="text-slate-600 text-[11px] font-bold">初始库存</label>
                         <Input
                           type="number"
                           value={parsedResult.stock}
                           onChange={(e) => setParsedResult({ ...parsedResult, stock: e.target.value })}
-                          className="h-8 bg-background border-slate-200 dark:border-zinc-700 text-foreground"
+                          className="h-8 bg-white border-slate-200 text-slate-900"
                         />
                       </div>
                     </div>
 
                     {/* AI 核心卖点 */}
                     <div className="space-y-1.5">
-                      <label className="text-muted-foreground text-[11px] font-medium">AI 提取核心卖点 (应用于脚本创作)</label>
+                      <label className="text-slate-600 text-[11px] font-bold">AI 提取核心卖点 (应用于脚本创作)</label>
                       {parsedResult.selling_points?.map((sp: string, idx: number) => (
                         <Input
                           key={idx}
@@ -1378,19 +1386,19 @@ function PriceStockSection({ form, setForm }: { form: FormState; setForm: React.
                             newSps[idx] = e.target.value;
                             setParsedResult({ ...parsedResult, selling_points: newSps });
                           }}
-                          className="h-7 text-xs bg-background border-slate-200 dark:border-zinc-700 text-foreground"
+                          className="h-7 text-xs bg-white border-slate-200 text-slate-900 font-medium"
                         />
                       ))}
                     </div>
 
                     {/* 商品简述 */}
                     <div className="space-y-1">
-                      <label className="text-muted-foreground text-[11px] font-medium">商品描述与功能点说明</label>
+                      <label className="text-slate-600 text-[11px] font-bold">商品描述与功能点说明</label>
                       <Textarea
                         rows={2}
                         value={parsedResult.description}
                         onChange={(e) => setParsedResult({ ...parsedResult, description: e.target.value })}
-                        className="bg-background border-slate-200 dark:border-zinc-700 text-xs text-foreground rounded-lg resize-none"
+                        className="bg-white border-slate-200 text-xs text-slate-900 rounded-lg resize-none font-medium"
                       />
                     </div>
                   </div>
@@ -1399,12 +1407,12 @@ function PriceStockSection({ form, setForm }: { form: FormState; setForm: React.
             )}
           </div>
 
-          <DialogFooter className="border-t border-slate-100 dark:border-zinc-800 pt-3 flex items-center justify-between">
+          <DialogFooter className="border-t border-slate-100 pt-3 flex items-center justify-between">
             <Button
               variant="outline"
               size="sm"
               onClick={() => setUrlParseOpen(false)}
-              className="h-9 text-xs rounded-xl border-slate-200 dark:border-zinc-700 text-muted-foreground hover:bg-slate-100"
+              className="h-9 text-xs rounded-xl border-slate-200 text-slate-700 hover:bg-slate-100 font-semibold"
             >
               取消
             </Button>
@@ -1415,7 +1423,7 @@ function PriceStockSection({ form, setForm }: { form: FormState; setForm: React.
                 variant="outline"
                 disabled={parsing || !inputUrl.trim()}
                 onClick={() => handleAIParseUrl()}
-                className="h-9 text-xs rounded-xl gap-1.5 border-rose-200 dark:border-rose-800/60 text-rose-600 dark:text-rose-300 hover:bg-rose-50"
+                className="h-9 text-xs rounded-xl gap-1.5 border-rose-200 text-rose-600 hover:bg-rose-50 font-semibold"
               >
                 <Wand2 className="w-3.5 h-3.5" />
                 {parsing ? '解析中...' : '重新解析'}
@@ -1426,7 +1434,7 @@ function PriceStockSection({ form, setForm }: { form: FormState; setForm: React.
                   size="sm"
                   disabled={savingParsed}
                   onClick={handleSaveParsedProduct}
-                  className="h-9 text-xs rounded-xl bg-gradient-to-r from-rose-600 to-purple-600 hover:from-rose-700 hover:to-purple-700 text-white font-semibold gap-1.5 shadow-md"
+                  className="h-9 text-xs rounded-xl bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 hover:from-rose-600 hover:to-purple-700 text-white font-bold gap-1.5 shadow-md shadow-rose-500/20"
                 >
                   {savingParsed ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
                   确认并导入商品管理
@@ -1436,9 +1444,9 @@ function PriceStockSection({ form, setForm }: { form: FormState; setForm: React.
                   size="sm"
                   disabled={parsing || !inputUrl.trim()}
                   onClick={() => handleAIParseUrl()}
-                  className="h-9 text-xs rounded-xl bg-gradient-to-r from-rose-600 to-purple-600 hover:from-rose-700 hover:to-purple-700 text-white font-semibold gap-1.5 shadow-md"
+                  className="h-9 text-xs rounded-xl bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 hover:from-rose-600 hover:to-purple-700 text-white font-bold gap-1.5 shadow-md shadow-rose-500/20"
                 >
-                  {parsing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                  {parsing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 text-amber-300" />}
                   🚀 AI 智能解析商品
                 </Button>
               )}
@@ -1532,51 +1540,53 @@ function ImagesSection({ form, imgUrlInput, setImgUrlInput, imgInputRef, addImag
     
       
 
-      {/* ── 一键 URL / 口令解析商品导入弹窗 (电商清爽风格) ───────────────────────────────────────────── */}
+      
+
+      {/* ── 一键 URL / 口令解析商品导入弹窗 (高亮亮彩电商风格) ───────────────────────────────────────────── */}
       <Dialog open={urlParseOpen} onOpenChange={setUrlParseOpen}>
-        <DialogContent className="sm:max-w-2xl bg-white dark:bg-zinc-900 border-rose-100 dark:border-zinc-800 text-foreground p-6 rounded-3xl shadow-2xl">
-          <DialogHeader className="space-y-1.5 border-b border-rose-100/60 dark:border-zinc-800/80 pb-3">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center shrink-0">
-                <Sparkles className="w-4 h-4 text-rose-500 animate-pulse" />
+        <DialogContent className="sm:max-w-2xl bg-white text-slate-900 border-slate-200/90 p-6 rounded-3xl shadow-[0_25px_70px_-15px_rgba(0,0,0,0.35)] z-50 overflow-hidden">
+          <DialogHeader className="space-y-1.5 border-b border-slate-100 pb-3">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-rose-500 to-purple-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-rose-500/20">
+                <Sparkles className="w-4 h-4 text-white animate-pulse" />
               </div>
-              <DialogTitle className="text-lg font-bold flex items-center gap-2 text-foreground">
+              <DialogTitle className="text-xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
                 一键 URL / 剪贴板口令解析商品导入
-                <Badge className="bg-rose-100 text-rose-600 dark:bg-rose-950/60 dark:text-rose-300 border-rose-200 dark:border-rose-800 text-[10px] font-normal">
+                <Badge className="bg-rose-50 text-rose-600 border border-rose-200/80 font-semibold text-[11px] rounded-full px-2.5 py-0.5">
                   DeepSeek-V4-Flash
                 </Badge>
               </DialogTitle>
             </div>
-            <p className="text-xs text-muted-foreground pl-10">
+            <p className="text-xs text-slate-500 pl-11 font-medium">
               支持抖音、TikTok、拼多多、淘宝全网平台。粘贴商品链接自动智能提炼标题、分类、活动售价与 3 大 AI 核心卖点
             </p>
           </DialogHeader>
 
           <div className="space-y-4 my-2">
             {/* 1. 目标平台选择 */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                <span className="w-4 h-4 rounded-full bg-rose-500 text-white flex items-center justify-center text-[10px] font-bold">1</span>
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                <span className="w-4 h-4 rounded-full bg-rose-500 text-white flex items-center justify-center text-[10px] font-extrabold shadow-xs">1</span>
                 选择目标电商平台
               </label>
               <div className="flex flex-wrap gap-1.5">
                 {[
-                  { id: 'douyin', label: '抖音 🎵', activeCls: 'bg-pink-500 text-white border-pink-500' },
-                  { id: 'tiktok', label: 'TikTok 🎶', activeCls: 'bg-zinc-900 text-white border-zinc-900 dark:bg-zinc-100 dark:text-zinc-900' },
-                  { id: 'pinduoduo', label: '拼多多 🔴', activeCls: 'bg-red-500 text-white border-red-500' },
-                  { id: 'taobao', label: '淘宝 🟠', activeCls: 'bg-orange-500 text-white border-orange-500' },
-                  { id: 'shopee', label: 'Shopee 🧡', activeCls: 'bg-amber-500 text-white border-amber-500' },
-                  { id: 'amazon', label: '亚马逊 📦', activeCls: 'bg-yellow-600 text-white border-yellow-600' },
-                  { id: 'general', label: '全网通用 🌐', activeCls: 'bg-blue-600 text-white border-blue-600' },
+                  { id: 'douyin', label: '抖音 🎵', activeCls: 'bg-gradient-to-r from-pink-500 to-rose-600 text-white font-bold border-transparent shadow-md shadow-pink-500/25' },
+                  { id: 'tiktok', label: 'TikTok 🎶', activeCls: 'bg-slate-900 text-white font-bold border-transparent shadow-md shadow-slate-900/25' },
+                  { id: 'pinduoduo', label: '拼多多 🔴', activeCls: 'bg-gradient-to-r from-red-500 to-rose-600 text-white font-bold border-transparent shadow-md shadow-red-500/25' },
+                  { id: 'taobao', label: '淘宝 🟠', activeCls: 'bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold border-transparent shadow-md shadow-orange-500/25' },
+                  { id: 'shopee', label: 'Shopee 🧡', activeCls: 'bg-gradient-to-r from-amber-500 to-orange-600 text-white font-bold border-transparent shadow-md shadow-amber-500/25' },
+                  { id: 'amazon', label: '亚马逊 📦', activeCls: 'bg-gradient-to-r from-yellow-500 to-amber-600 text-white font-bold border-transparent shadow-md shadow-yellow-500/25' },
+                  { id: 'general', label: '全网通用 🌐', activeCls: 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold border-transparent shadow-md shadow-blue-500/25' },
                 ].map(p => (
                   <button
                     key={p.id}
                     onClick={() => setParsePlatform(p.id)}
                     className={cn(
-                      "px-3 py-1.5 rounded-xl text-xs font-semibold transition-all border shadow-xs",
+                      "px-3 py-1.5 rounded-xl text-xs transition-all border",
                       parsePlatform === p.id
-                        ? p.activeCls + " shadow-sm font-bold"
-                        : "bg-slate-50 dark:bg-zinc-800/80 text-muted-foreground border-slate-200 dark:border-zinc-700 hover:bg-slate-100 hover:text-foreground"
+                        ? p.activeCls
+                        : "bg-slate-100/90 text-slate-700 border-slate-200/80 font-medium hover:bg-slate-200/80 hover:text-slate-900"
                     )}
                   >
                     {p.label}
@@ -1588,24 +1598,24 @@ function ImagesSection({ form, imgUrlInput, setImgUrlInput, imgInputRef, addImag
             {/* 2. 输入链接/口令 */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                  <span className="w-4 h-4 rounded-full bg-rose-500 text-white flex items-center justify-center text-[10px] font-bold">2</span>
+                <label className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                  <span className="w-4 h-4 rounded-full bg-rose-500 text-white flex items-center justify-center text-[10px] font-extrabold shadow-xs">2</span>
                   粘贴商品详情 URL 或口令分享文本
                 </label>
-                <span className="text-[10px] text-muted-foreground">自动提取淘口令/抖音推荐符</span>
+                <span className="text-[11px] text-slate-400 font-medium">自动提取淘口令/抖音推荐符</span>
               </div>
               <Textarea
                 rows={3}
                 value={inputUrl}
                 onChange={(e) => setInputUrl(e.target.value)}
                 placeholder="例如: https://v.douyin.com/iLeXa1/ 或 8.99 复制打开抖音看详情...【爆款90鹅绒连帽加厚羽绒服】"
-                className="bg-slate-50 dark:bg-zinc-800/80 border-slate-200 dark:border-zinc-700 text-xs text-foreground placeholder:text-muted-foreground/60 rounded-2xl resize-none p-3"
+                className="bg-slate-50 border-slate-200 text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-rose-400 focus:ring-2 focus:ring-rose-400/20 rounded-2xl resize-none p-3 font-normal shadow-inner"
               />
             </div>
 
             {/* 快捷测试示例 */}
             <div className="flex items-center gap-2 pt-0.5 flex-wrap">
-              <span className="text-[11px] text-muted-foreground shrink-0 font-medium">快捷示例:</span>
+              <span className="text-[11px] text-slate-500 shrink-0 font-semibold">快捷示例:</span>
               <button
                 onClick={() => {
                   setParsePlatform('douyin');
@@ -1613,7 +1623,7 @@ function ImagesSection({ form, imgUrlInput, setImgUrlInput, imgInputRef, addImag
                   setInputUrl(sample);
                   handleAIParseUrl(sample);
                 }}
-                className="text-[11px] px-2.5 py-1 rounded-lg bg-pink-50 dark:bg-pink-950/40 border border-pink-200 dark:border-pink-800/50 text-pink-600 dark:text-pink-300 hover:bg-pink-100 transition-colors truncate max-w-[170px]"
+                className="text-[11px] px-2.5 py-1 rounded-xl bg-pink-50 border border-pink-200 text-pink-700 hover:bg-pink-100 transition-colors font-medium truncate max-w-[170px]"
               >
                 🎵 抖音90鹅绒羽绒服
               </button>
@@ -1624,7 +1634,7 @@ function ImagesSection({ form, imgUrlInput, setImgUrlInput, imgInputRef, addImag
                   setInputUrl(sample);
                   handleAIParseUrl(sample);
                 }}
-                className="text-[11px] px-2.5 py-1 rounded-lg bg-teal-50 dark:bg-teal-950/40 border border-teal-200 dark:border-teal-800/50 text-teal-600 dark:text-teal-300 hover:bg-teal-100 transition-colors truncate max-w-[170px]"
+                className="text-[11px] px-2.5 py-1 rounded-xl bg-teal-50 border border-teal-200 text-teal-700 hover:bg-teal-100 transition-colors font-medium truncate max-w-[170px]"
               >
                 🎶 TikTok 鱼腥草爽肤水
               </button>
@@ -1635,7 +1645,7 @@ function ImagesSection({ form, imgUrlInput, setImgUrlInput, imgInputRef, addImag
                   setInputUrl(sample);
                   handleAIParseUrl(sample);
                 }}
-                className="text-[11px] px-2.5 py-1 rounded-lg bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-800/50 text-orange-600 dark:text-orange-300 hover:bg-orange-100 transition-colors truncate max-w-[170px]"
+                className="text-[11px] px-2.5 py-1 rounded-xl bg-orange-50 border border-orange-200 text-orange-700 hover:bg-orange-100 transition-colors font-medium truncate max-w-[170px]"
               >
                 🟠 淘宝烟酰胺精华
               </button>
@@ -1643,27 +1653,27 @@ function ImagesSection({ form, imgUrlInput, setImgUrlInput, imgInputRef, addImag
 
             {/* AI 智能解析进度条 */}
             {parsing && (
-              <div className="p-4 rounded-2xl bg-rose-50/80 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800/50 space-y-2 animate-in fade-in">
-                <div className="flex items-center justify-between text-xs font-semibold text-rose-600 dark:text-rose-300">
+              <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 space-y-2 animate-in fade-in">
+                <div className="flex items-center justify-between text-xs font-bold text-rose-700">
                   <span className="flex items-center gap-2">
-                    <Loader2 className="w-4 h-4 animate-spin text-rose-500" />
+                    <Loader2 className="w-4 h-4 animate-spin text-rose-600" />
                     DeepSeek-V4-Flash 多模态正在智能提炼商品属性与卖点...
                   </span>
-                  <span className="font-mono text-rose-500 font-bold">{parseProgress}%</span>
+                  <span className="font-mono text-rose-600 font-extrabold">{parseProgress}%</span>
                 </div>
-                <Progress value={parseProgress} className="h-1.5 bg-rose-100 dark:bg-zinc-800" />
+                <Progress value={parseProgress} className="h-1.5 bg-rose-100" />
               </div>
             )}
 
             {/* 3. 解析结果预览与自定义编辑区域 */}
             {parsedResult && !parsing && (
-              <div className="p-4 rounded-2xl bg-slate-50/90 dark:bg-zinc-800/50 border border-slate-200 dark:border-zinc-700/80 space-y-3 max-h-[320px] overflow-y-auto pr-1">
-                <div className="flex items-center justify-between border-b border-slate-200 dark:border-zinc-700 pb-2">
-                  <span className="text-xs font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1.5">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 max-h-[320px] overflow-y-auto pr-1">
+                <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                  <span className="text-xs font-bold text-rose-600 flex items-center gap-1.5">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                     解析完成！核对并自定义修改商品数据
                   </span>
-                  <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800 text-[10px]">
+                  <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold text-[10px]">
                     DeepSeek 提取完成
                   </Badge>
                 </div>
@@ -1671,86 +1681,86 @@ function ImagesSection({ form, imgUrlInput, setImgUrlInput, imgInputRef, addImag
                 <div className="flex gap-4 items-start">
                   {/* 封面预估 */}
                   <div className="w-24 shrink-0 space-y-1.5">
-                    <div className="aspect-square rounded-xl overflow-hidden border border-slate-200 dark:border-zinc-700 bg-background shadow-xs">
+                    <div className="aspect-square rounded-xl overflow-hidden border border-slate-200 bg-white shadow-sm">
                       <img src={parsedResult.cover_image} alt="" className="w-full h-full object-cover" />
                     </div>
                     <Input
                       value={parsedResult.cover_image}
                       onChange={(e) => setParsedResult({ ...parsedResult, cover_image: e.target.value })}
                       placeholder="封面图 URL"
-                      className="h-7 text-[10px] bg-background border-slate-200 dark:border-zinc-700 text-foreground"
+                      className="h-7 text-[10px] bg-white border-slate-200 text-slate-800"
                     />
                   </div>
 
                   {/* 信息字段编辑 */}
                   <div className="flex-1 space-y-2.5 text-xs">
                     <div className="space-y-1">
-                      <label className="text-muted-foreground text-[11px] font-medium">商品标题</label>
+                      <label className="text-slate-600 text-[11px] font-bold">商品标题</label>
                       <Input
                         value={parsedResult.name}
                         onChange={(e) => setParsedResult({ ...parsedResult, name: e.target.value })}
-                        className="h-8 bg-background border-slate-200 dark:border-zinc-700 text-foreground font-semibold"
+                        className="h-8 bg-white border-slate-200 text-slate-900 font-bold"
                       />
                     </div>
 
                     <div className="grid grid-cols-2 gap-2">
                       <div className="space-y-1">
-                        <label className="text-muted-foreground text-[11px] font-medium">所属分类</label>
+                        <label className="text-slate-600 text-[11px] font-bold">所属分类</label>
                         <Select
                           value={parsedResult.category}
                           onValueChange={(val) => setParsedResult({ ...parsedResult, category: val })}
                         >
-                          <SelectTrigger className="h-8 bg-background border-slate-200 dark:border-zinc-700 text-foreground">
+                          <SelectTrigger className="h-8 bg-white border-slate-200 text-slate-900 font-semibold">
                             <SelectValue />
                           </SelectTrigger>
-                          <SelectContent className="bg-background border-slate-200 dark:border-zinc-700 text-foreground">
+                          <SelectContent className="bg-white border-slate-200 text-slate-900">
                             {CATEGORIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                           </SelectContent>
                         </Select>
                       </div>
                       <div className="space-y-1">
-                        <label className="text-muted-foreground text-[11px] font-medium">子分类</label>
+                        <label className="text-slate-600 text-[11px] font-bold">子分类</label>
                         <Input
                           value={parsedResult.sub_category || ''}
                           onChange={(e) => setParsedResult({ ...parsedResult, sub_category: e.target.value })}
-                          className="h-8 bg-background border-slate-200 dark:border-zinc-700 text-foreground"
+                          className="h-8 bg-white border-slate-200 text-slate-900"
                         />
                       </div>
                     </div>
 
                     <div className="grid grid-cols-3 gap-2">
                       <div className="space-y-1">
-                        <label className="text-muted-foreground text-[11px] font-medium">原价 (¥/$)</label>
+                        <label className="text-slate-600 text-[11px] font-bold">原价 (¥/$)</label>
                         <Input
                           type="number"
                           value={parsedResult.original_price}
                           onChange={(e) => setParsedResult({ ...parsedResult, original_price: e.target.value })}
-                          className="h-8 bg-background border-slate-200 dark:border-zinc-700 text-foreground"
+                          className="h-8 bg-white border-slate-200 text-slate-900"
                         />
                       </div>
                       <div className="space-y-1">
-                        <label className="text-rose-600 dark:text-rose-400 text-[11px] font-bold">活动售价 (¥/$)</label>
+                        <label className="text-rose-600 text-[11px] font-bold">活动售价 (¥/$)</label>
                         <Input
                           type="number"
                           value={parsedResult.sale_price}
                           onChange={(e) => setParsedResult({ ...parsedResult, sale_price: e.target.value })}
-                          className="h-8 bg-background border-rose-300 dark:border-rose-700/60 text-rose-600 dark:text-rose-400 font-bold"
+                          className="h-8 bg-rose-50 border-rose-300 text-rose-600 font-extrabold"
                         />
                       </div>
                       <div className="space-y-1">
-                        <label className="text-muted-foreground text-[11px] font-medium">初始库存</label>
+                        <label className="text-slate-600 text-[11px] font-bold">初始库存</label>
                         <Input
                           type="number"
                           value={parsedResult.stock}
                           onChange={(e) => setParsedResult({ ...parsedResult, stock: e.target.value })}
-                          className="h-8 bg-background border-slate-200 dark:border-zinc-700 text-foreground"
+                          className="h-8 bg-white border-slate-200 text-slate-900"
                         />
                       </div>
                     </div>
 
                     {/* AI 核心卖点 */}
                     <div className="space-y-1.5">
-                      <label className="text-muted-foreground text-[11px] font-medium">AI 提取核心卖点 (应用于脚本创作)</label>
+                      <label className="text-slate-600 text-[11px] font-bold">AI 提取核心卖点 (应用于脚本创作)</label>
                       {parsedResult.selling_points?.map((sp: string, idx: number) => (
                         <Input
                           key={idx}
@@ -1760,19 +1770,19 @@ function ImagesSection({ form, imgUrlInput, setImgUrlInput, imgInputRef, addImag
                             newSps[idx] = e.target.value;
                             setParsedResult({ ...parsedResult, selling_points: newSps });
                           }}
-                          className="h-7 text-xs bg-background border-slate-200 dark:border-zinc-700 text-foreground"
+                          className="h-7 text-xs bg-white border-slate-200 text-slate-900 font-medium"
                         />
                       ))}
                     </div>
 
                     {/* 商品简述 */}
                     <div className="space-y-1">
-                      <label className="text-muted-foreground text-[11px] font-medium">商品描述与功能点说明</label>
+                      <label className="text-slate-600 text-[11px] font-bold">商品描述与功能点说明</label>
                       <Textarea
                         rows={2}
                         value={parsedResult.description}
                         onChange={(e) => setParsedResult({ ...parsedResult, description: e.target.value })}
-                        className="bg-background border-slate-200 dark:border-zinc-700 text-xs text-foreground rounded-lg resize-none"
+                        className="bg-white border-slate-200 text-xs text-slate-900 rounded-lg resize-none font-medium"
                       />
                     </div>
                   </div>
@@ -1781,12 +1791,12 @@ function ImagesSection({ form, imgUrlInput, setImgUrlInput, imgInputRef, addImag
             )}
           </div>
 
-          <DialogFooter className="border-t border-slate-100 dark:border-zinc-800 pt-3 flex items-center justify-between">
+          <DialogFooter className="border-t border-slate-100 pt-3 flex items-center justify-between">
             <Button
               variant="outline"
               size="sm"
               onClick={() => setUrlParseOpen(false)}
-              className="h-9 text-xs rounded-xl border-slate-200 dark:border-zinc-700 text-muted-foreground hover:bg-slate-100"
+              className="h-9 text-xs rounded-xl border-slate-200 text-slate-700 hover:bg-slate-100 font-semibold"
             >
               取消
             </Button>
@@ -1797,7 +1807,7 @@ function ImagesSection({ form, imgUrlInput, setImgUrlInput, imgInputRef, addImag
                 variant="outline"
                 disabled={parsing || !inputUrl.trim()}
                 onClick={() => handleAIParseUrl()}
-                className="h-9 text-xs rounded-xl gap-1.5 border-rose-200 dark:border-rose-800/60 text-rose-600 dark:text-rose-300 hover:bg-rose-50"
+                className="h-9 text-xs rounded-xl gap-1.5 border-rose-200 text-rose-600 hover:bg-rose-50 font-semibold"
               >
                 <Wand2 className="w-3.5 h-3.5" />
                 {parsing ? '解析中...' : '重新解析'}
@@ -1808,7 +1818,7 @@ function ImagesSection({ form, imgUrlInput, setImgUrlInput, imgInputRef, addImag
                   size="sm"
                   disabled={savingParsed}
                   onClick={handleSaveParsedProduct}
-                  className="h-9 text-xs rounded-xl bg-gradient-to-r from-rose-600 to-purple-600 hover:from-rose-700 hover:to-purple-700 text-white font-semibold gap-1.5 shadow-md"
+                  className="h-9 text-xs rounded-xl bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 hover:from-rose-600 hover:to-purple-700 text-white font-bold gap-1.5 shadow-md shadow-rose-500/20"
                 >
                   {savingParsed ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
                   确认并导入商品管理
@@ -1818,9 +1828,9 @@ function ImagesSection({ form, imgUrlInput, setImgUrlInput, imgInputRef, addImag
                   size="sm"
                   disabled={parsing || !inputUrl.trim()}
                   onClick={() => handleAIParseUrl()}
-                  className="h-9 text-xs rounded-xl bg-gradient-to-r from-rose-600 to-purple-600 hover:from-rose-700 hover:to-purple-700 text-white font-semibold gap-1.5 shadow-md"
+                  className="h-9 text-xs rounded-xl bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 hover:from-rose-600 hover:to-purple-700 text-white font-bold gap-1.5 shadow-md shadow-rose-500/20"
                 >
-                  {parsing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                  {parsing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 text-amber-300" />}
                   🚀 AI 智能解析商品
                 </Button>
               )}
@@ -1877,51 +1887,53 @@ function SpecsSection({ form, addSpec, removeSpec, updateSpec }: {
     
       
 
-      {/* ── 一键 URL / 口令解析商品导入弹窗 (电商清爽风格) ───────────────────────────────────────────── */}
+      
+
+      {/* ── 一键 URL / 口令解析商品导入弹窗 (高亮亮彩电商风格) ───────────────────────────────────────────── */}
       <Dialog open={urlParseOpen} onOpenChange={setUrlParseOpen}>
-        <DialogContent className="sm:max-w-2xl bg-white dark:bg-zinc-900 border-rose-100 dark:border-zinc-800 text-foreground p-6 rounded-3xl shadow-2xl">
-          <DialogHeader className="space-y-1.5 border-b border-rose-100/60 dark:border-zinc-800/80 pb-3">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center shrink-0">
-                <Sparkles className="w-4 h-4 text-rose-500 animate-pulse" />
+        <DialogContent className="sm:max-w-2xl bg-white text-slate-900 border-slate-200/90 p-6 rounded-3xl shadow-[0_25px_70px_-15px_rgba(0,0,0,0.35)] z-50 overflow-hidden">
+          <DialogHeader className="space-y-1.5 border-b border-slate-100 pb-3">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-rose-500 to-purple-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-rose-500/20">
+                <Sparkles className="w-4 h-4 text-white animate-pulse" />
               </div>
-              <DialogTitle className="text-lg font-bold flex items-center gap-2 text-foreground">
+              <DialogTitle className="text-xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
                 一键 URL / 剪贴板口令解析商品导入
-                <Badge className="bg-rose-100 text-rose-600 dark:bg-rose-950/60 dark:text-rose-300 border-rose-200 dark:border-rose-800 text-[10px] font-normal">
+                <Badge className="bg-rose-50 text-rose-600 border border-rose-200/80 font-semibold text-[11px] rounded-full px-2.5 py-0.5">
                   DeepSeek-V4-Flash
                 </Badge>
               </DialogTitle>
             </div>
-            <p className="text-xs text-muted-foreground pl-10">
+            <p className="text-xs text-slate-500 pl-11 font-medium">
               支持抖音、TikTok、拼多多、淘宝全网平台。粘贴商品链接自动智能提炼标题、分类、活动售价与 3 大 AI 核心卖点
             </p>
           </DialogHeader>
 
           <div className="space-y-4 my-2">
             {/* 1. 目标平台选择 */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                <span className="w-4 h-4 rounded-full bg-rose-500 text-white flex items-center justify-center text-[10px] font-bold">1</span>
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                <span className="w-4 h-4 rounded-full bg-rose-500 text-white flex items-center justify-center text-[10px] font-extrabold shadow-xs">1</span>
                 选择目标电商平台
               </label>
               <div className="flex flex-wrap gap-1.5">
                 {[
-                  { id: 'douyin', label: '抖音 🎵', activeCls: 'bg-pink-500 text-white border-pink-500' },
-                  { id: 'tiktok', label: 'TikTok 🎶', activeCls: 'bg-zinc-900 text-white border-zinc-900 dark:bg-zinc-100 dark:text-zinc-900' },
-                  { id: 'pinduoduo', label: '拼多多 🔴', activeCls: 'bg-red-500 text-white border-red-500' },
-                  { id: 'taobao', label: '淘宝 🟠', activeCls: 'bg-orange-500 text-white border-orange-500' },
-                  { id: 'shopee', label: 'Shopee 🧡', activeCls: 'bg-amber-500 text-white border-amber-500' },
-                  { id: 'amazon', label: '亚马逊 📦', activeCls: 'bg-yellow-600 text-white border-yellow-600' },
-                  { id: 'general', label: '全网通用 🌐', activeCls: 'bg-blue-600 text-white border-blue-600' },
+                  { id: 'douyin', label: '抖音 🎵', activeCls: 'bg-gradient-to-r from-pink-500 to-rose-600 text-white font-bold border-transparent shadow-md shadow-pink-500/25' },
+                  { id: 'tiktok', label: 'TikTok 🎶', activeCls: 'bg-slate-900 text-white font-bold border-transparent shadow-md shadow-slate-900/25' },
+                  { id: 'pinduoduo', label: '拼多多 🔴', activeCls: 'bg-gradient-to-r from-red-500 to-rose-600 text-white font-bold border-transparent shadow-md shadow-red-500/25' },
+                  { id: 'taobao', label: '淘宝 🟠', activeCls: 'bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold border-transparent shadow-md shadow-orange-500/25' },
+                  { id: 'shopee', label: 'Shopee 🧡', activeCls: 'bg-gradient-to-r from-amber-500 to-orange-600 text-white font-bold border-transparent shadow-md shadow-amber-500/25' },
+                  { id: 'amazon', label: '亚马逊 📦', activeCls: 'bg-gradient-to-r from-yellow-500 to-amber-600 text-white font-bold border-transparent shadow-md shadow-yellow-500/25' },
+                  { id: 'general', label: '全网通用 🌐', activeCls: 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold border-transparent shadow-md shadow-blue-500/25' },
                 ].map(p => (
                   <button
                     key={p.id}
                     onClick={() => setParsePlatform(p.id)}
                     className={cn(
-                      "px-3 py-1.5 rounded-xl text-xs font-semibold transition-all border shadow-xs",
+                      "px-3 py-1.5 rounded-xl text-xs transition-all border",
                       parsePlatform === p.id
-                        ? p.activeCls + " shadow-sm font-bold"
-                        : "bg-slate-50 dark:bg-zinc-800/80 text-muted-foreground border-slate-200 dark:border-zinc-700 hover:bg-slate-100 hover:text-foreground"
+                        ? p.activeCls
+                        : "bg-slate-100/90 text-slate-700 border-slate-200/80 font-medium hover:bg-slate-200/80 hover:text-slate-900"
                     )}
                   >
                     {p.label}
@@ -1933,24 +1945,24 @@ function SpecsSection({ form, addSpec, removeSpec, updateSpec }: {
             {/* 2. 输入链接/口令 */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                  <span className="w-4 h-4 rounded-full bg-rose-500 text-white flex items-center justify-center text-[10px] font-bold">2</span>
+                <label className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                  <span className="w-4 h-4 rounded-full bg-rose-500 text-white flex items-center justify-center text-[10px] font-extrabold shadow-xs">2</span>
                   粘贴商品详情 URL 或口令分享文本
                 </label>
-                <span className="text-[10px] text-muted-foreground">自动提取淘口令/抖音推荐符</span>
+                <span className="text-[11px] text-slate-400 font-medium">自动提取淘口令/抖音推荐符</span>
               </div>
               <Textarea
                 rows={3}
                 value={inputUrl}
                 onChange={(e) => setInputUrl(e.target.value)}
                 placeholder="例如: https://v.douyin.com/iLeXa1/ 或 8.99 复制打开抖音看详情...【爆款90鹅绒连帽加厚羽绒服】"
-                className="bg-slate-50 dark:bg-zinc-800/80 border-slate-200 dark:border-zinc-700 text-xs text-foreground placeholder:text-muted-foreground/60 rounded-2xl resize-none p-3"
+                className="bg-slate-50 border-slate-200 text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-rose-400 focus:ring-2 focus:ring-rose-400/20 rounded-2xl resize-none p-3 font-normal shadow-inner"
               />
             </div>
 
             {/* 快捷测试示例 */}
             <div className="flex items-center gap-2 pt-0.5 flex-wrap">
-              <span className="text-[11px] text-muted-foreground shrink-0 font-medium">快捷示例:</span>
+              <span className="text-[11px] text-slate-500 shrink-0 font-semibold">快捷示例:</span>
               <button
                 onClick={() => {
                   setParsePlatform('douyin');
@@ -1958,7 +1970,7 @@ function SpecsSection({ form, addSpec, removeSpec, updateSpec }: {
                   setInputUrl(sample);
                   handleAIParseUrl(sample);
                 }}
-                className="text-[11px] px-2.5 py-1 rounded-lg bg-pink-50 dark:bg-pink-950/40 border border-pink-200 dark:border-pink-800/50 text-pink-600 dark:text-pink-300 hover:bg-pink-100 transition-colors truncate max-w-[170px]"
+                className="text-[11px] px-2.5 py-1 rounded-xl bg-pink-50 border border-pink-200 text-pink-700 hover:bg-pink-100 transition-colors font-medium truncate max-w-[170px]"
               >
                 🎵 抖音90鹅绒羽绒服
               </button>
@@ -1969,7 +1981,7 @@ function SpecsSection({ form, addSpec, removeSpec, updateSpec }: {
                   setInputUrl(sample);
                   handleAIParseUrl(sample);
                 }}
-                className="text-[11px] px-2.5 py-1 rounded-lg bg-teal-50 dark:bg-teal-950/40 border border-teal-200 dark:border-teal-800/50 text-teal-600 dark:text-teal-300 hover:bg-teal-100 transition-colors truncate max-w-[170px]"
+                className="text-[11px] px-2.5 py-1 rounded-xl bg-teal-50 border border-teal-200 text-teal-700 hover:bg-teal-100 transition-colors font-medium truncate max-w-[170px]"
               >
                 🎶 TikTok 鱼腥草爽肤水
               </button>
@@ -1980,7 +1992,7 @@ function SpecsSection({ form, addSpec, removeSpec, updateSpec }: {
                   setInputUrl(sample);
                   handleAIParseUrl(sample);
                 }}
-                className="text-[11px] px-2.5 py-1 rounded-lg bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-800/50 text-orange-600 dark:text-orange-300 hover:bg-orange-100 transition-colors truncate max-w-[170px]"
+                className="text-[11px] px-2.5 py-1 rounded-xl bg-orange-50 border border-orange-200 text-orange-700 hover:bg-orange-100 transition-colors font-medium truncate max-w-[170px]"
               >
                 🟠 淘宝烟酰胺精华
               </button>
@@ -1988,27 +2000,27 @@ function SpecsSection({ form, addSpec, removeSpec, updateSpec }: {
 
             {/* AI 智能解析进度条 */}
             {parsing && (
-              <div className="p-4 rounded-2xl bg-rose-50/80 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800/50 space-y-2 animate-in fade-in">
-                <div className="flex items-center justify-between text-xs font-semibold text-rose-600 dark:text-rose-300">
+              <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 space-y-2 animate-in fade-in">
+                <div className="flex items-center justify-between text-xs font-bold text-rose-700">
                   <span className="flex items-center gap-2">
-                    <Loader2 className="w-4 h-4 animate-spin text-rose-500" />
+                    <Loader2 className="w-4 h-4 animate-spin text-rose-600" />
                     DeepSeek-V4-Flash 多模态正在智能提炼商品属性与卖点...
                   </span>
-                  <span className="font-mono text-rose-500 font-bold">{parseProgress}%</span>
+                  <span className="font-mono text-rose-600 font-extrabold">{parseProgress}%</span>
                 </div>
-                <Progress value={parseProgress} className="h-1.5 bg-rose-100 dark:bg-zinc-800" />
+                <Progress value={parseProgress} className="h-1.5 bg-rose-100" />
               </div>
             )}
 
             {/* 3. 解析结果预览与自定义编辑区域 */}
             {parsedResult && !parsing && (
-              <div className="p-4 rounded-2xl bg-slate-50/90 dark:bg-zinc-800/50 border border-slate-200 dark:border-zinc-700/80 space-y-3 max-h-[320px] overflow-y-auto pr-1">
-                <div className="flex items-center justify-between border-b border-slate-200 dark:border-zinc-700 pb-2">
-                  <span className="text-xs font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1.5">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 max-h-[320px] overflow-y-auto pr-1">
+                <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                  <span className="text-xs font-bold text-rose-600 flex items-center gap-1.5">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                     解析完成！核对并自定义修改商品数据
                   </span>
-                  <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800 text-[10px]">
+                  <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold text-[10px]">
                     DeepSeek 提取完成
                   </Badge>
                 </div>
@@ -2016,86 +2028,86 @@ function SpecsSection({ form, addSpec, removeSpec, updateSpec }: {
                 <div className="flex gap-4 items-start">
                   {/* 封面预估 */}
                   <div className="w-24 shrink-0 space-y-1.5">
-                    <div className="aspect-square rounded-xl overflow-hidden border border-slate-200 dark:border-zinc-700 bg-background shadow-xs">
+                    <div className="aspect-square rounded-xl overflow-hidden border border-slate-200 bg-white shadow-sm">
                       <img src={parsedResult.cover_image} alt="" className="w-full h-full object-cover" />
                     </div>
                     <Input
                       value={parsedResult.cover_image}
                       onChange={(e) => setParsedResult({ ...parsedResult, cover_image: e.target.value })}
                       placeholder="封面图 URL"
-                      className="h-7 text-[10px] bg-background border-slate-200 dark:border-zinc-700 text-foreground"
+                      className="h-7 text-[10px] bg-white border-slate-200 text-slate-800"
                     />
                   </div>
 
                   {/* 信息字段编辑 */}
                   <div className="flex-1 space-y-2.5 text-xs">
                     <div className="space-y-1">
-                      <label className="text-muted-foreground text-[11px] font-medium">商品标题</label>
+                      <label className="text-slate-600 text-[11px] font-bold">商品标题</label>
                       <Input
                         value={parsedResult.name}
                         onChange={(e) => setParsedResult({ ...parsedResult, name: e.target.value })}
-                        className="h-8 bg-background border-slate-200 dark:border-zinc-700 text-foreground font-semibold"
+                        className="h-8 bg-white border-slate-200 text-slate-900 font-bold"
                       />
                     </div>
 
                     <div className="grid grid-cols-2 gap-2">
                       <div className="space-y-1">
-                        <label className="text-muted-foreground text-[11px] font-medium">所属分类</label>
+                        <label className="text-slate-600 text-[11px] font-bold">所属分类</label>
                         <Select
                           value={parsedResult.category}
                           onValueChange={(val) => setParsedResult({ ...parsedResult, category: val })}
                         >
-                          <SelectTrigger className="h-8 bg-background border-slate-200 dark:border-zinc-700 text-foreground">
+                          <SelectTrigger className="h-8 bg-white border-slate-200 text-slate-900 font-semibold">
                             <SelectValue />
                           </SelectTrigger>
-                          <SelectContent className="bg-background border-slate-200 dark:border-zinc-700 text-foreground">
+                          <SelectContent className="bg-white border-slate-200 text-slate-900">
                             {CATEGORIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                           </SelectContent>
                         </Select>
                       </div>
                       <div className="space-y-1">
-                        <label className="text-muted-foreground text-[11px] font-medium">子分类</label>
+                        <label className="text-slate-600 text-[11px] font-bold">子分类</label>
                         <Input
                           value={parsedResult.sub_category || ''}
                           onChange={(e) => setParsedResult({ ...parsedResult, sub_category: e.target.value })}
-                          className="h-8 bg-background border-slate-200 dark:border-zinc-700 text-foreground"
+                          className="h-8 bg-white border-slate-200 text-slate-900"
                         />
                       </div>
                     </div>
 
                     <div className="grid grid-cols-3 gap-2">
                       <div className="space-y-1">
-                        <label className="text-muted-foreground text-[11px] font-medium">原价 (¥/$)</label>
+                        <label className="text-slate-600 text-[11px] font-bold">原价 (¥/$)</label>
                         <Input
                           type="number"
                           value={parsedResult.original_price}
                           onChange={(e) => setParsedResult({ ...parsedResult, original_price: e.target.value })}
-                          className="h-8 bg-background border-slate-200 dark:border-zinc-700 text-foreground"
+                          className="h-8 bg-white border-slate-200 text-slate-900"
                         />
                       </div>
                       <div className="space-y-1">
-                        <label className="text-rose-600 dark:text-rose-400 text-[11px] font-bold">活动售价 (¥/$)</label>
+                        <label className="text-rose-600 text-[11px] font-bold">活动售价 (¥/$)</label>
                         <Input
                           type="number"
                           value={parsedResult.sale_price}
                           onChange={(e) => setParsedResult({ ...parsedResult, sale_price: e.target.value })}
-                          className="h-8 bg-background border-rose-300 dark:border-rose-700/60 text-rose-600 dark:text-rose-400 font-bold"
+                          className="h-8 bg-rose-50 border-rose-300 text-rose-600 font-extrabold"
                         />
                       </div>
                       <div className="space-y-1">
-                        <label className="text-muted-foreground text-[11px] font-medium">初始库存</label>
+                        <label className="text-slate-600 text-[11px] font-bold">初始库存</label>
                         <Input
                           type="number"
                           value={parsedResult.stock}
                           onChange={(e) => setParsedResult({ ...parsedResult, stock: e.target.value })}
-                          className="h-8 bg-background border-slate-200 dark:border-zinc-700 text-foreground"
+                          className="h-8 bg-white border-slate-200 text-slate-900"
                         />
                       </div>
                     </div>
 
                     {/* AI 核心卖点 */}
                     <div className="space-y-1.5">
-                      <label className="text-muted-foreground text-[11px] font-medium">AI 提取核心卖点 (应用于脚本创作)</label>
+                      <label className="text-slate-600 text-[11px] font-bold">AI 提取核心卖点 (应用于脚本创作)</label>
                       {parsedResult.selling_points?.map((sp: string, idx: number) => (
                         <Input
                           key={idx}
@@ -2105,19 +2117,19 @@ function SpecsSection({ form, addSpec, removeSpec, updateSpec }: {
                             newSps[idx] = e.target.value;
                             setParsedResult({ ...parsedResult, selling_points: newSps });
                           }}
-                          className="h-7 text-xs bg-background border-slate-200 dark:border-zinc-700 text-foreground"
+                          className="h-7 text-xs bg-white border-slate-200 text-slate-900 font-medium"
                         />
                       ))}
                     </div>
 
                     {/* 商品简述 */}
                     <div className="space-y-1">
-                      <label className="text-muted-foreground text-[11px] font-medium">商品描述与功能点说明</label>
+                      <label className="text-slate-600 text-[11px] font-bold">商品描述与功能点说明</label>
                       <Textarea
                         rows={2}
                         value={parsedResult.description}
                         onChange={(e) => setParsedResult({ ...parsedResult, description: e.target.value })}
-                        className="bg-background border-slate-200 dark:border-zinc-700 text-xs text-foreground rounded-lg resize-none"
+                        className="bg-white border-slate-200 text-xs text-slate-900 rounded-lg resize-none font-medium"
                       />
                     </div>
                   </div>
@@ -2126,12 +2138,12 @@ function SpecsSection({ form, addSpec, removeSpec, updateSpec }: {
             )}
           </div>
 
-          <DialogFooter className="border-t border-slate-100 dark:border-zinc-800 pt-3 flex items-center justify-between">
+          <DialogFooter className="border-t border-slate-100 pt-3 flex items-center justify-between">
             <Button
               variant="outline"
               size="sm"
               onClick={() => setUrlParseOpen(false)}
-              className="h-9 text-xs rounded-xl border-slate-200 dark:border-zinc-700 text-muted-foreground hover:bg-slate-100"
+              className="h-9 text-xs rounded-xl border-slate-200 text-slate-700 hover:bg-slate-100 font-semibold"
             >
               取消
             </Button>
@@ -2142,7 +2154,7 @@ function SpecsSection({ form, addSpec, removeSpec, updateSpec }: {
                 variant="outline"
                 disabled={parsing || !inputUrl.trim()}
                 onClick={() => handleAIParseUrl()}
-                className="h-9 text-xs rounded-xl gap-1.5 border-rose-200 dark:border-rose-800/60 text-rose-600 dark:text-rose-300 hover:bg-rose-50"
+                className="h-9 text-xs rounded-xl gap-1.5 border-rose-200 text-rose-600 hover:bg-rose-50 font-semibold"
               >
                 <Wand2 className="w-3.5 h-3.5" />
                 {parsing ? '解析中...' : '重新解析'}
@@ -2153,7 +2165,7 @@ function SpecsSection({ form, addSpec, removeSpec, updateSpec }: {
                   size="sm"
                   disabled={savingParsed}
                   onClick={handleSaveParsedProduct}
-                  className="h-9 text-xs rounded-xl bg-gradient-to-r from-rose-600 to-purple-600 hover:from-rose-700 hover:to-purple-700 text-white font-semibold gap-1.5 shadow-md"
+                  className="h-9 text-xs rounded-xl bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 hover:from-rose-600 hover:to-purple-700 text-white font-bold gap-1.5 shadow-md shadow-rose-500/20"
                 >
                   {savingParsed ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
                   确认并导入商品管理
@@ -2163,9 +2175,9 @@ function SpecsSection({ form, addSpec, removeSpec, updateSpec }: {
                   size="sm"
                   disabled={parsing || !inputUrl.trim()}
                   onClick={() => handleAIParseUrl()}
-                  className="h-9 text-xs rounded-xl bg-gradient-to-r from-rose-600 to-purple-600 hover:from-rose-700 hover:to-purple-700 text-white font-semibold gap-1.5 shadow-md"
+                  className="h-9 text-xs rounded-xl bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 hover:from-rose-600 hover:to-purple-700 text-white font-bold gap-1.5 shadow-md shadow-rose-500/20"
                 >
-                  {parsing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                  {parsing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 text-amber-300" />}
                   🚀 AI 智能解析商品
                 </Button>
               )}
@@ -3293,51 +3305,53 @@ ${textToParse}`;
     
       
 
-      {/* ── 一键 URL / 口令解析商品导入弹窗 (电商清爽风格) ───────────────────────────────────────────── */}
+      
+
+      {/* ── 一键 URL / 口令解析商品导入弹窗 (高亮亮彩电商风格) ───────────────────────────────────────────── */}
       <Dialog open={urlParseOpen} onOpenChange={setUrlParseOpen}>
-        <DialogContent className="sm:max-w-2xl bg-white dark:bg-zinc-900 border-rose-100 dark:border-zinc-800 text-foreground p-6 rounded-3xl shadow-2xl">
-          <DialogHeader className="space-y-1.5 border-b border-rose-100/60 dark:border-zinc-800/80 pb-3">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center shrink-0">
-                <Sparkles className="w-4 h-4 text-rose-500 animate-pulse" />
+        <DialogContent className="sm:max-w-2xl bg-white text-slate-900 border-slate-200/90 p-6 rounded-3xl shadow-[0_25px_70px_-15px_rgba(0,0,0,0.35)] z-50 overflow-hidden">
+          <DialogHeader className="space-y-1.5 border-b border-slate-100 pb-3">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-rose-500 to-purple-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-rose-500/20">
+                <Sparkles className="w-4 h-4 text-white animate-pulse" />
               </div>
-              <DialogTitle className="text-lg font-bold flex items-center gap-2 text-foreground">
+              <DialogTitle className="text-xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
                 一键 URL / 剪贴板口令解析商品导入
-                <Badge className="bg-rose-100 text-rose-600 dark:bg-rose-950/60 dark:text-rose-300 border-rose-200 dark:border-rose-800 text-[10px] font-normal">
+                <Badge className="bg-rose-50 text-rose-600 border border-rose-200/80 font-semibold text-[11px] rounded-full px-2.5 py-0.5">
                   DeepSeek-V4-Flash
                 </Badge>
               </DialogTitle>
             </div>
-            <p className="text-xs text-muted-foreground pl-10">
+            <p className="text-xs text-slate-500 pl-11 font-medium">
               支持抖音、TikTok、拼多多、淘宝全网平台。粘贴商品链接自动智能提炼标题、分类、活动售价与 3 大 AI 核心卖点
             </p>
           </DialogHeader>
 
           <div className="space-y-4 my-2">
             {/* 1. 目标平台选择 */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                <span className="w-4 h-4 rounded-full bg-rose-500 text-white flex items-center justify-center text-[10px] font-bold">1</span>
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                <span className="w-4 h-4 rounded-full bg-rose-500 text-white flex items-center justify-center text-[10px] font-extrabold shadow-xs">1</span>
                 选择目标电商平台
               </label>
               <div className="flex flex-wrap gap-1.5">
                 {[
-                  { id: 'douyin', label: '抖音 🎵', activeCls: 'bg-pink-500 text-white border-pink-500' },
-                  { id: 'tiktok', label: 'TikTok 🎶', activeCls: 'bg-zinc-900 text-white border-zinc-900 dark:bg-zinc-100 dark:text-zinc-900' },
-                  { id: 'pinduoduo', label: '拼多多 🔴', activeCls: 'bg-red-500 text-white border-red-500' },
-                  { id: 'taobao', label: '淘宝 🟠', activeCls: 'bg-orange-500 text-white border-orange-500' },
-                  { id: 'shopee', label: 'Shopee 🧡', activeCls: 'bg-amber-500 text-white border-amber-500' },
-                  { id: 'amazon', label: '亚马逊 📦', activeCls: 'bg-yellow-600 text-white border-yellow-600' },
-                  { id: 'general', label: '全网通用 🌐', activeCls: 'bg-blue-600 text-white border-blue-600' },
+                  { id: 'douyin', label: '抖音 🎵', activeCls: 'bg-gradient-to-r from-pink-500 to-rose-600 text-white font-bold border-transparent shadow-md shadow-pink-500/25' },
+                  { id: 'tiktok', label: 'TikTok 🎶', activeCls: 'bg-slate-900 text-white font-bold border-transparent shadow-md shadow-slate-900/25' },
+                  { id: 'pinduoduo', label: '拼多多 🔴', activeCls: 'bg-gradient-to-r from-red-500 to-rose-600 text-white font-bold border-transparent shadow-md shadow-red-500/25' },
+                  { id: 'taobao', label: '淘宝 🟠', activeCls: 'bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold border-transparent shadow-md shadow-orange-500/25' },
+                  { id: 'shopee', label: 'Shopee 🧡', activeCls: 'bg-gradient-to-r from-amber-500 to-orange-600 text-white font-bold border-transparent shadow-md shadow-amber-500/25' },
+                  { id: 'amazon', label: '亚马逊 📦', activeCls: 'bg-gradient-to-r from-yellow-500 to-amber-600 text-white font-bold border-transparent shadow-md shadow-yellow-500/25' },
+                  { id: 'general', label: '全网通用 🌐', activeCls: 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold border-transparent shadow-md shadow-blue-500/25' },
                 ].map(p => (
                   <button
                     key={p.id}
                     onClick={() => setParsePlatform(p.id)}
                     className={cn(
-                      "px-3 py-1.5 rounded-xl text-xs font-semibold transition-all border shadow-xs",
+                      "px-3 py-1.5 rounded-xl text-xs transition-all border",
                       parsePlatform === p.id
-                        ? p.activeCls + " shadow-sm font-bold"
-                        : "bg-slate-50 dark:bg-zinc-800/80 text-muted-foreground border-slate-200 dark:border-zinc-700 hover:bg-slate-100 hover:text-foreground"
+                        ? p.activeCls
+                        : "bg-slate-100/90 text-slate-700 border-slate-200/80 font-medium hover:bg-slate-200/80 hover:text-slate-900"
                     )}
                   >
                     {p.label}
@@ -3349,24 +3363,24 @@ ${textToParse}`;
             {/* 2. 输入链接/口令 */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                  <span className="w-4 h-4 rounded-full bg-rose-500 text-white flex items-center justify-center text-[10px] font-bold">2</span>
+                <label className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                  <span className="w-4 h-4 rounded-full bg-rose-500 text-white flex items-center justify-center text-[10px] font-extrabold shadow-xs">2</span>
                   粘贴商品详情 URL 或口令分享文本
                 </label>
-                <span className="text-[10px] text-muted-foreground">自动提取淘口令/抖音推荐符</span>
+                <span className="text-[11px] text-slate-400 font-medium">自动提取淘口令/抖音推荐符</span>
               </div>
               <Textarea
                 rows={3}
                 value={inputUrl}
                 onChange={(e) => setInputUrl(e.target.value)}
                 placeholder="例如: https://v.douyin.com/iLeXa1/ 或 8.99 复制打开抖音看详情...【爆款90鹅绒连帽加厚羽绒服】"
-                className="bg-slate-50 dark:bg-zinc-800/80 border-slate-200 dark:border-zinc-700 text-xs text-foreground placeholder:text-muted-foreground/60 rounded-2xl resize-none p-3"
+                className="bg-slate-50 border-slate-200 text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-rose-400 focus:ring-2 focus:ring-rose-400/20 rounded-2xl resize-none p-3 font-normal shadow-inner"
               />
             </div>
 
             {/* 快捷测试示例 */}
             <div className="flex items-center gap-2 pt-0.5 flex-wrap">
-              <span className="text-[11px] text-muted-foreground shrink-0 font-medium">快捷示例:</span>
+              <span className="text-[11px] text-slate-500 shrink-0 font-semibold">快捷示例:</span>
               <button
                 onClick={() => {
                   setParsePlatform('douyin');
@@ -3374,7 +3388,7 @@ ${textToParse}`;
                   setInputUrl(sample);
                   handleAIParseUrl(sample);
                 }}
-                className="text-[11px] px-2.5 py-1 rounded-lg bg-pink-50 dark:bg-pink-950/40 border border-pink-200 dark:border-pink-800/50 text-pink-600 dark:text-pink-300 hover:bg-pink-100 transition-colors truncate max-w-[170px]"
+                className="text-[11px] px-2.5 py-1 rounded-xl bg-pink-50 border border-pink-200 text-pink-700 hover:bg-pink-100 transition-colors font-medium truncate max-w-[170px]"
               >
                 🎵 抖音90鹅绒羽绒服
               </button>
@@ -3385,7 +3399,7 @@ ${textToParse}`;
                   setInputUrl(sample);
                   handleAIParseUrl(sample);
                 }}
-                className="text-[11px] px-2.5 py-1 rounded-lg bg-teal-50 dark:bg-teal-950/40 border border-teal-200 dark:border-teal-800/50 text-teal-600 dark:text-teal-300 hover:bg-teal-100 transition-colors truncate max-w-[170px]"
+                className="text-[11px] px-2.5 py-1 rounded-xl bg-teal-50 border border-teal-200 text-teal-700 hover:bg-teal-100 transition-colors font-medium truncate max-w-[170px]"
               >
                 🎶 TikTok 鱼腥草爽肤水
               </button>
@@ -3396,7 +3410,7 @@ ${textToParse}`;
                   setInputUrl(sample);
                   handleAIParseUrl(sample);
                 }}
-                className="text-[11px] px-2.5 py-1 rounded-lg bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-800/50 text-orange-600 dark:text-orange-300 hover:bg-orange-100 transition-colors truncate max-w-[170px]"
+                className="text-[11px] px-2.5 py-1 rounded-xl bg-orange-50 border border-orange-200 text-orange-700 hover:bg-orange-100 transition-colors font-medium truncate max-w-[170px]"
               >
                 🟠 淘宝烟酰胺精华
               </button>
@@ -3404,27 +3418,27 @@ ${textToParse}`;
 
             {/* AI 智能解析进度条 */}
             {parsing && (
-              <div className="p-4 rounded-2xl bg-rose-50/80 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800/50 space-y-2 animate-in fade-in">
-                <div className="flex items-center justify-between text-xs font-semibold text-rose-600 dark:text-rose-300">
+              <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 space-y-2 animate-in fade-in">
+                <div className="flex items-center justify-between text-xs font-bold text-rose-700">
                   <span className="flex items-center gap-2">
-                    <Loader2 className="w-4 h-4 animate-spin text-rose-500" />
+                    <Loader2 className="w-4 h-4 animate-spin text-rose-600" />
                     DeepSeek-V4-Flash 多模态正在智能提炼商品属性与卖点...
                   </span>
-                  <span className="font-mono text-rose-500 font-bold">{parseProgress}%</span>
+                  <span className="font-mono text-rose-600 font-extrabold">{parseProgress}%</span>
                 </div>
-                <Progress value={parseProgress} className="h-1.5 bg-rose-100 dark:bg-zinc-800" />
+                <Progress value={parseProgress} className="h-1.5 bg-rose-100" />
               </div>
             )}
 
             {/* 3. 解析结果预览与自定义编辑区域 */}
             {parsedResult && !parsing && (
-              <div className="p-4 rounded-2xl bg-slate-50/90 dark:bg-zinc-800/50 border border-slate-200 dark:border-zinc-700/80 space-y-3 max-h-[320px] overflow-y-auto pr-1">
-                <div className="flex items-center justify-between border-b border-slate-200 dark:border-zinc-700 pb-2">
-                  <span className="text-xs font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1.5">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 max-h-[320px] overflow-y-auto pr-1">
+                <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                  <span className="text-xs font-bold text-rose-600 flex items-center gap-1.5">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                     解析完成！核对并自定义修改商品数据
                   </span>
-                  <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800 text-[10px]">
+                  <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold text-[10px]">
                     DeepSeek 提取完成
                   </Badge>
                 </div>
@@ -3432,86 +3446,86 @@ ${textToParse}`;
                 <div className="flex gap-4 items-start">
                   {/* 封面预估 */}
                   <div className="w-24 shrink-0 space-y-1.5">
-                    <div className="aspect-square rounded-xl overflow-hidden border border-slate-200 dark:border-zinc-700 bg-background shadow-xs">
+                    <div className="aspect-square rounded-xl overflow-hidden border border-slate-200 bg-white shadow-sm">
                       <img src={parsedResult.cover_image} alt="" className="w-full h-full object-cover" />
                     </div>
                     <Input
                       value={parsedResult.cover_image}
                       onChange={(e) => setParsedResult({ ...parsedResult, cover_image: e.target.value })}
                       placeholder="封面图 URL"
-                      className="h-7 text-[10px] bg-background border-slate-200 dark:border-zinc-700 text-foreground"
+                      className="h-7 text-[10px] bg-white border-slate-200 text-slate-800"
                     />
                   </div>
 
                   {/* 信息字段编辑 */}
                   <div className="flex-1 space-y-2.5 text-xs">
                     <div className="space-y-1">
-                      <label className="text-muted-foreground text-[11px] font-medium">商品标题</label>
+                      <label className="text-slate-600 text-[11px] font-bold">商品标题</label>
                       <Input
                         value={parsedResult.name}
                         onChange={(e) => setParsedResult({ ...parsedResult, name: e.target.value })}
-                        className="h-8 bg-background border-slate-200 dark:border-zinc-700 text-foreground font-semibold"
+                        className="h-8 bg-white border-slate-200 text-slate-900 font-bold"
                       />
                     </div>
 
                     <div className="grid grid-cols-2 gap-2">
                       <div className="space-y-1">
-                        <label className="text-muted-foreground text-[11px] font-medium">所属分类</label>
+                        <label className="text-slate-600 text-[11px] font-bold">所属分类</label>
                         <Select
                           value={parsedResult.category}
                           onValueChange={(val) => setParsedResult({ ...parsedResult, category: val })}
                         >
-                          <SelectTrigger className="h-8 bg-background border-slate-200 dark:border-zinc-700 text-foreground">
+                          <SelectTrigger className="h-8 bg-white border-slate-200 text-slate-900 font-semibold">
                             <SelectValue />
                           </SelectTrigger>
-                          <SelectContent className="bg-background border-slate-200 dark:border-zinc-700 text-foreground">
+                          <SelectContent className="bg-white border-slate-200 text-slate-900">
                             {CATEGORIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                           </SelectContent>
                         </Select>
                       </div>
                       <div className="space-y-1">
-                        <label className="text-muted-foreground text-[11px] font-medium">子分类</label>
+                        <label className="text-slate-600 text-[11px] font-bold">子分类</label>
                         <Input
                           value={parsedResult.sub_category || ''}
                           onChange={(e) => setParsedResult({ ...parsedResult, sub_category: e.target.value })}
-                          className="h-8 bg-background border-slate-200 dark:border-zinc-700 text-foreground"
+                          className="h-8 bg-white border-slate-200 text-slate-900"
                         />
                       </div>
                     </div>
 
                     <div className="grid grid-cols-3 gap-2">
                       <div className="space-y-1">
-                        <label className="text-muted-foreground text-[11px] font-medium">原价 (¥/$)</label>
+                        <label className="text-slate-600 text-[11px] font-bold">原价 (¥/$)</label>
                         <Input
                           type="number"
                           value={parsedResult.original_price}
                           onChange={(e) => setParsedResult({ ...parsedResult, original_price: e.target.value })}
-                          className="h-8 bg-background border-slate-200 dark:border-zinc-700 text-foreground"
+                          className="h-8 bg-white border-slate-200 text-slate-900"
                         />
                       </div>
                       <div className="space-y-1">
-                        <label className="text-rose-600 dark:text-rose-400 text-[11px] font-bold">活动售价 (¥/$)</label>
+                        <label className="text-rose-600 text-[11px] font-bold">活动售价 (¥/$)</label>
                         <Input
                           type="number"
                           value={parsedResult.sale_price}
                           onChange={(e) => setParsedResult({ ...parsedResult, sale_price: e.target.value })}
-                          className="h-8 bg-background border-rose-300 dark:border-rose-700/60 text-rose-600 dark:text-rose-400 font-bold"
+                          className="h-8 bg-rose-50 border-rose-300 text-rose-600 font-extrabold"
                         />
                       </div>
                       <div className="space-y-1">
-                        <label className="text-muted-foreground text-[11px] font-medium">初始库存</label>
+                        <label className="text-slate-600 text-[11px] font-bold">初始库存</label>
                         <Input
                           type="number"
                           value={parsedResult.stock}
                           onChange={(e) => setParsedResult({ ...parsedResult, stock: e.target.value })}
-                          className="h-8 bg-background border-slate-200 dark:border-zinc-700 text-foreground"
+                          className="h-8 bg-white border-slate-200 text-slate-900"
                         />
                       </div>
                     </div>
 
                     {/* AI 核心卖点 */}
                     <div className="space-y-1.5">
-                      <label className="text-muted-foreground text-[11px] font-medium">AI 提取核心卖点 (应用于脚本创作)</label>
+                      <label className="text-slate-600 text-[11px] font-bold">AI 提取核心卖点 (应用于脚本创作)</label>
                       {parsedResult.selling_points?.map((sp: string, idx: number) => (
                         <Input
                           key={idx}
@@ -3521,19 +3535,19 @@ ${textToParse}`;
                             newSps[idx] = e.target.value;
                             setParsedResult({ ...parsedResult, selling_points: newSps });
                           }}
-                          className="h-7 text-xs bg-background border-slate-200 dark:border-zinc-700 text-foreground"
+                          className="h-7 text-xs bg-white border-slate-200 text-slate-900 font-medium"
                         />
                       ))}
                     </div>
 
                     {/* 商品简述 */}
                     <div className="space-y-1">
-                      <label className="text-muted-foreground text-[11px] font-medium">商品描述与功能点说明</label>
+                      <label className="text-slate-600 text-[11px] font-bold">商品描述与功能点说明</label>
                       <Textarea
                         rows={2}
                         value={parsedResult.description}
                         onChange={(e) => setParsedResult({ ...parsedResult, description: e.target.value })}
-                        className="bg-background border-slate-200 dark:border-zinc-700 text-xs text-foreground rounded-lg resize-none"
+                        className="bg-white border-slate-200 text-xs text-slate-900 rounded-lg resize-none font-medium"
                       />
                     </div>
                   </div>
@@ -3542,12 +3556,12 @@ ${textToParse}`;
             )}
           </div>
 
-          <DialogFooter className="border-t border-slate-100 dark:border-zinc-800 pt-3 flex items-center justify-between">
+          <DialogFooter className="border-t border-slate-100 pt-3 flex items-center justify-between">
             <Button
               variant="outline"
               size="sm"
               onClick={() => setUrlParseOpen(false)}
-              className="h-9 text-xs rounded-xl border-slate-200 dark:border-zinc-700 text-muted-foreground hover:bg-slate-100"
+              className="h-9 text-xs rounded-xl border-slate-200 text-slate-700 hover:bg-slate-100 font-semibold"
             >
               取消
             </Button>
@@ -3558,7 +3572,7 @@ ${textToParse}`;
                 variant="outline"
                 disabled={parsing || !inputUrl.trim()}
                 onClick={() => handleAIParseUrl()}
-                className="h-9 text-xs rounded-xl gap-1.5 border-rose-200 dark:border-rose-800/60 text-rose-600 dark:text-rose-300 hover:bg-rose-50"
+                className="h-9 text-xs rounded-xl gap-1.5 border-rose-200 text-rose-600 hover:bg-rose-50 font-semibold"
               >
                 <Wand2 className="w-3.5 h-3.5" />
                 {parsing ? '解析中...' : '重新解析'}
@@ -3569,7 +3583,7 @@ ${textToParse}`;
                   size="sm"
                   disabled={savingParsed}
                   onClick={handleSaveParsedProduct}
-                  className="h-9 text-xs rounded-xl bg-gradient-to-r from-rose-600 to-purple-600 hover:from-rose-700 hover:to-purple-700 text-white font-semibold gap-1.5 shadow-md"
+                  className="h-9 text-xs rounded-xl bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 hover:from-rose-600 hover:to-purple-700 text-white font-bold gap-1.5 shadow-md shadow-rose-500/20"
                 >
                   {savingParsed ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
                   确认并导入商品管理
@@ -3579,9 +3593,9 @@ ${textToParse}`;
                   size="sm"
                   disabled={parsing || !inputUrl.trim()}
                   onClick={() => handleAIParseUrl()}
-                  className="h-9 text-xs rounded-xl bg-gradient-to-r from-rose-600 to-purple-600 hover:from-rose-700 hover:to-purple-700 text-white font-semibold gap-1.5 shadow-md"
+                  className="h-9 text-xs rounded-xl bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 hover:from-rose-600 hover:to-purple-700 text-white font-bold gap-1.5 shadow-md shadow-rose-500/20"
                 >
-                  {parsing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                  {parsing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 text-amber-300" />}
                   🚀 AI 智能解析商品
                 </Button>
               )}
