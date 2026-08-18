@@ -178,44 +178,40 @@ async def translate_marketing_script(script: str, target_language: str) -> Dict[
 
 @mcp.tool(
     name="synthesize_voice_tts",
-    description="Synthesizes speech from a script line using StepAudio stepaudio-2.5-tts. Returns base64 encoded MP3 audio data."
+    description="Synthesizes speech from a script line using FunAudioLLM/CosyVoice2-0.5B. Returns base64 encoded MP3 audio data."
 )
 async def synthesize_voice_tts(
     text: str,
-    voice_id: str = "cixingnansheng",
+    voice_id: str = "fnlp/MOSS-TTSD-v0.5:alex",
     speed: float = 1.0,
     volume: float = 0.9
 ) -> Dict[str, Any]:
     async def _impl():
-        if not STEP_API_KEY:
-            return {"error": "missing_api_key", "message": "StepFun API key (VITE_STEP_API_KEY) is not configured."}
+        silicon_key = os.getenv("SILICONFLOW_API_KEY") or os.getenv("VITE_SILICONFLOW_API_KEY") or "sk-fvaewxbnaadhaixwxkrprqdasapwbxkvbypruvquadzeaxyn"
+        silicon_base = os.getenv("SILICONFLOW_BASE_URL") or "https://api.siliconflow.cn/v1"
 
-        instruction = f"语气自然、情感丰富饱满，语速为 {speed}x，音量为 {volume}"
-        
         async with httpx.AsyncClient(timeout=45.0) as client:
             response = await client.post(
-                f"{STEP_BASE_URL}/audio/speech",
+                f"{silicon_base}/audio/speech",
                 headers={
                     "Content-Type": "application/json",
-                    "Authorization": f"Bearer {STEP_API_KEY}"
+                    "Authorization": f"Bearer {silicon_key}"
                 },
                 json={
-                    "model": "stepaudio-2.5-tts",
+                    "model": "FunAudioLLM/CosyVoice2-0.5B",
                     "input": text,
                     "voice": voice_id,
-                    "instruction": instruction,
-                    "response_format": "mp3"
+                    "response_format": "mp3",
+                    "stream": False
                 }
             )
             response.raise_for_status()
             audio_bytes = response.content
-            audio_base64 = base64.b64encode(audio_bytes).decode("utf-8")
-            
+            audio_b64 = base64.b64encode(audio_bytes).decode("utf-8")
             return {
+                "audio_base64": audio_b64,
                 "format": "mp3",
-                "audio_base64": audio_base64,
-                "voice_id": voice_id,
-                "instruction": instruction
+                "text_length": len(text)
             }
 
     return await handle_tool_call("synthesize_voice_tts", _impl())

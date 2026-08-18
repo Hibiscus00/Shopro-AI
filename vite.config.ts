@@ -42,6 +42,18 @@ export default defineConfig({
           });
         },
       },
+      '/siliconflow-api': {
+        target: 'https://api.siliconflow.cn',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/siliconflow-api/, ''),
+        secure: false,
+        configure: (proxy, _options) => {
+          proxy.on('proxyReq', (proxyReq) => {
+            proxyReq.removeHeader('origin');
+            proxyReq.removeHeader('referer');
+          });
+        },
+      },
     },
   },
 });

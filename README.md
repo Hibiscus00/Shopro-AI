@@ -8,7 +8,7 @@
   <img alt="Supabase" src="https://img.shields.io/badge/Supabase-2.103.1-3FCF8E?logo=supabase&logoColor=white" />
   <img alt="Deno" src="https://img.shields.io/badge/Edge_Functions-Deno-000000?logo=deno&logoColor=white" />
   <img alt="AI" src="https://img.shields.io/badge/AI-DeepSeek_v4_Flash-blue" />
-  <img alt="Audio" src="https://img.shields.io/badge/Audio-StepAudio_2.5-orange" />
+  <img alt="Audio" src="https://img.shields.io/badge/Audio-CosyVoice2_TeleSpeech-orange" />
   <img alt="Video" src="https://img.shields.io/badge/Video-Seedance_2.0-violet" />
 </p>
 
@@ -64,7 +64,7 @@
 | 模块/能力 | 对接模型 | 调用入口 / SDK | 用途与优势 |
 |---|---|---|---|
 | **文本大模型** | **DeepSeek-V4-Flash** | `/functions/v1/deepseek-v4-pro` | 营销文案、多语种翻译、商品特征解析、NLP情感极值标注 |
-| **语音大模型** | **StepAudio 2.5** | `/functions/v1/stepaudio` (asr/tts) | `stepaudio-2.5-tts` 情感化语音合成，`stepaudio-2.5-asr` 录音ITN规范转录 |
+| **语音大模型** | **CosyVoice2 / TeleSpeech** | `/functions/v1/siliconflow-audio` | `CosyVoice2-0.5B` 情感化语音合成，`TeleSpeechASR` 录音高精度转录 |
 | **视频生成** | **Seedance 2.0** | `/functions/v1/seedance` (submit/query) | `seedance-2-0-fast-260128` 物理级高画质多模态短视频生成与图生视频 |
 | **图像/封面** | **Flux 1.1 Pro** | `ai-assistant` (generate_cover) | 竖版高分辨率带货短视频封面设计及图生图参考 |
 | **备份视频** | Kling / Sora | `/functions/v1/kling-video-create` / `sora` | 备用高端概念短片生成与转场渲染 |
@@ -183,7 +183,7 @@ Shopro AI/
 
 ### 2. 👥 数字人情感合成与多轨剪辑 (`AvatarsPage.tsx`, `VideoEditPage.tsx`)
 *   **情绪对齐**：系统利用 NLP 分析台词的情感极值，在分镜时间轴上自动映射数字人的面部表情（平和、喜悦、担忧、激动、说服）与语气。
-*   **多模态配音**：利用 `stepaudio-2.5-tts` 根据情感标记生成自然拟真的小语种配音。
+*   **多模态配音**：利用 `CosyVoice2-0.5B` 根据情感标记生成自然拟真的小语种配音。
 *   **多轨道编辑器**：在网页端提供多轨道可视化 Canvas 剪辑面板，直观拖拽分镜卡片、配音音轨、字幕，实现免学习拼积木式合成。
 
 ### 3. 💡 流量追踪、A/B测试与广告回流 (`ABTestPage.tsx`, `AnalyticsPage.tsx`, `DataFeedbackPage.tsx`, `PublishPage.tsx`)
@@ -315,4 +315,4 @@ npm run build
 
 ## 📌 总结
 
-Shopro AI 是一套面向 **带货短视频量产** 领域的一站式 SaaS 系统。项目融合了 DeepSeek-V4-Flash、StepAudio 2.5、Seedance 2.0 等前沿多模态大模型，以极高的工程化完成度打通了“文案-配音-画面-数据回流-团队协作-支付”的商业化完整闭环。具有极高的商业化落地价值和出海想象空间。
+Shopro AI 是一套面向 **带货短视频量产** 领域的一站式 SaaS 系统。项目融合了 DeepSeek-V4-Flash、CosyVoice2-0.5B、TeleSpeechASR、Seedance 2.0 等前沿多模态大模型，以极高的工程化完成度打通了“文案-配音-画面-数据回流-团队协作-支付”的商业化完整闭环。具有极高的商业化落地价值和出海想象空间。

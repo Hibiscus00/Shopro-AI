@@ -27,7 +27,7 @@ graph TD
         T3["NLP 情感打点与口播翻译"]:::text
     end
 
-    subgraph AUDIO_STAGE ["🎵 声音与配音模态 (StepAudio 2.5)"]
+    subgraph AUDIO_STAGE ["🎵 声音与配音模态 (CosyVoice2 / TeleSpeechASR)"]
         A1["情感化拟真配音合成 (TTS)"]:::audio
         A2["录音高精度转写格式化 (ASR)"]:::audio
     end
@@ -68,7 +68,7 @@ graph TD
 ```
 
 ### 💡 一句话核心流程描述
-> **全链路智能生成与自进化闭环**：系统通过抓取商品链接或分析竞品视频，利用 DeepSeek-V4-Flash 提取卖点并生成四层说服结构脚本，智能对齐 StepAudio 2.5 情感化配音与 Seedance 2.0/happyhorse/wan 多模态画面渲染，最终由本地 XGBoost 流量预测模型和 RAG 知识库驱动内容诊断与自进化改写，实现从商品到高转化带货短视频的极速闭环生成。
+> **全链路智能生成与自进化闭环**：系统通过抓取商品链接或分析竞品视频，利用 DeepSeek-V4-Flash 提取卖点并生成四层说服结构脚本，智能对齐 FunAudioLLM/CosyVoice2-0.5B 情感化配音与 Seedance 2.0/happyhorse/wan 多模态画面渲染，最终由本地 XGBoost 流量预测模型和 RAG 知识库驱动内容诊断与自进化改写，实现从商品到高转化带货短视频的极速闭环生成。
 
 ### 🎨 架构概念图生图提示词 (Prompt)
 ```text
@@ -122,15 +122,15 @@ A futuristic dark-mode tech dashboard visualization representing multi-modal AI 
     <tr>
       <td rowspan="2" valign="top"><b>🎵 音频语音</b></td>
       <td>情感化配音生成</td>
-      <td>StepAudio 2.5 TTS</td>
+      <td>FunAudioLLM/CosyVoice2-0.5B</td>
       <td>约 ￥0.005 / 千字</td>
-      <td>基于情绪分析，动态调整配音语速、重音与情感</td>
+      <td>基于情绪分析，动态调整配音语速、重音与情感音色</td>
     </tr>
     <tr>
       <td>录音转写与语音输入</td>
-      <td>StepAudio 2.5 ASR</td>
+      <td>TeleAI/TeleSpeechASR</td>
       <td>约 ￥0.005 / 分钟</td>
-      <td>ITN规范，将口语自适应转书面语，提升精确度</td>
+      <td>高精度抗噪转录，将口语自适应转书面语，提升精确度</td>
     </tr>
     <tr>
       <td rowspan="4" valign="top"><b>👁️ 视觉与多模态</b></td>
@@ -178,8 +178,8 @@ A futuristic dark-mode tech dashboard visualization representing multi-modal AI 
 
 | 序号 | 核心AI能力需求                               | 已对接模型                                                                    | API 估算价格                                                       | 典型输入与输出示例                                                                                      | 提示词策略与核心 Prompt 设计                                                                                                                                                  |
 | :--: | :------------------------------------------- | :---------------------------------------------------------------------------- | :----------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2.1 | **情感化多语种配音生成**(TTS 语音合成) | **StepAudio 2.5 TTS (已对接)**(`stepaudio-2.5-tts`) /MiniMax 情感 TTS | StepAudio 2.5 TTS: 约 ￥0.005 / 千字MiniMax TTS: ￥0.005 / 字      | **输入**：包含情感特征标记的句子文本、音色 ID**输出**：高保真带情感波动的音频文件 (WAV/MP3) | **【情感状态控制参数】**基于 NLP 情绪分析得到的情绪类型（如喜悦、促销）和强度，动态调整 TTS 发音的语速、重音和情感控制系数，拒绝机械化发音。                                  |
-| 2.2 | **录音转写与语音输入**(ASR 语音转文字) | **StepAudio 2.5 ASR (已对接)**(`stepaudio-2.5-asr`) /Whisper          | StepAudio 2.5 ASR: 约 ￥0.005 / 分钟Whisper: 约 ￥0.043 / 录音分钟 | **输入**：录音语音分片 Base64 编码**输出**：识别的中文/英文文案文本                         | **【抗噪音高准确度转录】**通过 SSE 流式传输音频数据给 StepAudio ASR 接口，开启 ITN 规范（智能文本格式化），将口语中的数字、时间自适应转换为书面格式，提高生成提示词的精确度。 |
+| 2.1 | **情感化多语种配音生成**(TTS 语音合成) | **FunAudioLLM/CosyVoice2-0.5B (已对接)** /MiniMax 情感 TTS | CosyVoice2: 约 ￥0.005 / 千字 | **输入**：包含情感特征标记的句子文本、音色 ID**输出**：高保真带情感波动的音频文件 (MP3) | **【情感状态控制参数】**基于 SiliconFlow 平台调取 CosyVoice2-0.5B 高精度 TTS，支持多音色（如 MOSS-TTSD）极速合成情感口播音轨。 |
+| 2.2 | **录音转写与语音输入**(ASR 语音转文字) | **TeleAI/TeleSpeechASR (已对接)** /Whisper          | TeleSpeechASR: 约 ￥0.005 / 分钟 | **输入**：录音语音分片 Base64 编码 / 音频文件**输出**：识别的中文/英文文案文本 | **【高精度多语种转录】**基于 TeleAI/TeleSpeechASR 高精度转写接口，实现抗噪录音识别与自动转书面语文本。 |
 
 ### 3. 👁️ 视觉图像与多模态合成模态（Vision & Multimodal Synthesis Modality）
 

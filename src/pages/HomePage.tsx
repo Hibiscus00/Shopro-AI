@@ -316,7 +316,7 @@ export default function HomePage() {
   const handleVoiceInput = async () => {
     if (recording) {
       setRecording(false);
-      toast.info('🎙️ 录音已结束，正在通过 StepAudio 2.5 ASR 进行识别...');
+      toast.info('🎙️ 录音已结束，正在通过 TeleAI/TeleSpeechASR 进行识别...');
       try {
         const base64Wav = await audioRecorder.stop();
         await sendStepAudioASR({
@@ -419,7 +419,7 @@ export default function HomePage() {
   const handleImgVoiceInput = async () => {
     if (imgRecording) {
       setImgRecording(false);
-      toast.info('🎙️ 录音已结束，正在通过 StepAudio 2.5 ASR 进行识别...');
+      toast.info('🎙️ 录音已结束，正在通过 TeleAI/TeleSpeechASR 进行识别...');
       try {
         const base64Wav = await audioRecorder.stop();
         await sendStepAudioASR({

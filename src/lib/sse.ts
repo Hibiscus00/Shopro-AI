@@ -5,6 +5,7 @@
 import ky, { type KyResponse, type AfterResponseHook, type NormalizedOptions } from 'ky';
 import { createParser, type EventSourceParser } from 'eventsource-parser';
 import { submitVectrustSeedanceVideo, queryVectrustSeedanceVideo } from './vectrust';
+import { transcribeAudio, synthesizeSpeech, base64ToBlob } from '@/services/audio';
 
 export interface SSEOptions {
   onData: (data: string) => void;
@@ -226,121 +227,20 @@ export interface StepASROptions {
 }
 
 export async function sendStepAudioASR(options: StepASROptions): Promise<void> {
-  const { audioData, format, language, onData, onComplete, onError, signal } = options;
+  const { audioData, onData, onComplete, onError, signal } = options;
 
-  let fallbackTriggered = false;
-
-  async function callDirectASR() {
-    if (fallbackTriggered) return;
-    fallbackTriggered = true;
-
-    console.log("Edge function stepaudio ASR returned error, trying direct API fallback...");
-    const apiKey = import.meta.env.VITE_STEP_API_KEY as string;
-    if (!apiKey) {
-      onError(new Error("Missing VITE_STEP_API_KEY in environment configuration."));
-      return;
-    }
-
-    try {
-      const response = await fetch('https://api.stepfun.com/step_plan/v1/audio/asr/sse', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`,
-          'Accept': 'text/event-stream',
-        },
-        body: JSON.stringify({
-          audio: {
-            data: audioData,
-            input: {
-              transcription: {
-                model: 'stepaudio-2.5-asr',
-                language: language || 'zh',
-                enable_itn: true,
-              },
-              format: format || {
-                type: 'pcm',
-                codec: 'pcm_s16le',
-                rate: 16000,
-                bits: 16,
-                channel: 1,
-              },
-            },
-          },
-        }),
-        signal,
-      });
-
-      if (!response.ok || !response.body) {
-        throw new Error(`Direct API response error: ${response.status}`);
-      }
-
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder('utf8');
-      const parser = createParser({
-        onEvent: (event) => {
-          if (!event.data || event.data === '[DONE]') return;
-          try {
-            const parsed = JSON.parse(event.data);
-            const chunkText = parsed.choices?.[0]?.delta?.content || parsed.text || '';
-            if (chunkText) onData(chunkText);
-          } catch { /* ignore */ }
-        },
-      });
-
-      const read = (): void => {
-        reader.read().then((result) => {
-          if (result.done) {
-            onComplete();
-            return;
-          }
-          parser.feed(decoder.decode(result.value, { stream: true }));
-          read();
-        }).catch((error) => {
-          if (signal?.aborted) return;
-          onError(error as Error);
-        });
-      };
-
-      read();
-    } catch (err) {
-      if (!signal?.aborted) {
-        onError(err as Error);
-      }
-    }
-  }
-
-  // Try Edge Function first
   try {
-    const response = await fetch(`${SUPABASE_URL}/functions/v1/stepaudio`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-        'apikey': SUPABASE_ANON_KEY,
-      },
-      body: JSON.stringify({
-        action: 'asr',
-        audioData,
-        format,
-        language,
-      }),
-      signal,
-    });
-
-    if (!response.ok) throw new Error(`HTTP error ${response.status}`);
-    const resJson = await response.json();
-    if (resJson.error) throw new Error(resJson.error);
-    if (resJson.text) {
-      onData(resJson.text);
-      onComplete();
-    } else {
-      throw new Error("No transcription text returned from Edge function");
+    const audioBlob = base64ToBlob(audioData, 'audio/mp3');
+    const result = await transcribeAudio({ file: audioBlob, model: 'TeleAI/TeleSpeechASR' });
+    if (signal?.aborted) return;
+    if (result.text) {
+      onData(result.text);
     }
+    onComplete();
   } catch (err) {
-    callDirectASR().catch((fallbackErr) => {
-      onError(new Error(`Edge function ASR failed (${(err as Error).message}) and fallback failed: ${fallbackErr.message}`));
-    });
+    if (!signal?.aborted) {
+      onError(err as Error);
+    }
   }
 }
 
@@ -352,62 +252,14 @@ export interface StepTTSOptions {
 }
 
 export async function sendStepAudioTTS(options: StepTTSOptions): Promise<string> {
-  const { input, voice, instruction, response_format = 'mp3' } = options;
-
-  // Try Edge Function first
-  try {
-    const response = await fetch(`${SUPABASE_URL}/functions/v1/stepaudio`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-        'apikey': SUPABASE_ANON_KEY,
-      },
-      body: JSON.stringify({
-        action: 'tts',
-        input,
-        voice,
-        instruction,
-        response_format,
-      }),
-    });
-
-    if (!response.ok) throw new Error(`HTTP error ${response.status}`);
-    const blob = await response.blob();
-    return URL.createObjectURL(blob);
-  } catch (err) {
-    console.warn("Edge function stepaudio TTS failed, falling back to direct API calling:", err);
-    return await callDirectTTS();
-  }
-
-  async function callDirectTTS(): Promise<string> {
-    const apiKey = import.meta.env.VITE_STEP_API_KEY as string;
-    if (!apiKey) {
-      throw new Error("Missing VITE_STEP_API_KEY in environment configuration.");
-    }
-
-    const response = await fetch('https://api.stepfun.com/step_plan/v1/audio/speech', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: 'stepaudio-2.5-tts',
-        input,
-        voice: voice || 'cixingnansheng',
-        instruction: instruction || '语气温柔，语速偏慢',
-        response_format,
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Direct TTS API response error: ${response.status}`);
-    }
-
-    const blob = await response.blob();
-    return URL.createObjectURL(blob);
-  }
+  const { input, voice = 'fnlp/MOSS-TTSD-v0.5:alex', response_format = 'mp3' } = options;
+  const result = await synthesizeSpeech({
+    input,
+    voice,
+    model: 'FunAudioLLM/CosyVoice2-0.5B',
+    response_format: response_format as 'mp3' | 'wav' | 'opus',
+  });
+  return result.audioUrl;
 }
 
 export async function submitSeedanceVideo(payload: any): Promise<{ request_id: string }> {
