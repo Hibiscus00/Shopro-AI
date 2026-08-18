@@ -243,6 +243,9 @@ export default function HomePage() {
   const [firstFrame, setFirstFrame] = useState<string | null>(null);
   const [lastFrame, setLastFrame] = useState<string | null>(null);
 
+  // 语音输入状态
+  const [recording, setRecording] = useState(false);
+
   // 提示词增强进度条状态
   const [enhanceProgress, setEnhanceProgress] = useState(0);
 
