@@ -200,7 +200,7 @@ export default function HomePage() {
   const [inputTab, setInputTab] = useState('参考');
   const [prompt, setPrompt] = useState('');
   const [model, setModel] = useState<{ label: string; id: ModelId }>({ label: 'Seedance 2.0', id: 'Seedance' });
-  const [resolution, setResolution] = useState('1080P · 16:9 · 8s');
+  const [resolution, setResolution] = useState('720P · 16:9 · 5s');
   const [modelOpen, setModelOpen] = useState(false);
   const [resOpen, setResOpen] = useState(false);
 
@@ -232,9 +232,9 @@ export default function HomePage() {
   });
 
   // 新增的高级分辨率/宽高比/时长/扩展设置状态
-  const [activeResolution, setActiveResolution] = useState('1080P');
+  const [activeResolution, setActiveResolution] = useState('720P');
   const [activeRatio, setActiveRatio] = useState('16:9');
-  const [activeDuration, setActiveDuration] = useState(8);
+  const [activeDuration, setActiveDuration] = useState(5);
   const [autoOptimize, setAutoOptimize] = useState(false);
 
   // 新增参考图片、视频、首尾帧的图片上传状态
@@ -243,8 +243,8 @@ export default function HomePage() {
   const [firstFrame, setFirstFrame] = useState<string | null>(null);
   const [lastFrame, setLastFrame] = useState<string | null>(null);
 
-  // 语音输入状态
-  const [recording, setRecording] = useState(false);
+  // 提示词增强进度条状态
+  const [enhanceProgress, setEnhanceProgress] = useState(0);
 
   // 图片生成相关新状态与 ref
   const [imgSubTab, setImgSubTab] = useState('智能绘图');
@@ -826,6 +826,11 @@ export default function HomePage() {
   const handleEnhancePrompt = async () => {
     if (!prompt.trim()) { toast.error('请先输入基础描述'); return; }
     setEnhancing(true);
+    setEnhanceProgress(10);
+
+    const progressTimer = setInterval(() => {
+      setEnhanceProgress(prev => (prev < 90 ? prev + 8 : prev));
+    }, 150);
 
     const originalPrompt = prompt;
     abortRef.current = new AbortController();
@@ -858,10 +863,17 @@ export default function HomePage() {
           }
         },
         onComplete: () => {
-          toast.success('提示词已增强');
-          setEnhancing(false);
+          clearInterval(progressTimer);
+          setEnhanceProgress(100);
+          setTimeout(() => {
+            toast.success('提示词已增强');
+            setEnhancing(false);
+            setEnhanceProgress(0);
+          }, 200);
         },
         onError: (err) => {
+          clearInterval(progressTimer);
+          setEnhanceProgress(0);
           if (!abortRef.current?.signal.aborted) {
             toast.error(`增强失败：${err.message}`);
             if (isFirstChunk) {
@@ -873,6 +885,8 @@ export default function HomePage() {
         signal: abortRef.current.signal,
       });
     } catch (e: unknown) {
+      clearInterval(progressTimer);
+      setEnhanceProgress(0);
       if (!abortRef.current?.signal.aborted) {
         toast.error(`增强失败：${(e as Error).message}`);
         if (isFirstChunk) {
@@ -969,6 +983,25 @@ export default function HomePage() {
                 accept="image/*"
                 className="hidden"
               />
+
+              {/* AI 提示词增强动态打字机进度条 */}
+              {enhancing && (
+                <div className="px-4 py-2 border-b border-rose-500/20 bg-gradient-to-r from-rose-950/40 via-purple-950/30 to-amber-950/20 rounded-t-xl transition-all duration-300 space-y-1.5 animate-in fade-in">
+                  <div className="flex items-center justify-between text-xs font-semibold text-rose-300">
+                    <span className="flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-rose-400 animate-spin" />
+                      AI 正在深度智能扩展视频画面视角与光影细节...
+                    </span>
+                    <span className="text-[11px] font-mono text-rose-400 font-bold">{enhanceProgress}%</span>
+                  </div>
+                  <div className="w-full bg-zinc-900/80 rounded-full h-1.5 overflow-hidden border border-rose-500/30">
+                    <div
+                      className="h-full bg-gradient-to-r from-rose-500 via-pink-500 to-amber-400 rounded-full transition-all duration-150 shadow-[0_0_12px_rgba(244,63,94,0.6)]"
+                      style={{ width: `${enhanceProgress}%` }}
+                    />
+                  </div>
+                </div>
+              )}
 
               {/* 文本输入 */}
               <div className="px-3 md:px-4 pb-2 pt-2 flex flex-col gap-2">
@@ -1121,13 +1154,12 @@ export default function HomePage() {
                       <ChevronDown className="w-3 h-3 opacity-60" />
                     </button>
                     {modelOpen && (
-                      <div className="absolute top-full mt-1 left-0 z-50 bg-[#1e1d2a] border border-white/10 rounded-xl shadow-2xl py-1.5 min-w-[170px]">
+                      <div className="absolute top-full mt-1 left-0 z-50 bg-[#1e1d2a] border border-white/10 rounded-xl shadow-2xl py-1.5 min-w-[150px]">
                         {MODELS.map(m => (
                           <button key={m.id} onClick={() => { setModel({ label: m.label, id: m.id }); setModelOpen(false); }}
                             className={cn('w-full text-left px-3 py-2 text-xs flex items-center gap-2 hover:bg-white/10 transition-colors', m.id === model.id ? 'text-emerald-400 bg-white/5 font-semibold' : 'text-white/70')}>
                             <span className="text-sm leading-none shrink-0">{m.iconSymbol}</span>
-                            <span className="flex-1">{m.label}</span>
-                            <span className="text-[10px] text-white/30">{m.vendor}</span>
+                            <span className="font-semibold">{m.label}</span>
                           </button>
                         ))}
                       </div>
