@@ -113,35 +113,7 @@ const MOCK_SELECTION_POOL: SelectableProduct[] = [
     product_type: "hot",
     status: "active"
   },
-  {
-    id: "sp-my-5",
-    name: "Korean Style Oversized Solid T-Shirt Unisex Loose Fit",
-    category: "女装与女士内衣",
-    original_price: 29.90,
-    sale_price: 9.90,
-    currency: "RM",
-    country: "马来西亚",
-    country_flag: "🇲🇾",
-    rating: 4.7,
-    commission_rate: 8,
-    stock: 21000,
-    cover_image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=200",
-    shop_name: "FashionHub MY",
-    shop_logo: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=50",
-    shop_sales: "520.80万",
-    influencer_rate: "90%",
-    trend_data: [130, 138, 142, 150, 158, 165, 172],
-    sales_7d: "14.50万",
-    sales_7d_raw: 145000,
-    revenue_7d: "RM143.55万 ($31.20万)",
-    total_sales: "580.00万",
-    total_sales_raw: 5800000,
-    total_revenue: "RM574.20万 ($124.80万)",
-    associated_influencers: 4100,
-    shop_type: "local",
-    product_type: "free_shipping",
-    status: "active"
-  },
+
 
   // 美国 🇺🇸 (5 items)
   {

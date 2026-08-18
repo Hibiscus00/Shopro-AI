@@ -64,14 +64,14 @@ const QUICK_TOOLS = [
 
 // 模型与对应后端标识
 type ModelId = 'Seedance' | 'Kling' | 'Krea' | 'Luma' | 'pixverse' | 'happyhorse' | 'wan';
-const MODELS: { label: string; id: ModelId }[] = [
-  { label: 'Seedance 2.0', id: 'Seedance' },
-  { label: 'happyhorse 1.0', id: 'happyhorse' },
-  { label: 'wan2.7', id: 'wan' },
-  { label: 'Kling', id: 'Kling' },
-  { label: 'Krea', id: 'Krea' },
-  { label: 'Luma', id: 'Luma' },
-  { label: 'pixverse', id: 'pixverse' },
+const MODELS: { label: string; id: ModelId; vendor: string; iconSymbol: string }[] = [
+  { label: 'Seedance 2.0', id: 'Seedance', vendor: 'ByteDance', iconSymbol: '⚡' },
+  { label: 'happyhorse 1.0', id: 'happyhorse', vendor: 'HappyHorse AI', iconSymbol: '💎' },
+  { label: 'wan2.7', id: 'wan', vendor: 'Alibaba Cloud', iconSymbol: '☁️' },
+  { label: 'Kling', id: 'Kling', vendor: 'Kuaishou AI', iconSymbol: '🎬' },
+  { label: 'Krea', id: 'Krea', vendor: 'Krea AI', iconSymbol: '👾' },
+  { label: 'Luma', id: 'Luma', vendor: 'Luma Labs', iconSymbol: '📷' },
+  { label: 'pixverse', id: 'pixverse', vendor: 'PixVerse', iconSymbol: '🥞' },
 ];
 const RESOLUTIONS = ['720P · 9:16 · 5s', '1080P · 16:9 · 10s', '4K · 1:1 · 8s'];
 const INSPIRE_VIDEOS = [
@@ -200,7 +200,7 @@ export default function HomePage() {
   const [inputTab, setInputTab] = useState('参考');
   const [prompt, setPrompt] = useState('');
   const [model, setModel] = useState<{ label: string; id: ModelId }>({ label: 'Seedance 2.0', id: 'Seedance' });
-  const [resolution, setResolution] = useState('720P · 9:16 · 5s');
+  const [resolution, setResolution] = useState('1080P · 16:9 · 8s');
   const [modelOpen, setModelOpen] = useState(false);
   const [resOpen, setResOpen] = useState(false);
 
@@ -232,9 +232,9 @@ export default function HomePage() {
   });
 
   // 新增的高级分辨率/宽高比/时长/扩展设置状态
-  const [activeResolution, setActiveResolution] = useState('720P');
-  const [activeRatio, setActiveRatio] = useState('9:16');
-  const [activeDuration, setActiveDuration] = useState(5);
+  const [activeResolution, setActiveResolution] = useState('1080P');
+  const [activeRatio, setActiveRatio] = useState('16:9');
+  const [activeDuration, setActiveDuration] = useState(8);
   const [autoOptimize, setAutoOptimize] = useState(false);
 
   // 新增参考图片、视频、首尾帧的图片上传状态
@@ -822,7 +822,7 @@ export default function HomePage() {
     }
   };
 
-  // DeepSeek-V4-Flash 提示词增强 (全中文 5s 打字机效果)
+  // DeepSeek-V4-Flash 提示词增强 (全中文低延时打字机流式输出)
   const handleEnhancePrompt = async () => {
     if (!prompt.trim()) { toast.error('请先输入基础描述'); return; }
     setEnhancing(true);
@@ -832,22 +832,11 @@ export default function HomePage() {
     let fullText = '';
     let isFirstChunk = true;
 
-    // 5 秒强超时控制
-    const timerId = setTimeout(() => {
-      if (abortRef.current && !abortRef.current.signal.aborted) {
-        abortRef.current.abort();
-        if (fullText.trim()) {
-          toast.success('提示词已增强');
-        }
-        setEnhancing(false);
-      }
-    }, 5000);
-
     try {
       await sendDeepSeekStreamRequest({
         messages: [{
           role: 'user',
-          content: `请对以下描述进行视频提示词优化与增强，扩写为一段细节丰富、视觉表现力强的中文AI视频生成提示词。必须完全使用中文输出，严禁包含任何英文、解释、前缀或引导语，直接输出优化后的中文提示词。原描述：${originalPrompt}`,
+          content: `请对以下描述进行视频提示词扩展与增强。必须完全使用中文输出，严禁包含任何英文、解释、前缀或引导语，直接输出包含场景细节与视觉画面的中文提示词。原描述：${originalPrompt}`,
         }],
         max_tokens: 300,
         onData: (data) => {
@@ -869,12 +858,10 @@ export default function HomePage() {
           }
         },
         onComplete: () => {
-          clearTimeout(timerId);
           toast.success('提示词已增强');
           setEnhancing(false);
         },
         onError: (err) => {
-          clearTimeout(timerId);
           if (!abortRef.current?.signal.aborted) {
             toast.error(`增强失败：${err.message}`);
             if (isFirstChunk) {
@@ -886,7 +873,6 @@ export default function HomePage() {
         signal: abortRef.current.signal,
       });
     } catch (e: unknown) {
-      clearTimeout(timerId);
       if (!abortRef.current?.signal.aborted) {
         toast.error(`增强失败：${(e as Error).message}`);
         if (isFirstChunk) {
@@ -1126,17 +1112,22 @@ export default function HomePage() {
                   <div className="relative">
                     <button onClick={() => { setModelOpen(o => !o); setResOpen(false); }}
                       className="flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/15 text-xs text-emerald-400 transition-colors border border-emerald-500/20">
-                      <Sparkles className="w-3 h-3 text-emerald-400" />
-                      <span className="hidden sm:inline">{model.label}</span>
+                      {(() => {
+                        const currentModelObj = MODELS.find(m => m.id === model.id);
+                        return <span className="text-sm leading-none">{currentModelObj?.iconSymbol || '⚡'}</span>;
+                      })()}
+                      <span className="hidden sm:inline font-semibold">{model.label}</span>
                       <span className="sm:hidden">模型</span>
-                      <ChevronDown className="w-3 h-3" />
+                      <ChevronDown className="w-3 h-3 opacity-60" />
                     </button>
                     {modelOpen && (
-                      <div className="absolute top-full mt-1 left-0 z-50 bg-[#1e1d2a] border border-white/10 rounded-xl shadow-2xl py-1 min-w-[140px]">
+                      <div className="absolute top-full mt-1 left-0 z-50 bg-[#1e1d2a] border border-white/10 rounded-xl shadow-2xl py-1.5 min-w-[170px]">
                         {MODELS.map(m => (
-                          <button key={m.id} onClick={() => { setModel(m); setModelOpen(false); }}
-                            className={cn('w-full text-left px-3 py-2 text-xs hover:bg-white/10 transition-colors', m.id === model.id ? 'text-emerald-400' : 'text-white/70')}>
-                            {m.label}
+                          <button key={m.id} onClick={() => { setModel({ label: m.label, id: m.id }); setModelOpen(false); }}
+                            className={cn('w-full text-left px-3 py-2 text-xs flex items-center gap-2 hover:bg-white/10 transition-colors', m.id === model.id ? 'text-emerald-400 bg-white/5 font-semibold' : 'text-white/70')}>
+                            <span className="text-sm leading-none shrink-0">{m.iconSymbol}</span>
+                            <span className="flex-1">{m.label}</span>
+                            <span className="text-[10px] text-white/30">{m.vendor}</span>
                           </button>
                         ))}
                       </div>
