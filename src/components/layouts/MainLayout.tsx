@@ -43,7 +43,7 @@ const AI_TOOLBOX_ITEMS = [
   { label: '直播高光切片', path: '/live-highlight', badge: 'NEW', badgeColor: '#ef4444', desc: 'AI自动识别直播精华' },
   { label: '知识库', path: '/knowledge', badge: '语义', badgeColor: '#14b8a6', desc: '沉淀带货话术，AI语义检索' },
   { label: '情绪NLP分析', path: '/emotion-analysis', badge: 'NLP', badgeColor: '#6366f1', desc: '深度分析评论情感倾向' },
-  { label: '爆款特征库', path: '/trending-patterns', badge: '持续更新', badgeColor: '#f59e0b', desc: '沉淀千万级爆款特征' },
+  { label: '爆款特征库', path: '/competitor?tab=patterns', badge: '持续更新', badgeColor: '#f59e0b', desc: '沉淀千万级爆款特征' },
   { label: 'AI个性化微调', path: '/personalize', badge: 'Pro', badgeColor: '#7c3aed', desc: '基于账号风格私有化训练' },
 ];
 

@@ -133,7 +133,7 @@ const AI_TOOLS = [
   },
   {
     id: 'trending-patterns',
-    path: '/trending-patterns',
+    path: '/competitor?tab=patterns',
     label: '爆款特征库',
     desc: '沉淀千万级爆款特征，提炼可复用创作公式',
     icon: TrendingUp,

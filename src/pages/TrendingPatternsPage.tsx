@@ -132,8 +132,8 @@ function PatternCard({
   );
 }
 
-// ─── 主页面 ──────────────────────────────────────────────────────────────────
-export default function TrendingPatternsPage() {
+// ─── 爆款特征库独立组件 ────────────────────────────────────────────────────────
+export function TrendingPatternsSection({ showTitle = true }: { showTitle?: boolean }) {
   const [patterns, setPatterns] = useState<TrendingPattern[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -183,14 +183,16 @@ export default function TrendingPatternsPage() {
   };
 
   return (
-    <div className="space-y-6 p-4 md:p-6">
+    <div className="space-y-6">
       {/* 标题 */}
-      <div>
-        <h1 className="text-xl font-bold flex items-center gap-2">
-          <Flame className="w-5 h-5 text-destructive" />行业爆款特征库
-        </h1>
-        <p className="text-sm text-muted-foreground mt-0.5">P3-S03 · 基于万级样本提炼的爆款视频规律，指导内容创作</p>
-      </div>
+      {showTitle && (
+        <div>
+          <h1 className="text-xl font-bold flex items-center gap-2">
+            <Flame className="w-5 h-5 text-destructive" />行业爆款特征库
+          </h1>
+          <p className="text-sm text-muted-foreground mt-0.5">P3-S03 · 基于万级样本提炼的爆款视频规律，指导内容创作</p>
+        </div>
+      )}
 
       {/* 筛选栏 */}
       <div className="flex flex-wrap items-center gap-2">
@@ -331,6 +333,14 @@ export default function TrendingPatternsPage() {
           )}
         </DialogContent>
       </Dialog>
+    </div>
+  );
+}
+
+export default function TrendingPatternsPage() {
+  return (
+    <div className="p-4 md:p-6">
+      <TrendingPatternsSection showTitle={true} />
     </div>
   );
 }

@@ -8,11 +8,13 @@ import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
+  Dialog, DialogContent, DialogHeader, DialogTitle,
+} from '@/components/ui/dialog';
+import {
   BookOpen, Database, TrendingUp, CheckCircle2, RefreshCw,
   Sparkles, Star, Clock, ChevronRight, Zap, Search, Brain, X,
-  Fingerprint, Layers, Target, Activity, Sliders,
+  Fingerprint, Layers, Target, Activity, Sliders, Copy, FileText, Code, Eye,
 } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import type { KnowledgeEntry, KnowledgeSourceType } from '@/types/types';
@@ -58,24 +60,27 @@ const SOURCE_CONFIG: Record<KnowledgeSourceType, { label: string; color: string;
 };
 
 // ── 知识条目卡片 ───────────────────────────────────────────────────────────
-function EntryCard({ entry, onApply }: { entry: KnowledgeEntry; onApply: (id: string) => void }) {
+function EntryCard({ entry, onApply, onClick }: { entry: KnowledgeEntry; onApply: (id: string) => void; onClick: () => void }) {
   const cfg = SOURCE_CONFIG[entry.source_type];
   const date = new Date(entry.created_at).toLocaleDateString('zh-CN', {
     month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit',
   });
 
   return (
-    <div className={cn(
-      'rounded-xl border bg-card p-4 space-y-2 transition-all',
-      entry.is_applied ? 'border-success/30 bg-success/3' : 'border-border/70',
-    )}>
+    <div
+      onClick={onClick}
+      className={cn(
+        'rounded-xl border bg-card p-4 space-y-2 transition-all cursor-pointer hover:border-primary/50 hover:shadow-xs group',
+        entry.is_applied ? 'border-success/30 bg-success/3' : 'border-border/70',
+      )}
+    >
       <div className="flex items-start gap-3">
         <div className={cn('w-8 h-8 rounded-lg flex items-center justify-center shrink-0', cfg.bgColor)}>
           <Database className={cn('w-4 h-4', cfg.color)} />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-sm font-semibold truncate">{entry.title}</span>
+            <span className="text-sm font-semibold truncate group-hover:text-primary transition-colors">{entry.title}</span>
             <span className={cn('text-xs font-medium px-1.5 py-0.5 rounded', cfg.bgColor, cfg.color)}>
               {cfg.label}
             </span>
@@ -96,11 +101,14 @@ function EntryCard({ entry, onApply }: { entry: KnowledgeEntry; onApply: (id: st
             <span className="text-xs text-muted-foreground flex items-center gap-1">
               <Clock className="w-3 h-3" />{date}
             </span>
+            <span className="text-xs text-primary/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5 font-medium ml-auto">
+              <Eye className="w-3 h-3" />查看详情
+            </span>
           </div>
         </div>
         {!entry.is_applied && (
           <Button size="sm" variant="ghost" className="h-7 text-xs shrink-0 text-muted-foreground hover:text-primary gap-1"
-            onClick={() => onApply(entry.id)}>
+            onClick={(e) => { e.stopPropagation(); onApply(entry.id); }}>
             应用<ChevronRight className="w-3 h-3" />
           </Button>
         )}
@@ -129,18 +137,6 @@ function StatCard({
   );
 }
 
-// ── 模拟趋势数据 ──────────────────────────────────────────────────────────
-function buildTrendData(count: number) {
-  const days = 14;
-  const base = 55;
-  return Array.from({ length: days }, (_, i) => ({
-    day: `${i + 1}d`,
-    quality: Math.min(95, base + Math.floor((count * 0.3 + i * 1.8))),
-    entries: Math.floor(Math.random() * 5) + (i > 7 ? 2 : 0),
-  }));
-}
-
-// ── 主页面 ────────────────────────────────────────────────────────────────
 export default function KnowledgePage() {
   const { user } = useAuth();
   const [entries, setEntries]     = useState<KnowledgeEntry[]>([]);
@@ -149,6 +145,7 @@ export default function KnowledgePage() {
   const [updating, setUpdating]   = useState(false);
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
   const [filterType, setFilterType] = useState<KnowledgeSourceType | 'all'>('all');
+  const [detailEntry, setDetailEntry] = useState<KnowledgeEntry | null>(null);
 
   // P2-M04: RAG 相似向量检索
   const [ragQuery, setRagQuery]     = useState('');
@@ -295,7 +292,6 @@ export default function KnowledgePage() {
     : '0';
 
   const filtered = filterType === 'all' ? entries : entries.filter(e => e.source_type === filterType);
-  const trendData = buildTrendData(total);
 
   const FILTER_TABS: { value: KnowledgeSourceType | 'all'; label: string }[] = [
     { value: 'all',                label: '全部' },
@@ -348,40 +344,6 @@ export default function KnowledgePage() {
           sub="越高越好"  color="bg-info/10 text-info" />
         <StatCard icon={Star}        label="平均质量评分" value={`${avgQuality}/5`}
           sub="数据质量"  color="bg-warning/10 text-warning" />
-      </div>
-
-      {/* ── 进化趋势图 ── */}
-      <div className="rounded-2xl border border-border/70 bg-card p-5 space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-primary" />AI 生成质量趋势
-          </h2>
-          <span className="text-xs text-muted-foreground">近14天</span>
-        </div>
-        <div className="h-44 w-full min-w-0 overflow-hidden">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={trendData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.5} />
-              <XAxis dataKey="day" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
-              <YAxis domain={[40, 100]} tick={{ fontSize: 11 }} axisLine={false} tickLine={false} width={30} />
-              <Tooltip
-                contentStyle={{ fontSize: 12, borderRadius: 8, border: '1px solid hsl(var(--border))' }}
-                formatter={(v: number) => [`${v}`, '']}
-              />
-              <Line type="monotone" dataKey="quality" name="生成质量分"
-                stroke="hsl(var(--primary))" strokeWidth={2} dot={false} activeDot={{ r: 4 }} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-        {total > 0 && (
-          <div className="flex items-center gap-2 text-sm">
-            <TrendingUp className="w-4 h-4 text-success" />
-            <span className="text-muted-foreground">
-              基于 <span className="font-semibold text-foreground">{applied}</span> 条知识数据，
-              AI 生成质量提升约 <span className="font-semibold text-success">{Math.min(25, applied * 2)}%</span>
-            </span>
-          </div>
-        )}
       </div>
 
       <Separator />
@@ -438,7 +400,8 @@ export default function KnowledgePage() {
           <div className="space-y-3">
             {filtered.map(entry => (
               <EntryCard key={entry.id} entry={entry}
-                onApply={id => { setApplying(id); handleApply(id); }} />
+                onApply={id => { setApplying(id); handleApply(id); }}
+                onClick={() => setDetailEntry(entry)} />
             ))}
           </div>
         ) : (
@@ -651,6 +614,146 @@ export default function KnowledgePage() {
           </div>
         )}
       </div>
+
+      {/* ── 知识详情弹窗（查看具体的 脚本编辑、Prompt） ── */}
+      <Dialog open={!!detailEntry} onOpenChange={v => !v && setDetailEntry(null)}>
+        <DialogContent className="max-w-[calc(100%-2rem)] md:max-w-2xl max-h-[85vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-base font-bold">
+              <Database className="w-4.5 h-4.5 text-primary" />
+              {detailEntry?.title}
+            </DialogTitle>
+          </DialogHeader>
+
+          {detailEntry && (
+            <div className="flex-1 overflow-y-auto space-y-4 pr-1 text-xs">
+              {/* 元信息 */}
+              <div className="flex items-center justify-between flex-wrap gap-2 p-3 rounded-xl bg-muted/40 border border-border/50">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className={cn('text-xs font-semibold px-2 py-0.5 rounded', SOURCE_CONFIG[detailEntry.source_type]?.bgColor, SOURCE_CONFIG[detailEntry.source_type]?.color)}>
+                    {SOURCE_CONFIG[detailEntry.source_type]?.label || detailEntry.source_type}
+                  </span>
+                  <div className="flex gap-0.5 items-center">
+                    {[1, 2, 3, 4, 5].map(s => (
+                      <Star key={s} className={cn('w-3 h-3', s <= detailEntry.quality_score ? 'text-warning fill-warning' : 'text-muted-foreground/30')} />
+                    ))}
+                    <span className="text-[11px] text-muted-foreground ml-1 font-mono">{detailEntry.quality_score}/5分</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 text-muted-foreground text-[11px]">
+                  <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{new Date(detailEntry.created_at).toLocaleString('zh-CN')}</span>
+                  {detailEntry.is_applied ? (
+                    <span className="text-success font-medium flex items-center gap-0.5"><CheckCircle2 className="w-3 h-3" />已应用至 AI 训练</span>
+                  ) : (
+                    <span className="text-amber-500 font-medium">尚未应用</span>
+                  )}
+                </div>
+              </div>
+
+              {/* 脚本 / Prompt 详情 */}
+              {detailEntry.content && (
+                <div className="space-y-4">
+                  {/* 场景分镜明细 */}
+                  {Array.isArray(detailEntry.content.scenes) && detailEntry.content.scenes.length > 0 && (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold text-foreground flex items-center gap-1.5 text-xs">
+                          <FileText className="w-3.5 h-3.5 text-primary" />
+                          脚本分镜明细 ({detailEntry.content.scenes.length} 幕)
+                        </span>
+                        <Button size="sm" variant="outline" className="h-7 text-[11px] gap-1"
+                          onClick={() => {
+                            const txt = (detailEntry.content.scenes as any[]).map((s: any, idx: number) => 
+                              `第${idx + 1}幕 [${s.shot_type || s.camera || '镜头'}] (${s.duration || 5}s)\n画面：${s.visual || s.scene || ''}\n台词/字幕：${s.script || s.dialogue || s.text || ''}\n旁白：${s.audio || s.narration || ''}`
+                            ).join('\n\n');
+                            navigator.clipboard.writeText(txt);
+                            toast.success('已复制完整脚本');
+                          }}>
+                          <Copy className="w-3 h-3" />复制脚本
+                        </Button>
+                      </div>
+
+                      <div className="space-y-2 max-h-[260px] overflow-y-auto pr-1">
+                        {(detailEntry.content.scenes as any[]).map((scene: any, i: number) => (
+                          <div key={i} className="p-3 rounded-xl bg-card border border-border/70 space-y-1.5">
+                            <div className="flex items-center justify-between text-[11px] border-b border-border/40 pb-1">
+                              <span className="font-bold text-primary">第 {i + 1} 幕 · {scene.shot_type || scene.camera || '标准画面'}</span>
+                              {scene.duration && <span className="text-muted-foreground font-mono">{scene.duration}s</span>}
+                            </div>
+                            {scene.visual && <p className="text-muted-foreground"><strong className="text-foreground">【画面】</strong>{scene.visual}</p>}
+                            {(scene.script || scene.dialogue || scene.text) && (
+                              <p className="text-foreground font-medium bg-primary/5 p-2 rounded-lg"><strong className="text-primary">【台词】</strong>{scene.script || scene.dialogue || scene.text}</p>
+                            )}
+                            {scene.audio && <p className="text-muted-foreground"><strong className="text-foreground">【音效/旁白】</strong>{scene.audio}</p>}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Prompt 提示词/指令 */}
+                  {(detailEntry.content.prompt_text || detailEntry.content.prompt || detailEntry.content.prompt_template || detailEntry.content.original_prompt) && (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold text-foreground flex items-center gap-1.5 text-xs">
+                          <Code className="w-3.5 h-3.5 text-info" />
+                          AIGC Prompt 提示词 / 指令
+                        </span>
+                        <Button size="sm" variant="outline" className="h-7 text-[11px] gap-1"
+                          onClick={() => {
+                            const pText = String(detailEntry.content.prompt_text || detailEntry.content.prompt || detailEntry.content.prompt_template || detailEntry.content.original_prompt || '');
+                            navigator.clipboard.writeText(pText);
+                            toast.success('已复制 Prompt 提示词');
+                          }}>
+                          <Copy className="w-3 h-3" />复制 Prompt
+                        </Button>
+                      </div>
+                      <div className="p-3 rounded-xl bg-slate-900 text-slate-100 font-mono text-[11px] whitespace-pre-wrap leading-relaxed max-h-[200px] overflow-y-auto border border-slate-800">
+                        {String(detailEntry.content.prompt_text || detailEntry.content.prompt || detailEntry.content.prompt_template || detailEntry.content.original_prompt)}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 核心卖点 */}
+                  {Array.isArray(detailEntry.content.selling_points) && detailEntry.content.selling_points.length > 0 && (
+                    <div className="space-y-1.5">
+                      <span className="font-semibold text-foreground flex items-center gap-1.5 text-xs">
+                        <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                        提炼核心卖点
+                      </span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {(detailEntry.content.selling_points as string[]).map((sp: string, idx: number) => (
+                          <span key={idx} className="bg-amber-500/10 text-amber-700 dark:text-amber-300 px-2 py-1 rounded-lg text-xs font-medium">
+                            {sp}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 其它数据展示 */}
+                  {Object.keys(detailEntry.content).filter(k => !['scenes', 'prompt_text', 'prompt', 'prompt_template', 'selling_points', 'original_prompt'].includes(k)).length > 0 && (
+                    <div className="space-y-1.5 border-t border-border/50 pt-2">
+                      <span className="font-semibold text-muted-foreground text-[11px]">其它详细属性</span>
+                      <div className="p-3 rounded-xl bg-muted/40 space-y-1 text-[11px] font-mono overflow-x-auto">
+                        {Object.entries(detailEntry.content)
+                          .filter(([k]) => !['scenes', 'prompt_text', 'prompt', 'prompt_template', 'selling_points', 'original_prompt'].includes(k))
+                          .map(([k, v]) => (
+                            <div key={k} className="flex gap-2">
+                              <span className="text-muted-foreground shrink-0">{k}:</span>
+                              <span className="text-foreground break-all">{typeof v === 'object' ? JSON.stringify(v) : String(v)}</span>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
