@@ -18,7 +18,7 @@
 <img width="1884" height="1212" alt="image" src="https://github.com/user-attachments/assets/e8b5767a-6113-4193-af0e-954e29b68f32" />
 <img width="1280" height="705" alt="image" src="https://github.com/user-attachments/assets/8a2b2a47-b8a1-4b46-9a7a-efb9c1f16564" />
 <img width="1280" height="679" alt="image" src="https://github.com/user-attachments/assets/cf2db694-ed54-4606-b7ca-6ff22854d3fb" />
-**Shopro-电商AIGC带货视频** 是一款面向电商商家（如抖音、TikTok、快手、小红书、Amazon 等）的 SaaS 平台。该系统通过深度融合先进的多模态大模型与全链路智能工作流，解决商家在短视频营销中面临的“文案撰写难、数字人外籍演员贵、剪辑成本高、多语言本地化差、跨平台发布繁琐”等痛点。
+  Shopro-电商AIGC带货视频是一款面向电商商家（如抖音、TikTok、快手、小红书、Amazon 等）的 SaaS 平台。该系统通过深度融合先进的多模态大模型与全链路智能工作流，解决商家在短视频营销中面临的“文案撰写难、数字人外籍演员贵、剪辑成本高、多语言本地化差、跨平台发布繁琐”等痛点。
 系统支持从「商品信息输入/URL 卖点提取 ➔ AI 智能脚本生成 ➔ 数字人选择与克隆 ➔ 多语言智能翻译 ➔ 分镜编辑 ➔ 素材混剪 ➔ 视频异步合成 ➔ 多平台一键发布」的完整闭环，将传统的五人工作流压缩为“一人 + 浏览器”，帮助商家以极低成本高速量产高转化的爆款短视频。
 
 ### ⚡ 核心价值
@@ -174,6 +174,40 @@ Shopro AI/
 
 ## ⚡ 核心功能模块与工作流
 
+### 🔄 全链路智能生成工作流
+
+```
+商品 URL / 口令输入
+        │
+        ▼
+① 🕷️  URL 卖点智能提取
+   DeepSeek-V4-Flash 解析 HTML → 输出 3 条核心卖点 JSON
+        │
+        ▼
+② ✍️  CoT 四层营销脚本生成（SSE 打字机流式）
+   卖点层 → 痛点层 → 钩子层（前3秒留存）→ CTA 转化层
+        │
+        ▼
+③ 🎭  NLP 情感分析与数字人映射
+   台词情绪极值分析 → 时间轴情绪标注 → 数字人表情/语气映射
+        │
+        ▼
+④ 🎙️  多语种情感配音合成
+   CosyVoice2-0.5B → 情感化口播 MP3 / TeleSpeechASR 录音转写
+        │
+        ▼
+⑤ 🎬  Seedance 2.0 物理级视频渲染（异步队列）
+   首尾帧参考图 + 音频声轨 → 720P 多模态合成视频
+        │
+        ▼
+⑥ ✂️  多轨道可视化编辑器（可选）
+   字幕轨 / 人像轨 / 声音轨 / 特效轨 → 拖拽拼接
+        │
+        ▼
+⑦ 🚀  跨平台一键发布 + 数据回流自调优
+   抖音 / TikTok / 快手 / 小红书 / B站 定时发布 → ROI 回流 → AI 重写优化
+```
+
 ### 1. 🧠 AI 脚本与提示词增强工作台 (`HomePage.tsx`, `ScriptPage.tsx`)
 *   **低延时中文流式打字机**：工作台“提示词增强”强约束纯中文输出，支持低延时平滑逐字/逐块打字机流式渲染，瞬间提升提示词专业度。
 *   **视频生成模型矩阵**：集成了 7 大业界尖端视频生成模型，并配备厂商专属视觉标识：
@@ -216,7 +250,6 @@ Shopro AI/
 ### 6. 🔗 团队协作与 OpenAPI 开放平台 (`TeamSpacePage.tsx`, `OpenAPIPage.tsx`)
 *   **团队协作**：支持主账号创建团队空间，通过邮箱发送邀请凭证，配置管理员或协作者角色，共享素材库与作品集。
 *   **OpenAPI 调试**：面向大商户或 ERP 系统，提供 `ak_...` 自定义 API 密钥生成、Revoke 控制，并附带在线交互式 API 沙箱调试器。
-
 ---
 
 ## ⚙️ 部署指南
@@ -234,22 +267,7 @@ npm install
 
 ### 2. 配置前端环境变量
 在项目根目录创建 `.env` 文件：
-```env
-VITE_SUPABASE_URL="https://<your-project-ref>.supabase.co"
-VITE_SUPABASE_ANON_KEY="<your-supabase-anon-key>"
 
-# DeepSeek-V4-Flash 模型与代理配置
-API_KEY="sk-Cze3IQFfJMNJ6VlXYGT9WTTz0bJjB4Kz"
-DEEPSEEK_API_KEY="sk-Cze3IQFfJMNJ6VlXYGT9WTTz0bJjB4Kz"
-VITE_DEEPSEEK_API_KEY="sk-Cze3IQFfJMNJ6VlXYGT9WTTz0bJjB4Kz"
-DEEPSEEK_BASE_URL="https://ai.dxkp.com/v1"
-VITE_DEEPSEEK_BASE_URL="/dxkp-api/v1"
-
-# StepAudio & Cdance 核心 API
-VITE_STEP_API_KEY="<your-step-key>" # 备用本地 Fallback 调用
-VITE_CDANCE_API_KEY="sk-Cze3IQFfJMNJ6VlXYGT9WTTz0bJjB4Kz"
-VITE_CDANCE_BASE_URL="/dxkp-api/v1"
-```
 
 ### 3. 部署数据库迁移
 连接你的 Supabase 项目并应用迁移（包含全部 21 个 SQL 迁移文件）：
@@ -260,22 +278,6 @@ supabase db push
 
 ### 4. 配置服务端 Secret
 在 Supabase 控制台或使用 CLI 设置 Secrets：
-```bash
-supabase secrets set \
-  INTEGRATIONS_API_KEY="<default-ai-gateway-key>" \
-  DEEPSEEK_API_KEY="sk-Cze3IQFfJMNJ6VlXYGT9WTTz0bJjB4Kz" \
-  DEEPSEEK_BASE_URL="https://ai.dxkp.com/v1" \
-  STEP_API_KEY="<step-api-key>" \
-  SEEDANCE_API_KEY="<seedance-api-key>" \
-  WECHAT_PAY_APPID="<wechat-app-id>" \
-  WECHAT_PAY_MCHID="<wechat-merchant-id>" \
-  WECHAT_PAY_PRIVATE_KEY="<wechat-private-key>" \
-  WECHAT_PAY_CERT_SERIAL_NO="<wechat-cert-serial-no>" \
-  KLING_API_KEY="<kling-key>" \
-  KLING_API_SECRET="<kling-secret>" \
-  MINIMAX_API_KEY="<minimax-key>" \
-  SORA_API_KEY="<sora-key>"
-```
 
 ### 5. 部署边缘函数 (部署全部 16 个 Edge Functions)
 ```bash
@@ -312,28 +314,109 @@ npm run build
 
 ---
 
-## 🔐 安全性与并发设计
+## 📦 API 接口
 
-1.  **RLS 行级安全**：所有 PostgreSQL 数据表默认开启 `ROW LEVEL SECURITY`。商户的商品、视频任务、充值订单、团队资源等均绑定到 `auth.uid()`，通过外键约束在物理数据库层隔离。
-2.  **防薅积分锁 (Optimistic Lock & DB Transaction)**：对于调用外部 API 需计费的动作（如 Seedance 视频合成），系统在下发 API 动作前，会执行一个高并发安全的存储过程。通过 `SELECT ... FOR UPDATE` 加上排他锁，余额校验无误后才执行扣减，防止并发溢出薅免费算力。
-3.  **敏感密钥零泄漏**：前端仅暴露 Supabase 公钥 `VITE_SUPABASE_ANON_KEY`。所有的 API 密钥如 `STEP_API_KEY`、`SEEDANCE_API_KEY` 等均安全隔离在 Supabase 服务端 Vault Secrets 中。
+### 🌐`ai-assistant` — 统一 AI 网关
+
+> **端点**：`POST /functions/v1/ai-assistant`  
+> **请求格式**：`{ "action": "<action>", "user_id": "<uid>", ...params }`
+
+| Action | 功能描述 | 核心参数 | 响应数据 |
+|--------|---------|---------|---------|
+| `generate_selling_points` | 商品卖点生成 | `product_name`, `category`, `description` | `{ selling_points: string[] }` |
+| `extract_url_selling_points` | URL 网页卖点提取 | `url` | `{ selling_points: string[] }` |
+| `optimize_prompt` | 视频 Prompt 优化（英文输出） | `prompt`, `product_name`, `platform`, `style` | `{ optimized_prompt: string }` |
+| `generate_storyboard` | 分镜脚本生成 | `product_name`, `selling_points[]` | `{ shots: Shot[] }` |
+| `generate_script_four_layer` | CoT 四层流式脚本生成 | `product_name`, `category`, `selling_points`, `audience`, `platform`, `video_length` | `{ scenes: Scene[], prompt_text, script_id }` |
+| `analyze_traffic` | 流量完播率预测 | `duration`, `has_subtitle`, `pacing`, `bgm_tempo`, `product_category` | `{ completion_rate, click_rate, suggestions[] }` |
+| `analyze_style` | 竞品视频风格分析 | `source_url`, `source_type` | `{ rhythm, pacing, virality_score, … }` |
+| `analyze_style_deep` | 竞品风格深度文字解读 | `dna_fingerprint`, `rhythm`, `virality_score`, … | `{ analysis: string }` |
+| `generate_ab_variants` | A/B 变体脚本生成 | `product_name`, `variant_count` | `{ variants: Variant[] }` |
+| `extract_highlights` | 直播高光切片提取 | `video_url`, `user_id` | `{ highlights[] }` |
+| `knowledge_rag_search` | RAG 向量知识库检索 | `query`, `user_id`, `limit` | `{ results: KBItem[] }` |
+| `emotion_analysis` | 台词 NLP 情绪分析 | `sentences: string[]` | `[{ emotion, intensity, color, suggestion }]` |
+| `translate_script` | 多语种脚本翻译 | `script`, `source_lang`, `target_lang` | `{ translated: string }` |
+| `generate_cover` | AI 封面图生成任务提交 | `product_name`, `style`, `platform` | `{ task_id: string }` |
+| `query_cover_task` | 封面生成任务状态查询 | `task_id` | `{ status, image_url }` |
+| `content_moderation` | 内容安全审核 | `text` | `{ safe: boolean, flags[] }` |
+| `retry_video_job` | 失败视频任务重试 | `project_id`, `user_id` | `{ success: boolean }` |
+| `generate_video` | 视频生成任务提交（Seedance） | `project_id`, `prompt`, `materials[]` | `{ success, request_id }` |
+
+### 📺`seedance` — Seedance 2.0 视频生成
+
+> **端点**：`POST /functions/v1/seedance`
+
+| Action | 功能 | 核心参数 | 响应 |
+|--------|------|---------|------|
+| `create` | 提交视频生成任务 | `prompt`, `first_frame`, `last_frame`, `duration`, `resolution`, `ratio`, `seed` | `{ task_id }` |
+| `query` | 查询任务状态 | `task_id` | `{ status, video_url, progress }` |
+
+### 🤖`phase3-assistant` — Phase 3 综合后端
+
+> **端点**：`POST /functions/v1/phase3-assistant`（需 `Authorization: Bearer <JWT>`）
+
+| Action | 功能描述 |
+|--------|---------|
+| `add_competitor` | 添加竞品监控账号 |
+| `crawl_competitor` | 立即抓取竞品数据 |
+| `list_competitors` | 列出竞品账号列表 |
+| `generate_api_key` | 生成 OpenAPI 密钥（`ak_…`） |
+| `revoke_api_key` | 撤销 API 密钥 |
+| `list_api_keys` | 列出所有 API 密钥 |
+| `create_publish_task` | 创建跨平台定时发布任务 |
+| `list_publish_tasks` | 查询发布任务列表 |
+| `invite_team_member` | 邀请团队成员（邮箱） |
+| `list_team_members` | 列出团队成员及角色 |
+
+### 💳 微信支付 API
+
+| 端点 | 功能描述 |
+|------|---------|
+| `POST /functions/v1/create-payment-order` | 创建微信支付订单 + 返回二维码 URL |
+| `POST /functions/v1/wechat-payment-webhook` | 微信支付成功回调验签 + 积分充值入账 |
+| `POST /functions/v1/query-payment-status` | 轮询支付状态查询 |
+
+### 🎙️ 音频 API
+
+| 端点 | 功能 | 核心参数 |
+|------|------|---------|
+| `POST /functions/v1/siliconflow-audio` | CosyVoice2 TTS 情感合成 | `text`, `voice_id`, `emotion` |
+| `POST /functions/v1/stepaudio` | TeleSpeechASR 录音转写 | `audio_base64`, `language` |
+
+### 🔗 备选模型 API
+
+| 端点 | 功能描述 |
+|------|---------|
+| `POST /functions/v1/deepseek-v4-pro` | DeepSeek V4 直连代理（带 API Fallback） |
+| `POST /functions/v1/minimax-chat` | MiniMax-M3 对话代理 |
+| `POST /functions/v1/kling-video-create` | 可灵视频任务创建 |
+| `POST /functions/v1/kling-video-query` | 可灵视频任务状态查询 |
+| `POST /functions/v1/sora-video-create` | Sora 视频任务创建 |
+| `POST /functions/v1/sora-video-query` | Sora 视频任务状态查询 |
+| `POST /functions/v1/wenxin-text-generation` | 百度文心一言文本代理 |
+| `POST /functions/v1/send-sms-code` | 发送手机短信验证码 |
+| `POST /functions/v1/verify-sms-code` | 验证短信验证码登录 |
 
 ---
 
-## 🧪 常见问题解答 (FAQ)
+## 💡 总结与展望
 
-### 1. 如何启动本地开发服务？
-可以直接运行 `npm run dev`，此命令会自动加载包含专用开发代理及跨域允许的 `vite.config.dev.ts` 配置，并在 `http://0.0.0.0:5173` 监听服务。在进行代码提交前，建议运行 `npm run lint` 进行全量工程质检。
-
-### 2. 视频异步合成显示“等待中”卡住如何排查？
-*   确认 Supabase Service Role Key 部署正确，以确保 Edge Function 能够安全回写 `video_projects` 的 `status` 状态。
-*   检查 Seedance 任务日志，确定是否因为账户欠费或首尾帧图的分辨率比例不符（推荐使用 9:16 标准比例）导致接口拦截。
-
-### 3. 如何配置多用户共享团队额度？
-进入 `团队协作空间 (TeamSpacePage)` 创设团队后，添加成员邮箱。成员确认后，其扣费存储过程会自动向上追溯团队所有者 (Owner) 的积分余额包。
-
----
-
-## 📌 总结
+### 📌 总结
 
 Shopro AI 是一套面向 **带货短视频量产** 领域的一站式 SaaS 系统。项目融合了 DeepSeek-V4-Flash、CosyVoice2-0.5B、TeleSpeechASR、Seedance 2.0 等前沿多模态大模型，以极高的工程化完成度打通了“文案-配音-画面-数据回流-团队协作-支付”的商业化完整闭环。具有极高的商业化落地价值和出海想象空间。
+
+### 🗺️ 未来 GTM 路线图
+
+| 阶段 | 时间 | 里程碑 |
+|------|------|--------|
+| 🌱 公测种子期 | 2026 Q2 | 正式上线，获客 5000+ 商家，付费转化率 ≥ 8% |
+| 📈 规模商业化 | 2026 Q3-Q4 | 联合 20+ 头部 MCN/ERP，月 MRR 突破 ¥20 万 |
+| 🌐 跨境出海版 | 2027 | TikTok Shop/Lazada/Shopee 一键发布，海外节点上线 |
+| 🏭 生态开放 | 2027+ | 完全开放 OpenAPI，接入聚水潭/旺店通，打造无人值守视频工场 |
+
+---
+
+<p align="center">
+  <sub>Built with ❤️ Shopro AI 研发团队 
+</p>
+

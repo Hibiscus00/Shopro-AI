@@ -11,8 +11,7 @@ function getApiKey(): string {
     import.meta.env.VITE_CDANCE_API_KEY ||
     import.meta.env.VITE_VECTRUST_API_KEY ||
     import.meta.env.VITE_SEEDANCE_API_KEY ||
-    import.meta.env.VITE_DEEPSEEK_API_KEY ||
-    'sk-Cze3IQFfJMNJ6VlXYGT9WTTz0bJjB4Kz';
+    import.meta.env.VITE_DEEPSEEK_API_KEY || '';
   return apiKey;
 }
 

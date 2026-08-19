@@ -37,7 +37,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
     );
   }
 
-  let apiKey = Deno.env.get('DEEPSEEK_API_KEY') || 'sk-Cze3IQFfJMNJ6VlXYGT9WTTz0bJjB4Kz';
+  let apiKey = Deno.env.get('DEEPSEEK_API_KEY') || Deno.env.get('API_KEY') || '';
   const baseUrl = Deno.env.get('DEEPSEEK_BASE_URL') || 'https://ai.dxkp.com/v1';
 
   // 1. Try dxkp endpoint first

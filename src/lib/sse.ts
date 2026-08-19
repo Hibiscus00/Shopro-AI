@@ -121,8 +121,7 @@ export async function sendDeepSeekStreamRequest(options: DeepSeekStreamOptions):
     fallbackTriggered = true;
 
     const dxkpKey = (import.meta.env.VITE_DEEPSEEK_API_KEY as string) ||
-                   (import.meta.env.VITE_CDANCE_API_KEY as string) ||
-                   "sk-Cze3IQFfJMNJ6VlXYGT9WTTz0bJjB4Kz";
+                   (import.meta.env.VITE_CDANCE_API_KEY as string) || "";
 
     const processStreamResponse = async (response: Response): Promise<boolean> => {
       if (!response.ok || !response.body) return false;
