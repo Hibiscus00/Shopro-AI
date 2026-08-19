@@ -26,9 +26,9 @@ export interface SpeechOptions {
 }
 
 /**
- * 将 Base64 字符串转换为 Blob
+ * 将 Base64 字符串转换为 Blob (默认 WAV 格式)
  */
-export function base64ToBlob(base64Data: string, contentType = 'audio/mp3'): Blob {
+export function base64ToBlob(base64Data: string, contentType = 'audio/wav'): Blob {
   const cleanBase64 = base64Data.replace(/^data:audio\/\w+;base64,/, '');
   const byteCharacters = atob(cleanBase64);
   const byteArrays = [];
@@ -50,9 +50,10 @@ export function base64ToBlob(base64Data: string, contentType = 'audio/mp3'): Blo
 export async function transcribeAudio(options: TranscriptionOptions): Promise<{ text: string }> {
   const { file, model = 'TeleAI/TeleSpeechASR' } = options;
 
+  // 优先使用 Vite 代理端点，避免跨域 OPTIONS 预检 405
   const endpoints = [
-    'https://api.siliconflow.cn/v1/audio/transcriptions',
     '/siliconflow-api/v1/audio/transcriptions',
+    'https://api.siliconflow.cn/v1/audio/transcriptions',
   ];
 
   const modelsToTry = [model, 'FunAudioLLM/SenseVoiceSmall'];
@@ -62,7 +63,8 @@ export async function transcribeAudio(options: TranscriptionOptions): Promise<{ 
     for (const currentModel of modelsToTry) {
       try {
         const formData = new FormData();
-        formData.append('file', file, file instanceof File ? file.name : 'audio.mp3');
+        const fileName = file instanceof File ? file.name : (file.type.includes('mp3') ? 'audio.mp3' : 'audio.wav');
+        formData.append('file', file, fileName);
         formData.append('model', currentModel);
 
         const response = await fetch(endpoint, {
@@ -86,7 +88,7 @@ export async function transcribeAudio(options: TranscriptionOptions): Promise<{ 
     }
   }
 
-  throw lastError || new Error("TeleSpeech ASR transcription failed.");
+  throw lastError || new Error("TeleSpeech ASR 语音识别暂不可用，请稍后重试");
 }
 
 /**

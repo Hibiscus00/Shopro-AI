@@ -323,16 +323,63 @@ export async function sendStepAudioASR(options: StepASROptions): Promise<void> {
   const { audioData, onData, onComplete, onError, signal } = options;
 
   try {
-    const audioBlob = base64ToBlob(audioData, 'audio/mp3');
+    // 1. 尝试 Edge Function 远程代理 (如果可用)
+    if (SUPABASE_URL && SUPABASE_ANON_KEY) {
+      try {
+        const edgeRes = await fetch(`${SUPABASE_URL}/functions/v1/stepaudio`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          },
+          body: JSON.stringify({
+            action: 'asr',
+            audioData,
+            format: {
+              type: 'wav',
+              codec: 'pcm_s16le',
+              rate: 16000,
+              bits: 16,
+              channel: 1,
+            },
+          }),
+          signal,
+        });
+
+        if (edgeRes.ok) {
+          const json = await edgeRes.json();
+          if (json.text && json.text.trim()) {
+            if (!signal?.aborted) {
+              onData(json.text.trim());
+              onComplete();
+            }
+            return;
+          }
+        }
+      } catch (edgeErr) {
+        console.warn('StepAudio Edge Function ASR 代理不可用，切换至 SiliconFlow 降级接口:', edgeErr);
+      }
+    }
+
+    // 2. 降级为 SiliconFlow 接口处理 (基于标准 WAV 音频)
+    const audioBlob = base64ToBlob(audioData, 'audio/wav');
     const result = await transcribeAudio({ file: audioBlob, model: 'TeleAI/TeleSpeechASR' });
     if (signal?.aborted) return;
-    if (result.text) {
-      onData(result.text);
+
+    if (result.text && result.text.trim()) {
+      onData(result.text.trim());
+      onComplete();
+    } else {
+      onError(new Error('未识别到清晰语音，请重试或键入提示词'));
     }
-    onComplete();
   } catch (err) {
     if (!signal?.aborted) {
-      onError(err as Error);
+      const errMsg = (err as Error).message || '';
+      if (errMsg.includes('405') || errMsg.includes('Failed to fetch') || errMsg.includes('ERR_CONNECTION_RESET')) {
+        onError(new Error('语音接口连接超时，请重试或在输入框中手动输入'));
+      } else {
+        onError(err as Error);
+      }
     }
   }
 }

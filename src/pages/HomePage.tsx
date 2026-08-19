@@ -320,11 +320,17 @@ export default function HomePage() {
   const handleVoiceInput = async () => {
     if (recording) {
       setRecording(false);
-      toast.info('🎙️ 录音已结束，正在通过 TeleAI/TeleSpeechASR 进行识别...');
+      toast.info('🎙️ 录音已结束，正在识别语音...');
       try {
-        const base64Wav = await audioRecorder.stop();
+        const { base64, recognizedText } = await audioRecorder.stop();
+        if (recognizedText && recognizedText.trim()) {
+          setPrompt(prev => prev + (prev ? '，' : '') + recognizedText.trim());
+          toast.success('🎙️ 语音识别成功');
+          return;
+        }
+
         await sendStepAudioASR({
-          audioData: base64Wav,
+          audioData: base64,
           onData: (text) => {
             setPrompt(prev => prev + (prev ? '，' : '') + text);
           },
@@ -333,7 +339,7 @@ export default function HomePage() {
           },
           onError: (err) => {
             console.error('ASR error:', err);
-            toast.error(`识别失败: ${err.message}`);
+            toast.error(`${err.message}`);
           }
         });
       } catch (err) {
@@ -423,11 +429,17 @@ export default function HomePage() {
   const handleImgVoiceInput = async () => {
     if (imgRecording) {
       setImgRecording(false);
-      toast.info('🎙️ 录音已结束，正在通过 TeleAI/TeleSpeechASR 进行识别...');
+      toast.info('🎙️ 录音已结束，正在识别语音...');
       try {
-        const base64Wav = await audioRecorder.stop();
+        const { base64, recognizedText } = await audioRecorder.stop();
+        if (recognizedText && recognizedText.trim()) {
+          setImgPrompt(prev => prev + (prev ? '，' : '') + recognizedText.trim());
+          toast.success('🎙️ 语音识别成功');
+          return;
+        }
+
         await sendStepAudioASR({
-          audioData: base64Wav,
+          audioData: base64,
           onData: (text) => {
             setImgPrompt(prev => prev + (prev ? '，' : '') + text);
           },
@@ -436,7 +448,7 @@ export default function HomePage() {
           },
           onError: (err) => {
             console.error('ASR error:', err);
-            toast.error(`识别失败: ${err.message}`);
+            toast.error(`${err.message}`);
           }
         });
       } catch (err) {
@@ -1798,6 +1810,9 @@ export default function HomePage() {
                       playsInline
                       preload="metadata"
                       className="w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      onError={(e) => {
+                        (e.target as HTMLElement).style.display = 'none';
+                      }}
                     />
                     <div className="absolute top-2 right-2 opacity-100 group-hover:opacity-0 transition-opacity">
                       <span className="text-[10px] px-2 py-0.5 rounded-md bg-black/60 text-white/80 backdrop-blur">{video.model}</span>

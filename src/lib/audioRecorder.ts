@@ -6,21 +6,50 @@ class AudioRecorder {
   private leftchannel: Float32Array[] = [];
   private recordingLength = 0;
   private sampleRate = 16000;
+  private recognition: any = null;
+  private recognizedText = '';
 
   async start() {
     this.leftchannel = [];
     this.recordingLength = 0;
+    this.recognizedText = '';
 
-    // Request microphone access
+    // 初始化浏览器原生 Web Speech API (如果支持)
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      try {
+        this.recognition = new SpeechRecognition();
+        this.recognition.lang = 'zh-CN';
+        this.recognition.continuous = true;
+        this.recognition.interimResults = true;
+
+        this.recognition.onresult = (event: any) => {
+          let text = '';
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            text += event.results[i][0].transcript;
+          }
+          if (text) {
+            this.recognizedText = text;
+          }
+        };
+
+        this.recognition.onerror = () => {};
+        this.recognition.start();
+      } catch {
+        this.recognition = null;
+      }
+    }
+
+    // 请求麦克风权限
     this.mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
-    // Create AudioContext with 16000Hz sample rate directly
+    // 创建 16000Hz AudioContext
     const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
     this.audioContext = new AudioContextClass({ sampleRate: this.sampleRate });
 
     this.input = this.audioContext.createMediaStreamSource(this.mediaStream);
 
-    // Create ScriptProcessorNode to record raw PCM data
+    // 创建 ScriptProcessorNode 录制原生 PCM 数据
     this.processor = this.audioContext.createScriptProcessor(4096, 1, 1);
 
     this.processor.onaudioprocess = (e) => {
@@ -33,7 +62,18 @@ class AudioRecorder {
     this.processor.connect(this.audioContext.destination);
   }
 
-  async stop(): Promise<string> {
+  getRecognizedText(): string {
+    return this.recognizedText;
+  }
+
+  async stop(): Promise<{ base64: string; recognizedText: string }> {
+    if (this.recognition) {
+      try {
+        this.recognition.stop();
+      } catch {}
+      this.recognition = null;
+    }
+
     if (this.processor && this.input && this.audioContext) {
       this.processor.disconnect();
       this.input.disconnect();
@@ -44,7 +84,7 @@ class AudioRecorder {
       this.mediaStream.getTracks().forEach((track) => track.stop());
     }
 
-    // Flatten the left channel audio samples
+    // 平铺左声道音频采样数据
     const samples = new Float32Array(this.recordingLength);
     let offset = 0;
     for (let i = 0; i < this.leftchannel.length; i++) {
@@ -52,7 +92,7 @@ class AudioRecorder {
       offset += this.leftchannel[i].length;
     }
 
-    // Encode to WAV format
+    // 编码为标准的 WAV 格式 (16kHz 16bit Mono)
     const buffer = new ArrayBuffer(44 + samples.length * 2);
     const view = new DataView(buffer);
 
@@ -83,7 +123,7 @@ class AudioRecorder {
     /* data chunk length */
     view.setUint32(40, samples.length * 2, true);
 
-    // Write PCM audio samples
+    // 写入 PCM 音频采样数据
     let index = 44;
     for (let i = 0; i < samples.length; i++) {
       const s = Math.max(-1, Math.min(1, samples[i]));
@@ -91,14 +131,19 @@ class AudioRecorder {
       index += 2;
     }
 
-    // Convert ArrayBuffer to Base64
+    // 转换 ArrayBuffer 为 Base64 字符串
     const bytes = new Uint8Array(buffer);
     let binary = '';
     const len = bytes.byteLength;
     for (let i = 0; i < len; i++) {
       binary += String.fromCharCode(bytes[i]);
     }
-    return btoa(binary);
+    const base64 = btoa(binary);
+
+    return {
+      base64,
+      recognizedText: this.recognizedText,
+    };
   }
 
   private writeString(view: DataView, offset: number, string: string) {
@@ -109,3 +154,4 @@ class AudioRecorder {
 }
 
 export const audioRecorder = new AudioRecorder();
+
