@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import {
   LayoutDashboard, Video, FolderOpen, ImageIcon,
-  Menu, ChevronRight, Sparkles,
+  Menu, ChevronRight, Sparkles, ShoppingBag,
   Package, Users2, CreditCard, Wand2,
   Search, X, ArrowRight, Scissors, Moon, Sun,
   Layers, Share2, Code2, Gift, LayoutGrid, Bell, House, CheckCheck, LogOut,
@@ -52,7 +52,7 @@ const navGroups = [
     label: '主要功能',
     items: [
       { path: '/video/create', label: '工作台', icon: Video },
-      { path: '/product-selection', label: '智能选品', icon: Sparkles },
+      { path: '/product-selection', label: '智能选品', icon: ShoppingBag },
       { path: '/products', label: '商品管理', icon: Package },
       { path: '/avatars', label: '数字人库', icon: Users2 },
       { path: '/video/edit', label: '视频剪辑', icon: Scissors },

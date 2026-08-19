@@ -15,6 +15,7 @@ import {
   Clock, CheckCircle2, AlertCircle, FileVideo, BarChart3, RefreshCw,
   Sparkles, ImagePlus, FlipHorizontal, Trophy, TrendingUp,
   Zap, Target, Activity, Scissors, Upload, ImageIcon, Edit2,
+  CheckSquare, Square, Check,
 } from 'lucide-react';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -47,6 +48,7 @@ const STATUS_TABS = [
 // ── 作品卡片 ─────────────────────────────────────────────────────────────
 function WorkCard({
   project, onPreview, onDelete, onAnalyze, onRetry, onReload,
+  selectMode, isSelected, onToggleSelect,
 }: {
   project: VideoProject;
   onPreview: (p: VideoProject) => void;
@@ -54,6 +56,9 @@ function WorkCard({
   onAnalyze: (id: string) => void;
   onRetry:   (p: VideoProject) => void;
   onReload:  () => void;
+  selectMode?: boolean;
+  isSelected?: boolean;
+  onToggleSelect?: (id: string) => void;
 }) {
   const cfg = STATUS_CONFIG[project.status];
   const StatusIcon = cfg.Icon;
@@ -126,14 +131,48 @@ function WorkCard({
   });
 
   return (
-    <div className="rounded-2xl overflow-hidden flex flex-col bg-[hsl(var(--card))] border border-border/60 shadow-sm transition-all hover:shadow-lg hover:-translate-y-1 group relative">
+    <div
+      className={cn(
+        "rounded-2xl overflow-hidden flex flex-col bg-[hsl(var(--card))] border transition-all hover:shadow-lg group relative",
+        selectMode ? "cursor-pointer hover:border-primary/60" : "hover:-translate-y-1 shadow-sm",
+        isSelected ? "border-primary ring-2 ring-primary/40 bg-primary/5" : "border-border/60"
+      )}
+      onClick={() => {
+        if (selectMode) {
+          onToggleSelect?.(project.id);
+        }
+      }}
+    >
+      {/* 多选勾选图标 */}
+      {selectMode && (
+        <div
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleSelect?.(project.id);
+          }}
+          className={cn(
+            "absolute top-2.5 right-2.5 z-30 w-6 h-6 rounded-lg flex items-center justify-center transition-all cursor-pointer shadow-md backdrop-blur",
+            isSelected ? "bg-primary text-primary-foreground scale-105" : "bg-black/60 border border-white/40 text-transparent hover:border-white/80"
+          )}
+        >
+          <Check className="w-4 h-4 stroke-[3]" />
+        </div>
+      )}
+
       {/* ── 预览区（点击封面弹窗预览） ── */}
       <div
         className={cn(
           'relative bg-muted overflow-hidden cursor-pointer max-h-[220px]',
           aspect
         )}
-        onClick={() => canPlay && onPreview(project)}
+        onClick={(e) => {
+          if (selectMode) {
+            e.stopPropagation();
+            onToggleSelect?.(project.id);
+          } else if (canPlay) {
+            onPreview(project);
+          }
+        }}
       >
         {project.thumbnail_url ? (
           <img
@@ -416,20 +455,58 @@ function formatDateShort(iso: string): string {
 // ── 素材卡片 ─────────────────────────────────────────────────────────────
 function MaterialCard({
   material, onPreview, onDownload, onDelete,
+  selectMode, isSelected, onToggleSelect,
 }: {
   material: Material;
   onPreview:  (m: Material) => void;
   onDownload: (m: Material) => void;
   onDelete:   (id: string) => void;
+  selectMode?: boolean;
+  isSelected?: boolean;
+  onToggleSelect?: (id: string) => void;
 }) {
   const isImage = material.type === 'image';
   const [aspect, setAspect] = useState('aspect-[4/3]');
 
   return (
-    <div className="rounded-2xl overflow-hidden flex flex-col bg-card border border-border/60 shadow-sm hover:shadow-md transition-shadow duration-200">
+    <div
+      className={cn(
+        "rounded-2xl overflow-hidden flex flex-col bg-card border transition-all shadow-sm hover:shadow-md relative",
+        selectMode ? "cursor-pointer hover:border-primary/60" : "",
+        isSelected ? "border-primary ring-2 ring-primary/40 bg-primary/5" : "border-border/60"
+      )}
+      onClick={() => {
+        if (selectMode) {
+          onToggleSelect?.(material.id);
+        }
+      }}
+    >
+      {/* 多选勾选图标 */}
+      {selectMode && (
+        <div
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleSelect?.(material.id);
+          }}
+          className={cn(
+            "absolute top-2.5 right-2.5 z-30 w-6 h-6 rounded-lg flex items-center justify-center transition-all cursor-pointer shadow-md backdrop-blur",
+            isSelected ? "bg-primary text-primary-foreground scale-105" : "bg-black/60 border border-white/40 text-transparent hover:border-white/80"
+          )}
+        >
+          <Check className="w-4 h-4 stroke-[3]" />
+        </div>
+      )}
+
       <div
         className={cn("relative cursor-pointer group bg-muted overflow-hidden max-h-[220px]", aspect)}
-        onClick={() => onPreview(material)}
+        onClick={(e) => {
+          if (selectMode) {
+            e.stopPropagation();
+            onToggleSelect?.(material.id);
+          } else {
+            onPreview(material);
+          }
+        }}
       >
         {isImage ? (
           <img src={material.url} alt={material.name}
@@ -497,6 +574,12 @@ export default function WorksPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [mainTab, setMainTab] = useState<'works' | 'materials'>('works');
+
+  // ── 多选与批量删除 state ──
+  const [selectMode, setSelectMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [isBatchDeleteOpen, setIsBatchDeleteOpen] = useState(false);
+  const [batchDeleting, setBatchDeleting] = useState(false);
 
   // ── 作品管理 state ──
   const [projects, setProjects] = useState<VideoProject[]>([]);
@@ -784,6 +867,66 @@ async function seedTestUserVideos(userId: string) {
     setDeleteId(null);
   };
 
+  const toggleSelectItem = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const handleSelectAll = () => {
+    if (mainTab === 'works') {
+      const allFilteredIds = filtered.map(p => p.id);
+      const isAll = allFilteredIds.length > 0 && allFilteredIds.every(id => selectedIds.has(id));
+      if (isAll) {
+        setSelectedIds(new Set());
+      } else {
+        setSelectedIds(new Set(allFilteredIds));
+      }
+    } else {
+      const allMatIds = filteredMaterials.map(m => m.id);
+      const isAll = allMatIds.length > 0 && allMatIds.every(id => selectedIds.has(id));
+      if (isAll) {
+        setSelectedIds(new Set());
+      } else {
+        setSelectedIds(new Set(allMatIds));
+      }
+    }
+  };
+
+  const handleBatchDeleteConfirm = async () => {
+    if (selectedIds.size === 0) return;
+    setBatchDeleting(true);
+    try {
+      const idsArray = Array.from(selectedIds);
+      if (mainTab === 'works') {
+        const { error } = await supabase.from('video_projects').delete().in('id', idsArray);
+        if (error) throw error;
+        setProjects(prev => prev.filter(p => !selectedIds.has(p.id)));
+        toast.success(`已成功删除 ${idsArray.length} 个作品`);
+      } else {
+        const matsToDelete = materials.filter(m => selectedIds.has(m.id));
+        const paths = matsToDelete.map(m => m.url.split('/materials/')[1]).filter(Boolean);
+        if (paths.length) {
+          await supabase.storage.from('materials').remove(paths);
+        }
+        const { error } = await supabase.from('materials').delete().in('id', idsArray);
+        if (error) throw error;
+        setMaterials(prev => prev.filter(m => !selectedIds.has(m.id)));
+        toast.success(`已成功删除 ${idsArray.length} 个素材`);
+      }
+      setSelectedIds(new Set());
+      setSelectMode(false);
+    } catch (err: any) {
+      toast.error(`批量删除失败: ${err.message || err}`);
+    } finally {
+      setBatchDeleting(false);
+      setIsBatchDeleteOpen(false);
+    }
+  };
+
   // P1-N06 失败重试：调用 EF retryVideoJob action + 重置项目状态
   const [retrying, setRetrying] = useState<string | null>(null);
   const handleRetry = async (project: VideoProject) => {
@@ -846,6 +989,18 @@ async function seedTestUserVideos(userId: string) {
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
+          <Button
+            variant={selectMode ? "secondary" : "outline"}
+            size="sm"
+            className={cn("h-9 gap-1.5", selectMode && "border-primary text-primary font-semibold bg-primary/10")}
+            onClick={() => {
+              setSelectMode(!selectMode);
+              setSelectedIds(new Set());
+            }}
+          >
+            <CheckSquare className="w-4 h-4" />
+            {selectMode ? '退出多选' : '多选操作'}
+          </Button>
           {mainTab === 'works' ? (
             <>
               <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" onClick={loadProjects} title="刷新">
@@ -877,13 +1032,57 @@ async function seedTestUserVideos(userId: string) {
           { value: 'works' as const,     label: '视频作品', icon: Video },
           { value: 'materials' as const, label: '素材库',   icon: ImageIcon },
         ].map(({ value, label, icon: Icon }) => (
-          <button key={value} onClick={() => setMainTab(value)}
+          <button key={value} onClick={() => { setMainTab(value); setSelectedIds(new Set()); }}
             className={cn('flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-medium transition-all',
               mainTab === value ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground')}>
             <Icon className="w-3.5 h-3.5" />{label}
           </button>
         ))}
       </div>
+
+      {/* ── 多选批量操作控制栏 ── */}
+      {selectMode && (
+        <div className="flex items-center justify-between gap-3 p-3 rounded-xl bg-primary/10 border border-primary/30 backdrop-blur animate-in fade-in duration-200">
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-medium text-foreground">
+              已选择 <span className="text-primary font-bold text-base px-1">{selectedIds.size}</span> 项
+            </span>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 text-xs text-muted-foreground hover:text-foreground"
+              onClick={handleSelectAll}
+            >
+              {((mainTab === 'works' && filtered.length > 0 && filtered.every(p => selectedIds.has(p.id))) ||
+                (mainTab === 'materials' && filteredMaterials.length > 0 && filteredMaterials.every(m => selectedIds.has(m.id))))
+                  ? '取消全选' : '全选本页'}
+            </Button>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="destructive"
+              size="sm"
+              disabled={selectedIds.size === 0}
+              onClick={() => setIsBatchDeleteOpen(true)}
+              className="h-8 text-xs gap-1.5 shadow-sm"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              批量删除 ({selectedIds.size})
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setSelectMode(false);
+                setSelectedIds(new Set());
+              }}
+              className="h-8 text-xs"
+            >
+              取消
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* ══════════════ 视频作品 Tab ══════════════ */}
       {mainTab === 'works' && (
@@ -929,7 +1128,8 @@ async function seedTestUserVideos(userId: string) {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filtered.map(p => (
                   <WorkCard key={p.id} project={p} onPreview={setPreviewProject} onDelete={setDeleteId}
-                    onAnalyze={id => navigate(`/analytics?projectId=${id}`)} onRetry={handleRetry} onReload={loadProjects} />
+                    onAnalyze={id => navigate(`/analytics?projectId=${id}`)} onRetry={handleRetry} onReload={loadProjects}
+                    selectMode={selectMode} isSelected={selectedIds.has(p.id)} onToggleSelect={toggleSelectItem} />
                 ))}
               </div>
             </>
@@ -1023,7 +1223,8 @@ async function seedTestUserVideos(userId: string) {
           ) : filteredMaterials.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
               {filteredMaterials.map(m => (
-                <MaterialCard key={m.id} material={m} onPreview={setMatPreview} onDownload={handleMatDownload} onDelete={setMatDeleteId} />
+                <MaterialCard key={m.id} material={m} onPreview={setMatPreview} onDownload={handleMatDownload} onDelete={setMatDeleteId}
+                  selectMode={selectMode} isSelected={selectedIds.has(m.id)} onToggleSelect={toggleSelectItem} />
               ))}
             </div>
           ) : (
@@ -1332,6 +1533,28 @@ async function seedTestUserVideos(userId: string) {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* ── 批量删除确认弹窗 ── */}
+      <AlertDialog open={isBatchDeleteOpen} onOpenChange={setIsBatchDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>确认批量删除</AlertDialogTitle>
+            <AlertDialogDescription>
+              您确定要删除选中的 {selectedIds.size} 个{mainTab === 'works' ? '视频作品' : '素材文件'}吗？此操作无法撤销。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={batchDeleting}>取消</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleBatchDeleteConfirm}
+              disabled={batchDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {batchDeleting ? '正在删除...' : '确定删除'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
