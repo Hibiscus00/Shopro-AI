@@ -63,7 +63,7 @@
 
 | 模块/能力 | 对接模型 | 调用入口 / SDK | 用途与优势 |
 |---|---|---|---|
-| **文本大模型** | **DeepSeek-V4-Flash** | `/functions/v1/deepseek-v4-pro` | 营销文案、多语种翻译、商品特征解析、NLP情感极值标注 |
+| **文本大模型** | **DeepSeek-V4-Flash** | `/functions/v1/deepseek-v4-flash` | 营销文案、多语种翻译、商品特征解析、NLP情感极值标注 |
 | **语音大模型** | **CosyVoice2 / TeleSpeech** | `/functions/v1/siliconflow-audio` | `CosyVoice2-0.5B` 情感化语音合成，`TeleSpeechASR` 录音高精度转录 |
 | **视频生成** | **Seedance 2.0** | `/functions/v1/seedance` (submit/query) | `seedance-2-0-fast-260128` 物理级高画质多模态短视频生成与图生视频 |
 | **图像/封面** | **Flux 1.1 Pro** | `ai-assistant` (generate_cover) | 竖版高分辨率带货短视频封面设计及图生图参考 |
@@ -208,7 +208,7 @@ Shopro AI/
    抖音 / TikTok / 快手 / 小红书 / B站 定时发布 → ROI 回流 → AI 重写优化
 ```
 
-### 1. 🧠 AI 脚本与提示词增强工作台 (`HomePage.tsx`, `ScriptPage.tsx`)
+### 1. 🧠 AI 脚本与提示词增强工作台
 *   **低延时中文流式打字机**：工作台“提示词增强”强约束纯中文输出，支持低延时平滑逐字/逐块打字机流式渲染，瞬间提升提示词专业度。
 *   **视频生成模型矩阵**：集成了 7 大业界尖端视频生成模型，并配备厂商专属视觉标识：
     - ⚡ **Seedance 2.0** (ByteDance)
@@ -221,7 +221,7 @@ Shopro AI/
 *   **视频默认画质**：工作台默认配置 `720P · 16:9 · 5s` 标清爆款比例与高清帧率。
 *   **分镜 CoT 架构**：基于思维链（CoT）四层营销架构，流式（SSE）生成分镜脚本：钩子（Hook）➔ 痛点（Pain Point）➔ 产品介绍（Product）➔ 行动召唤（CTA）。
 
-### 2. 🛍️ 一键 URL / 口令解析商品导入 & 16国选品矩阵 (`ProductsPage.tsx`, `ProductSelectionPage.tsx`)
+### 2. 🛍️ 一键 URL / 口令解析商品导入 & 16国选品矩阵
 *   **一键 URL / 剪贴板口令解析导入**：
     - 支持抖音 🎵、TikTok 🎶、拼多多 🔴、淘宝 🟠、Shopee 🧡、亚马逊 📦、全网通用 🌐 等平台商品网页链接或分享口令（淘口令/抖音口令）。
     - 实时调用 **DeepSeek-V4-Flash** 多模态能力，自动提取规范标题、所属分类、原价/折后活动售价、三大 AI 核心卖点、商品实物封面图及详细描述。
@@ -232,22 +232,22 @@ Shopro AI/
 *   **16 国爆款商品矩阵**：
     - 涵盖美国、印尼、英国、越南、泰国、马来西亚、菲律宾、西班牙、墨西哥、德国、法国、意大利、巴西、日本、新加坡等 16 个国家/地区，每国包含 5+ 真实实物无人物商品图片数据。
 
-### 3. 🎬 作品素材与首帧封面动态提取 (`WorksPage.tsx`, `src/lib/videoFrame.ts`)
+### 3. 🎬 作品素材与首帧封面动态提取 
 *   **视频首帧动态截取**：全站 AI 生成视频保存至作品素材库时，自动调用 `extractVideoFirstFrame` 截取对应视频第一帧图片作为真实高保真封面。
 *   **真实提示词绑定**：作品标题自动绑定并保存为用户输入的真实提示词内容（`prompt.trim()`），告别固定模板标题。
 
-### 4. 👥 数字人情感合成与多轨剪辑 (`AvatarsPage.tsx`, `VideoEditPage.tsx`)
+### 4. 👥 数字人情感合成与多轨剪辑 
 *   **情绪对齐**：系统利用 NLP 分析台词的情感极值，在分镜时间轴上自动映射数字人的面部表情（平和、喜悦、担忧、激动、说服）与语气。
 *   **多模态配音**：利用 `CosyVoice2-0.5B` 根据情感标记生成自然拟真的小语种配音。
 *   **多轨道编辑器**：在网页端提供多轨道可视化 Canvas 剪辑面板，直观拖拽分镜卡片、配音音轨、字幕，实现免学习拼积木式合成。
 
-### 5. 💡 流量追踪、A/B测试与广告回流 (`ABTestPage.tsx`, `AnalyticsPage.tsx`, `DataFeedbackPage.tsx`, `PublishPage.tsx`)
+### 5. 💡 流量追踪、A/B测试与广告回流 
 *   **漏斗分析**：展示不同视频版本的转化漏斗图（播放量-完播率-点击率-成交金额），直接计算 ROI。
 *   **A/B测试**：同一商品配置多组脚本/封面，在线追踪测试，智能淘汰低效版本。
 *   **多平台发布**：可将渲染完成的视频直接调度至抖音、TikTok、小红书、快手或 B站，设定排期计划自动定时发布。
 *   **自适应优化**：将真实投放转化差的文案数据回流，自动反馈给 AI 训练，对低分脚本进行“一键调优”重写。
 
-### 6. 🔗 团队协作与 OpenAPI 开放平台 (`TeamSpacePage.tsx`, `OpenAPIPage.tsx`)
+### 6. 🔗 团队协作与 OpenAPI 开放平台 
 *   **团队协作**：支持主账号创建团队空间，通过邮箱发送邀请凭证，配置管理员或协作者角色，共享素材库与作品集。
 *   **OpenAPI 调试**：面向大商户或 ERP 系统，提供 `ak_...` 自定义 API 密钥生成、Revoke 控制，并附带在线交互式 API 沙箱调试器。
 ---
@@ -351,7 +351,7 @@ npm run build
 | `create` | 提交视频生成任务 | `prompt`, `first_frame`, `last_frame`, `duration`, `resolution`, `ratio`, `seed` | `{ task_id }` |
 | `query` | 查询任务状态 | `task_id` | `{ status, video_url, progress }` |
 
-### 🤖`phase3-assistant` — Phase 3 综合后端
+### 🤖`phase3-assistant` — 综合后端
 
 > **端点**：`POST /functions/v1/phase3-assistant`（需 `Authorization: Bearer <JWT>`）
 
@@ -417,6 +417,6 @@ Shopro AI 是一套面向 **带货短视频量产** 领域的一站式 SaaS 系�
 ---
 
 <p align="center">
-  <sub>Built with ❤️ Shopro AI 研发团队 
+  <sub>Built with ❤️ Shopro AI 研发团队 -晓叶
 </p>
 
