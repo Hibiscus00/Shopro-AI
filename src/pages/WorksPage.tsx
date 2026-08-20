@@ -45,6 +45,32 @@ const STATUS_TABS = [
   { value: 'failed',     label: '失败' },
 ];
 
+// 视频与本地真实首帧封面映射字典 (数据库刷新永远有效)
+const VIDEO_COVER_MAP: Record<string, string> = {
+  '/Video/CreatOK_2.mp4': '/person/girl1.png',
+  '/Video/CreatOK_4.mp4': '/person/boy1.png',
+  '/Video/CreatOK_7.mp4': '/person/girl2.png',
+  '/Video/CreatOK_8.mp4': '/person/boy2.png',
+  '/Video/CreatOK_10.mp4': '/person/girl3.png',
+  '/Video/CreatOK_6.mp4': '/person/boy3.png',
+  '/Video/CreatOK_9.mp4': '/person/girl4.png',
+  '/Video/CreatOK_11.mp4': '/person/girl5.png',
+  '/Video/CreatOK_5.mp4': '/person/girl1.png',
+};
+
+function getValidWorkThumbnail(project: VideoProject): string {
+  const thumb = project.thumbnail_url;
+  if (thumb && thumb.startsWith('http') && !thumb.endsWith('.mp4')) return thumb;
+  if (thumb && thumb.startsWith('data:image')) return thumb;
+  if (thumb && thumb.startsWith('/person/')) return thumb;
+
+  if (project.video_url && VIDEO_COVER_MAP[project.video_url]) {
+    return VIDEO_COVER_MAP[project.video_url];
+  }
+
+  return 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&auto=format&fit=crop&q=80';
+}
+
 // ── 作品卡片 ─────────────────────────────────────────────────────────────
 function WorkCard({
   project, onPreview, onDelete, onAnalyze, onRetry, onReload,
@@ -174,9 +200,9 @@ function WorkCard({
           }
         }}
       >
-        {project.thumbnail_url ? (
+        {getValidWorkThumbnail(project) ? (
           <img
-            src={project.thumbnail_url}
+            src={getValidWorkThumbnail(project)}
             alt={project.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             onLoad={(e) => {
@@ -186,6 +212,9 @@ function WorkCard({
               else if (ratio < 0.8) setAspect('aspect-[3/4]');
               else if (ratio < 1.2) setAspect('aspect-square');
               else setAspect('aspect-video');
+            }}
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&auto=format&fit=crop&q=80';
             }}
           />
         ) : project.video_url ? (

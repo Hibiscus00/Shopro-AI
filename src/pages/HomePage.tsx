@@ -12,7 +12,7 @@ import { toast } from 'sonner';
 import ProductVideoWizard from './VideoCreatePage';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { sendDeepSeekStreamRequest, sendStepAudioASR, submitSeedanceVideo, querySeedanceVideo, sendStepFlashStreamRequest } from '@/lib/sse';
-import { extractVideoFirstFrame } from '@/lib/videoFrame';
+import { extractVideoFirstFrame, getVideoCoverImage } from '@/lib/videoFrame';
 import { audioRecorder } from '@/lib/audioRecorder';
 
 
@@ -650,7 +650,7 @@ export default function HomePage() {
           setResultVideo(videoUrl);
           toast.success(selectedAvatar ? `已为您成功生成数字人「${selectedAvatar.name}」带货视频！` : 'Seedance 视频生成完成！');
           if (dbProjectId) {
-            const coverFrame = (await extractVideoFirstFrame(videoUrl)) || videoUrl;
+            const coverFrame = await getVideoCoverImage(videoUrl, selectedAvatar?.preview_image, firstFrame || undefined);
             await supabase.from('video_projects').update({
               status: 'completed',
               progress: 100,
@@ -705,7 +705,7 @@ export default function HomePage() {
             setResultVideo(videoUrl);
             toast.success('Kling 视频生成完成！');
             if (dbProjectId) {
-              const coverFrame = (await extractVideoFirstFrame(videoUrl)) || videoUrl;
+              const coverFrame = await getVideoCoverImage(videoUrl, selectedAvatar?.preview_image, firstFrame || undefined);
               await supabase.from('video_projects').update({
                 status: 'completed',
                 progress: 100,
@@ -901,7 +901,7 @@ export default function HomePage() {
             toast.success(`${model.label} 视频生成完成！`);
 
             if (dbProjectId) {
-              const coverFrame = (await extractVideoFirstFrame(randomVideo)) || randomVideo;
+              const coverFrame = await getVideoCoverImage(randomVideo, selectedAvatar?.preview_image, firstFrame || undefined);
               await supabase.from('video_projects').update({
                 status: 'completed',
                 progress: 100,

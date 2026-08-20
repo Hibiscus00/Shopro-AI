@@ -1647,17 +1647,54 @@ ${textToParse}`;
                 </div>
 
                 <div className="flex gap-4 items-start">
-                  {/* 封面预估 */}
-                  <div className="w-24 shrink-0 space-y-1.5">
-                    <div className="aspect-square rounded-xl overflow-hidden border border-slate-200 bg-white shadow-sm">
-                      <img src={parsedResult.cover_image} alt="" className="w-full h-full object-cover" />
+                  {/* 封面预估与自定义选择 */}
+                  <div className="w-28 shrink-0 space-y-1.5">
+                    <div className="aspect-square rounded-xl overflow-hidden border border-slate-200 bg-white shadow-sm relative group">
+                      <img
+                        src={parsedResult.cover_image || getCategoryFallbackImage(parsedResult.category)}
+                        alt={parsedResult.name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          const fallback = getCategoryFallbackImage(parsedResult.category);
+                          (e.currentTarget as HTMLImageElement).src = fallback;
+                          setParsedResult(prev => prev ? { ...prev, cover_image: fallback } : null);
+                        }}
+                      />
                     </div>
-                    <Input
-                      value={parsedResult.cover_image}
-                      onChange={(e) => setParsedResult({ ...parsedResult, cover_image: e.target.value })}
-                      placeholder="封面图 URL"
-                      className="h-7 text-[10px] bg-white border-slate-200 text-slate-800"
-                    />
+                    <div className="flex gap-1">
+                      <label className="flex-1 py-1 rounded bg-rose-50 hover:bg-rose-100 text-rose-600 text-[10px] font-bold border border-rose-200 cursor-pointer text-center">
+                        <span>上传本地图</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onload = () => {
+                                if (reader.result) {
+                                  setParsedResult(prev => prev ? { ...prev, cover_image: reader.result as string } : null);
+                                  toast.success('自定义封面图片已导入');
+                                }
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                        />
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const fallback = getCategoryFallbackImage(parsedResult.category);
+                          setParsedResult(prev => prev ? { ...prev, cover_image: fallback } : null);
+                          toast.info('已切换为分类高清推荐封面');
+                        }}
+                        className="px-1.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-semibold border border-slate-200"
+                      >
+                        推荐封面
+                      </button>
+                    </div>
                   </div>
 
                   {/* 信息字段编辑 */}
