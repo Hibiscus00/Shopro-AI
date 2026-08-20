@@ -40,10 +40,20 @@ interface Props {
   initialText?: string;
 }
 
+const DEFAULT_EMOTION_TEXT = `你是不是也经常晚上睡不着，白天没精神？\n试过好多办法都没用，工作效率急剧下降！\n今天给你推荐这款草本安睡蒸汽眼罩，蕴含天然洋甘菊提取物。\n戴上10分钟，微温蒸汽舒缓眼部疲劳，沉浸式助眠！\n全网已狂销100万+盒，今天下单买一送一，快点击左下角下单吧！`;
+
+const DEFAULT_EMOTION_SEGMENTS: EmotionSegment[] = [
+  { index: 1, text: '你是不是也经常晚上睡不着，白天没精神？', emotion: 'hook', intensity: 88, color: '#f59e0b', suggestion: '【钩子引导】开场共鸣感强，建议提高重音强调“睡不着”。' },
+  { index: 2, text: '试过好多办法都没用，工作效率急剧下降！', emotion: 'pain_point', intensity: 92, color: '#ef4444', suggestion: '【痛点共鸣】精准击中焦虑痛点，语调可带同理心叹息。' },
+  { index: 3, text: '今天给你推荐这款草本安睡蒸汽眼罩，蕴含天然洋甘菊提取物。', emotion: 'product_intro', intensity: 78, color: '#3b82f6', suggestion: '【产品介绍】表达专业清晰，语速保持中速稳重。' },
+  { index: 4, text: '戴上10分钟，微温蒸汽舒缓眼部疲劳，沉浸式助眠！', emotion: 'product_intro', intensity: 85, color: '#3b82f6', suggestion: '【体验升华】突出“沉浸式”，停顿0.5秒加深印象。' },
+  { index: 5, text: '全网已狂销100万+盒，今天下单买一送一，快点击左下角下单吧！', emotion: 'cta', intensity: 96, color: '#10b981', suggestion: '【行动号召】紧迫感十足，重音放在“买一送一”。' },
+];
+
 export default function EmotionAnalysisPage({ initialText = '' }: Props) {
   const { user } = useAuth();
-  const [text, setText] = useState(initialText);
-  const [segments, setSegments] = useState<EmotionSegment[]>([]);
+  const [text, setText] = useState(initialText || DEFAULT_EMOTION_TEXT);
+  const [segments, setSegments] = useState<EmotionSegment[]>(DEFAULT_EMOTION_SEGMENTS);
   const [analyzing, setAnalyzing] = useState(false);
 
   const analyze = async () => {

@@ -190,22 +190,51 @@ function MultimodalProgress({ step, progress }: { step: number; progress: number
   );
 }
 
+const DEFAULT_SAMPLE_REPORT: StyleReport = {
+  rhythm: '快节奏强按拍', pacing: '快节奏（1.8s/镜头）',
+  transitions: ['快切闪白', '视差放大', 'J-Cut混音'],
+  subtitle_style: '黄白高亮+黑描边加粗',
+  bgm_type: '抖音极速电子音律', bgm_mood: '激昂充满紧迫感',
+  color_tone: '明亮高对比暖色',
+  rhythm_score: 92,
+  virality_score: 89,
+  completion_score: 86,
+  strengths: ['前3秒痛点开场强抓眼球', '字幕高亮与声画重音同步', '结尾限时诱惑行动号召高'],
+  improvements: ['中段讲解可增加更多产品实测特写'],
+  dna_scores: {
+    openingHook: 94,
+    paceRhythm: 91,
+    emotionCurve: 88,
+    productShow: 85,
+    ctaStrength: 90,
+    audioVisual: 92,
+  },
+  dna_fingerprint: 'A3E8B9C1',
+  tags: ['黄金前3秒Hook', '高频快切', '黑描边高亮字幕', '电音强律动', '限时促单'],
+  pacing_label: '快节奏（1.8s/镜头）',
+  transitions_summary: '急速快切 + 视差放大转场',
+  subtitle_summary: '黄白高亮 + 黑描边加粗双色字幕',
+  bgm_summary: '128BPM 极速电子音律',
+};
+
+const DEFAULT_SAMPLE_LLM_ANALYSIS = '根据该爆款视频风格DNA分析：其核心成功要素为「痛点反差Hook + 黄金15秒视觉高频切换」。复刻建议在开场使用【极简痛点提问】，配乐选择128BPM快节奏电音，关键卖点使用黑描边黄字高亮。';
+
 // ── 主页面 ────────────────────────────────────────────────────────────────────
 export default function StyleCopyPage() {
   const { user }   = useAuth();
   const navigate   = useNavigate();
 
   const [inputMode, setInputMode] = useState<'link' | 'upload'>('link');
-  const [linkUrl,   setLinkUrl]   = useState('');
+  const [linkUrl,   setLinkUrl]   = useState('https://www.douyin.com/video/728912384918237');
   const [dragging,  setDragging]  = useState(false);
   const [fileUrl,   setFileUrl]   = useState<string | null>(null);
   const [fileName,  setFileName]  = useState('');
   const [analyzing, setAnalyzing] = useState(false);
   const [progress,  setProgress]  = useState(0);
   const [mmStep,    setMmStep]    = useState(0); // 多模态分析步骤
-  const [report,    setReport]    = useState<StyleReport | null>(null);
+  const [report,    setReport]    = useState<StyleReport | null>(DEFAULT_SAMPLE_REPORT);
   const [savedId,   setSavedId]   = useState<string | null>(null);
-  const [llmAnalysis, setLlmAnalysis] = useState('');
+  const [llmAnalysis, setLlmAnalysis] = useState(DEFAULT_SAMPLE_LLM_ANALYSIS);
   const [llmLoading, setLlmLoading] = useState(false);
 
   // ── 上传视频 ──────────────────────────────────────────────────────────────
@@ -563,7 +592,7 @@ export default function StyleCopyPage() {
                   </code>
                 </div>
                 <div className="flex flex-wrap gap-1.5">
-                  {report.tags.map((tag, i) => (
+                  {(report.tags ?? []).map((tag, i) => (
                     <Badge key={i} variant="secondary" className="text-xs gap-1">
                       <Tag className="w-2.5 h-2.5" />{tag}
                     </Badge>
@@ -629,10 +658,10 @@ export default function StyleCopyPage() {
                   <h2 className="text-sm font-semibold">风格详情分析</h2>
                 </div>
                 <div className="p-4 grid grid-cols-1 gap-3">
-                  <InfoRow icon={Zap}     label="节奏类型" value={`${report.rhythm} · ${report.pacing_label}`} />
-                  <InfoRow icon={Play}    label="转场特点" value={report.transitions_summary} />
-                  <InfoRow icon={Type}    label="字幕样式" value={report.subtitle_summary} />
-                  <InfoRow icon={Music}   label="背景音乐" value={report.bgm_summary} />
+                  <InfoRow icon={Zap}     label="节奏类型" value={`${report.rhythm} · ${report.pacing_label || report.pacing || ''}`} />
+                  <InfoRow icon={Play}    label="转场特点" value={report.transitions_summary || (report.transitions ?? []).join('、')} />
+                  <InfoRow icon={Type}    label="字幕样式" value={report.subtitle_summary || report.subtitle_style} />
+                  <InfoRow icon={Music}   label="背景音乐" value={report.bgm_summary || `${report.bgm_type} · ${report.bgm_mood}`} />
                   <InfoRow icon={Palette} label="色调风格" value={report.color_tone} />
                 </div>
               </div>
@@ -643,7 +672,7 @@ export default function StyleCopyPage() {
                   <h3 className="text-xs font-semibold text-success flex items-center gap-1.5">
                     <ThumbsUp className="w-3.5 h-3.5" />值得借鉴的优势
                   </h3>
-                  {report.strengths.map((s, i) => (
+                  {(report.strengths ?? []).map((s, i) => (
                     <div key={i} className="flex items-start gap-2 text-xs text-foreground/80">
                       <span className="w-4 h-4 rounded-full bg-success/20 text-success flex items-center justify-center text-[10px] shrink-0 mt-0.5">{i + 1}</span>
                       <span>{s}</span>
@@ -654,7 +683,7 @@ export default function StyleCopyPage() {
                   <h3 className="text-xs font-semibold text-warning flex items-center gap-1.5">
                     <ThumbsDown className="w-3.5 h-3.5" />可以优化的方向
                   </h3>
-                  {report.improvements.map((s, i) => (
+                  {(report.improvements ?? []).map((s, i) => (
                     <div key={i} className="flex items-start gap-2 text-xs text-foreground/80">
                       <span className="w-4 h-4 rounded-full bg-warning/20 text-warning flex items-center justify-center text-[10px] shrink-0 mt-0.5">{i + 1}</span>
                       <span>{s}</span>

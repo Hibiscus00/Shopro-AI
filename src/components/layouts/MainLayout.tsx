@@ -34,15 +34,15 @@ function useThemePersist() {
   return { theme, setTheme };
 }
 
-// 7+AI工具箱二级菜单条目
+// AI工具箱7+二级菜单条目
 const AI_TOOLBOX_ITEMS = [
   { label: 'Prompt知识库', path: '/knowledge', badge: 'Prompt', badgeColor: '#14b8a6', desc: '聚合优质 Prompt，整合提效写作' },
   { label: '商品带货脚本', path: '/script', badge: '脚本', badgeColor: '#a855f7', desc: '智能生成短视频爆款带货脚本' },
-  { label: '作品流量预测', path: '/analytics', badge: '预测', badgeColor: '#22c55e', desc: '实时追踪完播率与流量预测' },
+  { label: '直播高光切片', path: '/live-highlight', badge: 'NEW', badgeColor: '#ef4444', desc: 'AI自动识别直播精华' },
+  { label: '口播台词优化', path: '/emotion-analysis', badge: '口播', badgeColor: '#6366f1', desc: '深度优化台词表达与情感重音' },
   { label: '竞品爆款分析', path: '/competitor', badge: '24h', badgeColor: '#3b82f6', desc: '抓取竞品爆款视频策略' },
   { label: '爆款风格复刻', path: '/style-copy', badge: '热门', badgeColor: '#f97316', desc: '一键复刻高转化内容风格' },
-  { label: '口播台词优化', path: '/emotion-analysis', badge: '口播', badgeColor: '#6366f1', desc: '深度优化台词表达与情感重音' },
-  { label: '直播高光切片', path: '/live-highlight', badge: 'NEW', badgeColor: '#ef4444', desc: 'AI自动识别直播精华' },
+  { label: '作品流量预测', path: '/analytics', badge: '预测', badgeColor: '#22c55e', desc: '实时追踪完播率与流量预测' },
 ];
 
 const navGroups = [
@@ -245,7 +245,7 @@ function AIToolboxNavItem({ onNavClick }: { onNavClick?: () => void }) {
         )}
       >
         <LayoutGrid className={cn('w-4 h-4 shrink-0 transition-colors', isActive ? 'text-primary' : 'text-sidebar-foreground/50 group-hover:text-sidebar-foreground')} />
-        <span className="flex-1 text-left">7+AI工具箱</span>
+        <span className="flex-1 text-left">AI工具箱7+</span>
       </button>
 
       {/* 二级子菜单 */}

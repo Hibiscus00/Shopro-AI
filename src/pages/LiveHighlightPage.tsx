@@ -105,16 +105,29 @@ function SliceCard({ slice, onToggle }: { slice: HighlightSlice & { selected: bo
   );
 }
 
+const DEFAULT_LIVE_RESULT: AnalysisResult = {
+  task_id: 'live-task-888',
+  transcript_summary: '全场直播持续3.5小时，最高在线观看人数达12.5万人。在00:15及01:40处出现两次显著订单爆单峰值，商品弹幕互动率达 48.2%。',
+  highlights: [
+    { type: 'promo', start_sec: 900, end_sec: 960, title: '【爆单高光】洗面奶买一发三限量抢购', score: 96, peak_viewers: 125000, keyword: '买一送一 / 抢完即止', suggested_title: '疯了吧！买一送三直接炸场！', selected: true },
+    { type: 'product_pitch', start_sec: 1820, end_sec: 1910, title: '【干货演示】3分钟黑头导出实测过程', score: 91, peak_viewers: 98000, keyword: '黑头导出 / 干净透亮', suggested_title: '看傻了！鼻子上黑头居然能这样洗出来？', selected: true },
+    { type: 'demo', start_sec: 3600, end_sec: 3680, title: '【产品对比】左右脸半边测试，紧致对比明显', score: 88, peak_viewers: 86000, keyword: '紧致提拉 / 歪脸对比', suggested_title: '做完半边脸直接惊呆！这对比也太真实了！', selected: true },
+    { type: 'qa', start_sec: 5400, end_sec: 5460, title: '【粉丝答疑】敏感肌/孕妇到底能不能用？', score: 82, peak_viewers: 72000, keyword: '成分安全 / 零添加', suggested_title: '主播亲测！敏感肌姐妹放心用！', selected: true },
+  ]
+};
+
 // ─── 主页面 ──────────────────────────────────────────────────────────────────
 export default function LiveHighlightPage() {
   const { user } = useAuth();
-  const [sourceUrl, setSourceUrl] = useState('');
-  const [title, setTitle] = useState('');
+  const [sourceUrl, setSourceUrl] = useState('https://live.douyin.com/playback/89123849123');
+  const [title, setTitle] = useState('618年中狂欢美妆专场直播');
   const [analyzing, setAnalyzing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [progressLabel, setProgressLabel] = useState('');
-  const [result, setResult] = useState<AnalysisResult | null>(null);
-  const [slices, setSlices] = useState<(HighlightSlice & { selected: boolean })[]>([]);
+  const [result, setResult] = useState<AnalysisResult | null>(DEFAULT_LIVE_RESULT);
+  const [slices, setSlices] = useState<(HighlightSlice & { selected: boolean })[]>(
+    DEFAULT_LIVE_RESULT.highlights.map(h => ({ ...h, selected: true }))
+  );
   const [exporting, setExporting] = useState(false);
   const [detailSlice, setDetailSlice] = useState<(HighlightSlice & { selected: boolean }) | null>(null);
 
