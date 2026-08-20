@@ -326,7 +326,8 @@ function ImagesSection({ form, imgUrlInput, setImgUrlInput, imgInputRef, addImag
             <ImageIcon className="w-5 h-5 text-muted-foreground/50" />
           </div>
           <p className="text-sm text-muted-foreground">点击上方输入框粘贴图片URL</p>
-          <p className="text-xs text-muted-foreground/60">支持JPG、PNG、WebP格式，建议800×800px</p>
+        </div>
+      )}
     </div>
   );
 }
@@ -371,6 +372,7 @@ function SpecsSection({ form, addSpec, removeSpec, updateSpec }: {
             </div>
           ))}
         </div>
+      )}
     </div>
   );
 }
