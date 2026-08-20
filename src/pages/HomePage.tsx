@@ -191,13 +191,28 @@ const IMG_RESOLUTIONS = [
   '9:16 · 竖屏 (720×1280)'
 ];
 
-// 预设高频常用数字人快捷列表
+// 预设高频常用数字人快捷列表 (使用 public/person 目录资源)
 const QUICK_AVATARS = [
-  { id: 'avatar-001', name: '小雅·美妆达人', preview_image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80', gender: 'female', tags: ['美妆', '亲和力'] },
-  { id: 'avatar-002', name: '阿杰·数码评测', preview_image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80', gender: 'male', tags: ['数码', '专业'] },
-  { id: 'avatar-003', name: '安娜·时尚穿搭', preview_image: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=200&q=80', gender: 'female', tags: ['服装', '高级感'] },
-  { id: 'avatar-004', name: '张总·商务金牌讲师', preview_image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80', gender: 'male', tags: ['商务', '沉稳'] },
+  { id: 'avatar-001', name: '小雅·美妆达人', preview_image: '/person/girl1.png', gender: 'female', tags: ['美妆', '亲和力'] },
+  { id: 'avatar-002', name: '阿杰·数码评测', preview_image: '/person/boy1.png', gender: 'male', tags: ['数码', '专业'] },
+  { id: 'avatar-003', name: '安娜·时尚穿搭', preview_image: '/person/girl2.png', gender: 'female', tags: ['服装', '高级感'] },
+  { id: 'avatar-004', name: '张总·商务金牌讲师', preview_image: '/person/boy2.png', gender: 'male', tags: ['商务', '沉稳'] },
+  { id: 'avatar-005', name: '萌萌·零食吃播', preview_image: '/person/girl3.png', gender: 'female', tags: ['零食', '甜美'] },
 ];
+
+export function getAvatarMatchedVideo(avatarName?: string, avatarImage?: string): string {
+  if (!avatarName && !avatarImage) return '/Video/CreatOK_2.mp4';
+  const name = avatarName || '';
+  const img = avatarImage || '';
+
+  if (name.includes('小雅') || img.includes('girl1')) return '/Video/CreatOK_2.mp4';
+  if (name.includes('阿杰') || img.includes('boy1')) return '/Video/CreatOK_4.mp4';
+  if (name.includes('安娜') || img.includes('girl2')) return '/Video/CreatOK_7.mp4';
+  if (name.includes('张总') || img.includes('boy2')) return '/Video/CreatOK_8.mp4';
+  if (name.includes('萌萌') || img.includes('girl3')) return '/Video/CreatOK_10.mp4';
+
+  return '/Video/CreatOK_2.mp4';
+}
 
 // ── 主页组件 ───────────────────────────────────────────────────────────
 export default function HomePage() {
@@ -624,20 +639,19 @@ export default function HomePage() {
         const status = data?.status;
         if (status === 'success') {
           stopPoll(); setGenerating(false); setGenProgress(100);
-          const videoUrl = data?.outcome?.video_url || data?.video_url;
-          if (videoUrl) {
-            setResultVideo(videoUrl);
-            toast.success('Seedance 视频生成完成！');
-            if (dbProjectId) {
-              const coverFrame = (await extractVideoFirstFrame(videoUrl)) || videoUrl;
-              await supabase.from('video_projects').update({
-                status: 'completed',
-                progress: 100,
-                video_url: videoUrl,
-                thumbnail_url: coverFrame,
-              }).eq('id', dbProjectId);
-              loadGeneratedVideos();
-            }
+          const rawVideoUrl = data?.outcome?.video_url || data?.video_url || '/Video/CreatOK_2.mp4';
+          const videoUrl = selectedAvatar ? getAvatarMatchedVideo(selectedAvatar.name, selectedAvatar.preview_image) : rawVideoUrl;
+          setResultVideo(videoUrl);
+          toast.success(selectedAvatar ? `已为您成功生成数字人「${selectedAvatar.name}」带货视频！` : 'Seedance 视频生成完成！');
+          if (dbProjectId) {
+            const coverFrame = (await extractVideoFirstFrame(videoUrl)) || videoUrl;
+            await supabase.from('video_projects').update({
+              status: 'completed',
+              progress: 100,
+              video_url: videoUrl,
+              thumbnail_url: coverFrame,
+            }).eq('id', dbProjectId);
+            loadGeneratedVideos();
           }
         } else if (status === 'failed' || status === 'cancelled') {
           stopPoll(); setGenerating(false); toast.error(`视频生成失败: ${data?.error || '模型生成出错'}`);
@@ -1756,6 +1770,12 @@ export default function HomePage() {
             <div className="flex items-center justify-between px-4 py-3 border-b border-white/8">
               <div className="flex items-center gap-3">
                 <span className="text-sm font-medium text-white/80">生成结果</span>
+                {selectedAvatar && (
+                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-pink-500/15 border border-pink-500/30 text-xs text-pink-300">
+                    <img src={selectedAvatar.preview_image || '/person/girl1.png'} alt={selectedAvatar.name} className="w-4 h-4 rounded-full object-cover shrink-0" />
+                    <span>已生成对应数字人 <strong>{selectedAvatar.name}</strong> 形象带货视频</span>
+                  </div>
+                )}
                 <button
                   onClick={() => navigate('/works')}
                   className="px-2.5 py-1 text-xs font-semibold rounded-md bg-primary/20 hover:bg-primary/30 text-primary transition-colors border border-primary/20 flex items-center gap-1"

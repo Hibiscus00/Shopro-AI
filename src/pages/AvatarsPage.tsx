@@ -419,18 +419,30 @@ export default function AvatarsPage() {
       const { data } = await supabase.from('avatars').select('*').eq('is_active', true).order('use_count', { ascending: false });
       const dbAvatars = Array.isArray(data) ? data : [];
       const mapped = dbAvatars.map(a => {
-        if (a.name === 'Mia') {
-          return { ...a, preview_image: '/mia_avatar.png' };
-        }
-        if (a.name === '阳阳') {
-          return { ...a, preview_image: '/yangyang_avatar.png' };
-        }
-        if (a.name === 'Brandon') {
-          return { ...a, preview_image: '/brandon_avatar.png' };
-        }
+        if (a.name.includes('小雅')) return { ...a, preview_image: '/person/girl1.png' };
+        if (a.name.includes('阿杰')) return { ...a, preview_image: '/person/boy1.png' };
+        if (a.name.includes('安娜')) return { ...a, preview_image: '/person/girl2.png' };
+        if (a.name.includes('张总') || a.name.includes('Brandon')) return { ...a, preview_image: '/person/boy2.png' };
+        if (a.name.includes('萌萌') || a.name.includes('Mia')) return { ...a, preview_image: '/person/girl3.png' };
+        if (a.name === '阳阳') return { ...a, preview_image: '/person/boy1.png' };
         return a;
       });
-      setAvatars(mapped);
+
+      const DEFAULT_PERSON_AVATARS: AvatarType[] = [
+        { id: 'av-p1', name: '小雅·爆款美妆主播', gender: 'female', language: 'zh', style: '时尚活泼', description: '专业美妆高转化主播，黄金前3秒Hook强力吸睛', preview_image: '/person/girl1.png', is_active: true, use_count: 35800, tags: ['美妆带货', '爆款种草', '高转化'] },
+        { id: 'av-p2', name: '阿杰·数码科技极客', gender: 'male', language: 'zh', style: '科技商务', description: '数码测评带货主播，五官干练立体，逻辑讲解清晰', preview_image: '/person/boy1.png', is_active: true, use_count: 28400, tags: ['数码测评', '硬核带货', '阳刚帅气'] },
+        { id: 'av-p3', name: '安娜·知性服饰穿搭', gender: 'female', language: 'zh', style: '知性优雅', description: '高端女装与饰品主播，气质高贵优雅，回购率极高', preview_image: '/person/girl2.png', is_active: true, use_count: 31200, tags: ['女装穿搭', '知性优雅', '高客单'] },
+        { id: 'av-p4', name: '张总·企业创始人演讲', gender: 'male', language: 'zh', style: '商务专业', description: '品牌创始人/金牌讲师形象，背书感与信任感极强', preview_image: '/person/boy2.png', is_active: true, use_count: 42100, tags: ['品牌背书', '商务创始人', '沉稳信任'] },
+        { id: 'av-p5', name: '萌萌·零食美食吃播', gender: 'female', language: 'zh', style: '活力青春', description: '美食吃播萌妹主播，表情感染力极强，快速引爆冲动消费', preview_image: '/person/girl3.png', is_active: true, use_count: 25600, tags: ['零食吃播', '活泼可爱', '高能促单'] },
+      ];
+
+      const existingIds = new Set(mapped.map(a => a.id));
+      const combined = [...mapped];
+      DEFAULT_PERSON_AVATARS.forEach(d => {
+        if (!existingIds.has(d.id)) combined.unshift(d);
+      });
+
+      setAvatars(combined);
       setLoading(false);
     })();
   }, []);
