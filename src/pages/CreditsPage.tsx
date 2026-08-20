@@ -20,6 +20,7 @@ import {
   PackagePlus, Wallet, ClipboardList, Gift
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import PaymentDialog from '@/components/common/PaymentDialog';
 import QRCodeDataUrl from '@/components/ui/qrcodedataurl';
 import { format } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
@@ -282,40 +283,20 @@ export default function CreditsPage() {
     return () => clearInterval(timer);
   }, [payStatus, payOrderNo, loadPlan, loadLogs]);
 
-  const handleSelectPlan = async (plan: Plan) => {
+  const [payModalOpen, setPayModalOpen] = useState(false);
+  const [selectedPayPkg, setSelectedPayPkg] = useState({ name: '专业版', price: '299', credits: '1000' });
+
+  const handleSelectPlan = (plan: Plan | any) => {
     if (plan.price === 0) {
-      toast.info('暂不支持降级至免费版，如需帮助请联系客服');
+      toast.info('您当前已在享有体验权益');
       return;
     }
-    setPayingObj(plan);
-    setPayOpen(true);
-    setPayStatus('creating');
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) { toast.error('请先登录'); return; }
-
-      const { data, error } = await supabase.functions.invoke('create-payment-order', {
-        body: { plan_id: plan.id },
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      });
-      toast.dismiss('pay');
-
-      if (error) {
-        const msg = await error?.context?.text?.() ?? error.message;
-        toast.error(`创建订单失败：${msg}`);
-        return;
-      }
-      if (data?.code !== 0) {
-        toast.error(data?.message ?? '创建订单失败，请检查支付配置');
-        return;
-      }
-      setPayUrl(data.data.wechat_pay_url);
-      setPayOrderNo(data.data.order_no);
-      setPayStatus('polling');
-    } catch (e) {
-      setPayStatus('error');
-      console.error('handleSelectPlan:', e);
-    }
+    setSelectedPayPkg({
+      name: plan.name,
+      price: String(plan.price),
+      credits: String(plan.credits || '500'),
+    });
+    setPayModalOpen(true);
   };
 
   // 积分使用率
@@ -683,10 +664,18 @@ export default function CreditsPage() {
               </div>
             )}
             
-            <p className="text-xs text-muted-foreground mt-4 text-center">支付成功后将自动到账<br/>如遇问题请联系客服</p>
+            <p className="text-xs text-muted-foreground mt-4 text-center">支付成功后将自动到账<br/>如遇问题请联系客服微信：wyx200265</p>
           </div>
         </DialogContent>
       </Dialog>
+
+      <PaymentDialog
+        open={payModalOpen}
+        onOpenChange={setPayModalOpen}
+        pkgName={selectedPayPkg.name}
+        price={selectedPayPkg.price}
+        credits={selectedPayPkg.credits}
+      />
     </div>
   );
 }

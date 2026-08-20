@@ -10,6 +10,7 @@ import {
   Sparkles, TrendingUp, Shield, Video, Play, Pause, Volume2, VolumeX, Maximize, Menu, X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import PaymentDialog from '@/components/common/PaymentDialog';
 
 // ── 型別 ─────────────────────────────────────────────────────────────────
 interface Particle {
@@ -692,6 +693,8 @@ export default function LandingPage() {
   const navigate = useNavigate();
   const [navOpen, setNavOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [payDialogOpen, setPayDialogOpen] = useState(false);
+  const [payPkg, setPayPkg] = useState({ name: '专业版', price: '299', credits: '1,000' });
 
   // 导航栏滚动透明→不透明
   useEffect(() => {
@@ -1131,7 +1134,18 @@ export default function LandingPage() {
 
                       {/* CTA 按钮 */}
                       <button
-                        onClick={goToApp}
+                        onClick={() => {
+                          if (plan.price === '¥0') {
+                            goToApp();
+                          } else {
+                            setPayPkg({
+                              name: plan.name,
+                              price: plan.price.replace('¥', ''),
+                              credits: plan.name.includes('专业') ? '1,000' : '5,000',
+                            });
+                            setPayDialogOpen(true);
+                          }
+                        }}
                         className={cn(
                           'w-full py-3 rounded-xl text-sm font-bold transition-all duration-200 hover:scale-[1.02] hover:shadow-lg',
                           plan.highlight ? 'text-white animate-border-glow' : 'text-white/80 hover:text-white'
@@ -1281,6 +1295,14 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+
+      <PaymentDialog
+        open={payDialogOpen}
+        onOpenChange={setPayDialogOpen}
+        pkgName={payPkg.name}
+        price={payPkg.price}
+        credits={payPkg.credits}
+      />
     </div>
   );
 }

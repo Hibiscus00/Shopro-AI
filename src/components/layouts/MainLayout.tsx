@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import PaymentDialog from '@/components/common/PaymentDialog';
 import {
   LayoutDashboard, Video, FolderOpen, ImageIcon,
   Menu, ChevronRight, Sparkles, ShoppingBag,
@@ -483,17 +484,26 @@ function CreditsDetailModal({ open, onOpenChange }: { open: boolean; onOpenChang
     { id: 'l-4', type: 'reward', desc: '新用户注册赠送包', amount: '+50', date: '2026-08-18 14:20', status: '赠送' },
   ];
 
+  const [payDialogOpen, setPayDialogOpen] = useState(false);
+  const [payPkg, setPayPkg] = useState({ name: '爆款进阶包', price: '50', credits: '550' });
+
   const handleRedeem = () => {
     if (!couponCode.trim()) { toast.error('请输入兑换码'); return; }
     toast.success(`兑换码「${couponCode}」核销成功！已为您到账 +100 积分`);
     setCouponCode('');
   };
 
-  const handlePay = (pkgName: string, price: number) => {
-    toast.success(`已发起「${pkgName}」(￥${price}) 支付，积分即刻到账！`);
+  const handlePay = (pkg: typeof PACKAGES[0]) => {
+    setPayPkg({
+      name: pkg.name,
+      price: String(pkg.price),
+      credits: String(pkg.credits + pkg.bonus),
+    });
+    setPayDialogOpen(true);
   };
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[620px] p-0 overflow-hidden bg-[#16151f] border border-pink-500/20 text-white rounded-2xl shadow-2xl">
         <DialogHeader className="p-6 pb-4 bg-gradient-to-r from-pink-950/40 via-purple-950/30 to-zinc-900 border-b border-white/10">
@@ -590,8 +600,8 @@ function CreditsDetailModal({ open, onOpenChange }: { open: boolean; onOpenChang
                       </div>
                       <Button
                         size="sm"
-                        onClick={(e) => { e.stopPropagation(); handlePay(pkg.name, pkg.price); }}
-                        className={cn('h-7 text-xs px-2.5 font-medium', selectedPkg === pkg.id ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white' : 'variant-outline text-zinc-300')}
+                        onClick={(e) => { e.stopPropagation(); handlePay(pkg); }}
+                        className={cn('h-7 text-xs px-2.5 font-medium', selectedPkg === pkg.id ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white' : 'variant-outline text-zinc-300')}
                       >
                         立即充值
                       </Button>
@@ -603,7 +613,7 @@ function CreditsDetailModal({ open, onOpenChange }: { open: boolean; onOpenChang
               {/* 兑换码兑换 */}
               <div className="mt-3 p-3.5 rounded-xl bg-white/5 border border-white/10 space-y-2">
                 <span className="text-xs font-semibold text-zinc-300 flex items-center gap-1.5">
-                  <Gift className="w-3.5 h-3.5 text-amber-400" />兑换码 / 卡券快速核销
+                  <Gift className="w-3.5 h-3.5 text-pink-400" />兑换码 / 卡券快速核销
                 </span>
                 <div className="flex gap-2">
                   <input
@@ -611,9 +621,9 @@ function CreditsDetailModal({ open, onOpenChange }: { open: boolean; onOpenChang
                     value={couponCode}
                     onChange={e => setCouponCode(e.target.value)}
                     placeholder="输入兑换码 (例如 VIP888)"
-                    className="flex-1 h-8 px-3 rounded-lg bg-black/40 border border-white/15 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-amber-500"
+                    className="flex-1 h-8 px-3 rounded-lg bg-black/40 border border-white/15 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-pink-500"
                   />
-                  <Button size="sm" onClick={handleRedeem} className="h-8 text-xs bg-amber-500 hover:bg-amber-600 text-black font-semibold">
+                  <Button size="sm" onClick={handleRedeem} className="h-8 text-xs bg-pink-500 hover:bg-pink-600 text-white font-semibold">
                     兑换
                   </Button>
                 </div>
@@ -626,7 +636,7 @@ function CreditsDetailModal({ open, onOpenChange }: { open: boolean; onOpenChang
                 <div key={log.id} className="p-3 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between hover:bg-white/8 transition-colors">
                   <div className="flex items-center gap-3">
                     <div className={cn('w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold',
-                      log.amount.startsWith('+') ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30')}>
+                      log.amount.startsWith('+') ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-pink-500/20 text-pink-400 border border-pink-500/30')}>
                       {log.amount.startsWith('+') ? '+' : '-'}
                     </div>
                     <div>
@@ -635,7 +645,7 @@ function CreditsDetailModal({ open, onOpenChange }: { open: boolean; onOpenChang
                     </div>
                   </div>
                   <div className="text-right">
-                    <span className={cn('text-sm font-bold font-mono block', log.amount.startsWith('+') ? 'text-emerald-400' : 'text-amber-400')}>
+                    <span className={cn('text-sm font-bold font-mono block', log.amount.startsWith('+') ? 'text-emerald-400' : 'text-pink-400')}>
                       {log.amount}
                     </span>
                     <span className="text-[10px] text-zinc-500">{log.status}</span>
@@ -647,6 +657,15 @@ function CreditsDetailModal({ open, onOpenChange }: { open: boolean; onOpenChang
         </div>
       </DialogContent>
     </Dialog>
+
+    <PaymentDialog
+      open={payDialogOpen}
+      onOpenChange={setPayDialogOpen}
+      pkgName={payPkg.name}
+      price={payPkg.price}
+      credits={payPkg.credits}
+    />
+    </>
   );
 }
 

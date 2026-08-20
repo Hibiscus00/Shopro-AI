@@ -17,7 +17,7 @@ import {
   Users2, Search, Play, Pause, StopCircle, Loader2, SlidersHorizontal,
   Volume2, Mic2, Sparkles, RefreshCw, Download, Frown, Smile,
   Zap, ShoppingCart, Heart, ChevronRight, Wand2, Upload, Plus, X,
-  Film, Clock, Eye,
+  Film, Clock, Eye, Trash2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
