@@ -417,31 +417,31 @@ export default function AvatarsPage() {
     (async () => {
       setLoading(true);
       const { data } = await supabase.from('avatars').select('*').eq('is_active', true).order('use_count', { ascending: false });
-      const UNWANTED_NAMES = ['Mia', '晓雅', '阳阳', 'Brandon'];
+      const UNWANTED_NAMES = ['Catherine', 'Mia', '晓雅', '阳阳', 'Brandon'];
       const rawDbAvatars = Array.isArray(data) ? data : [];
       const dbAvatars = rawDbAvatars.filter(a => !UNWANTED_NAMES.some(un => a.name.includes(un)));
 
       const mapped = dbAvatars.map(a => {
+        if (a.name.includes('萌萌')) return { ...a, preview_image: '/person/girl3.png' };
+        if (a.name.includes('安娜')) return { ...a, preview_image: '/person/girl2.png' };
+        if (a.name.includes('张总') || a.name.includes('大疆')) return { ...a, name: '张总·大疆Pocket 4品牌风格宣传', preview_image: '/person/boy2.png' };
         if (a.name.includes('小雅')) return { ...a, preview_image: '/person/girl1.png' };
         if (a.name.includes('阿杰')) return { ...a, preview_image: '/person/boy1.png' };
-        if (a.name.includes('安娜')) return { ...a, preview_image: '/person/girl2.png' };
-        if (a.name.includes('张总')) return { ...a, preview_image: '/person/boy2.png' };
-        if (a.name.includes('萌萌')) return { ...a, preview_image: '/person/girl3.png' };
-        if (a.name.includes('陆沉')) return { ...a, preview_image: '/person/boy3.png' };
         if (a.name.includes('美玲')) return { ...a, preview_image: '/person/girl4.png' };
+        if (a.name.includes('陆沉')) return { ...a, preview_image: '/person/boy3.png' };
         if (a.name.includes('雪儿')) return { ...a, preview_image: '/person/girl5.png' };
         return a;
       });
 
       const DEFAULT_PERSON_AVATARS: AvatarType[] = [
+        { id: 'av-p5', name: '萌萌·零食美食吃播', gender: 'female', language: 'zh', style: '活力青春', description: '美食吃播萌妹主播，表情感染力极强，快速引爆冲动消费', preview_image: '/person/girl3.png', is_active: true, use_count: 38800, tags: ['零食吃播', '活泼可爱', '高能促单'] },
+        { id: 'av-p3', name: '安娜·知性服饰穿搭', gender: 'female', language: 'zh', style: '知性优雅', description: '高端女装与饰品主播，气质高贵优雅，回购率极高', preview_image: '/person/girl2.png', is_active: true, use_count: 36200, tags: ['女装穿搭', '知性优雅', '高客单'] },
+        { id: 'av-p4', name: '张总·大疆Pocket 4品牌风格宣传', gender: 'male', language: 'zh', style: '商务专业', description: '大疆Pocket 4品牌与数码新品宣传主讲，科技信任感强', preview_image: '/person/boy2.png', is_active: true, use_count: 45100, tags: ['大疆Pocket4', '品牌宣传', '沉稳信任'] },
         { id: 'av-p1', name: '小雅·爆款美妆主播', gender: 'female', language: 'zh', style: '时尚活泼', description: '专业美妆高转化主播，黄金前3秒Hook强力吸睛', preview_image: '/person/girl1.png', is_active: true, use_count: 35800, tags: ['美妆带货', '爆款种草', '高转化'] },
         { id: 'av-p2', name: '阿杰·数码科技极客', gender: 'male', language: 'zh', style: '科技商务', description: '数码测评带货主播，五官干练立体，逻辑讲解清晰', preview_image: '/person/boy1.png', is_active: true, use_count: 28400, tags: ['数码测评', '硬核带货', '阳刚帅气'] },
-        { id: 'av-p3', name: '安娜·知性服饰穿搭', gender: 'female', language: 'zh', style: '知性优雅', description: '高端女装与饰品主播，气质高贵优雅，回购率极高', preview_image: '/person/girl2.png', is_active: true, use_count: 31200, tags: ['女装穿搭', '知性优雅', '高客单'] },
-        { id: 'av-p4', name: '张总·企业创始人演讲', gender: 'male', language: 'zh', style: '商务专业', description: '品牌创始人/金牌讲师形象，背书感与信任感极强', preview_image: '/person/boy2.png', is_active: true, use_count: 42100, tags: ['品牌背书', '商务创始人', '沉稳信任'] },
-        { id: 'av-p5', name: '萌萌·零食美食吃播', gender: 'female', language: 'zh', style: '活力青春', description: '美食吃播萌妹主播，表情感染力极强，快速引爆冲动消费', preview_image: '/person/girl3.png', is_active: true, use_count: 25600, tags: ['零食吃播', '活泼可爱', '高能促单'] },
-        { id: 'av-p6', name: '陆沉·男装潮流风尚', gender: 'male', language: 'zh', style: '潮流风尚', description: '潮流男装与鞋靴带货主播，阳光率真，镜头感十足', preview_image: '/person/boy3.png', is_active: true, use_count: 29800, tags: ['潮流男装', '鞋靴穿搭', '帅气质感'] },
-        { id: 'av-p7', name: '美玲·韩系美妆流行', gender: 'female', language: 'zh', style: '韩系时尚', description: '韩系彩妆与护肤达人，妆容精致，亲和力极佳', preview_image: '/person/girl4.png', is_active: true, use_count: 33400, tags: ['韩系彩妆', '护肤心得', '时尚爆款'] },
-        { id: 'av-p8', name: '雪儿·轻奢珠宝饰品', gender: 'female', language: 'zh', style: '轻奢典雅', description: '珠宝黄金与高端饰品主播，端庄典雅，话术感染力强', preview_image: '/person/girl5.png', is_active: true, use_count: 27900, tags: ['轻奢珠宝', '黄金饰品', '端庄典雅'] },
+        { id: 'av-p7', name: '美玲·韩系美妆流行', gender: 'female', language: 'zh', style: '韩系时尚', description: '韩系彩妆与护肤达人，妆容精致，亲和力极佳', preview_image: '/person/girl4.png', is_active: true, use_count: 23400, tags: ['韩系彩妆', '护肤心得', '时尚爆款'] },
+        { id: 'av-p6', name: '陆沉·男装潮流风尚', gender: 'male', language: 'zh', style: '潮流风尚', description: '潮流男装与鞋靴带货主播，阳光率真，镜头感十足', preview_image: '/person/boy3.png', is_active: true, use_count: 19800, tags: ['潮流男装', '鞋靴穿搭', '帅气质感'] },
+        { id: 'av-p8', name: '雪儿·轻奢珠宝饰品', gender: 'female', language: 'zh', style: '轻奢典雅', description: '珠宝黄金与高端饰品主播，端庄典雅，话术感染力强', preview_image: '/person/girl5.png', is_active: true, use_count: 17900, tags: ['轻奢珠宝', '黄金饰品', '端庄典雅'] },
       ];
 
       const existingIds = new Set(mapped.map(a => a.id));

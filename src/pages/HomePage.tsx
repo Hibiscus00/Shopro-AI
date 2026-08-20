@@ -193,31 +193,31 @@ const IMG_RESOLUTIONS = [
 
 // 预设高频常用数字人快捷列表 (使用 public/person 目录资源)
 const QUICK_AVATARS = [
+  { id: 'avatar-005', name: '萌萌·零食吃播', preview_image: '/person/girl3.png', gender: 'female', tags: ['零食', '甜美'] },
+  { id: 'avatar-003', name: '安娜·时尚穿搭', preview_image: '/person/girl2.png', gender: 'female', tags: ['服装', '高级感'] },
+  { id: 'avatar-004', name: '张总·大疆Pocket 4品牌风格宣传', preview_image: '/person/boy2.png', gender: 'male', tags: ['大疆Pocket4', '沉稳'] },
   { id: 'avatar-001', name: '小雅·美妆达人', preview_image: '/person/girl1.png', gender: 'female', tags: ['美妆', '亲和力'] },
   { id: 'avatar-002', name: '阿杰·数码评测', preview_image: '/person/boy1.png', gender: 'male', tags: ['数码', '专业'] },
-  { id: 'avatar-003', name: '安娜·时尚穿搭', preview_image: '/person/girl2.png', gender: 'female', tags: ['服装', '高级感'] },
-  { id: 'avatar-004', name: '张总·商务金牌讲师', preview_image: '/person/boy2.png', gender: 'male', tags: ['商务', '沉稳'] },
-  { id: 'avatar-005', name: '萌萌·零食吃播', preview_image: '/person/girl3.png', gender: 'female', tags: ['零食', '甜美'] },
-  { id: 'avatar-006', name: '陆沉·男装潮流风尚', preview_image: '/person/boy3.png', gender: 'male', tags: ['潮服', '帅气'] },
   { id: 'avatar-007', name: '美玲·韩系美妆', preview_image: '/person/girl4.png', gender: 'female', tags: ['美妆', '精致'] },
+  { id: 'avatar-006', name: '陆沉·男装潮流风尚', preview_image: '/person/boy3.png', gender: 'male', tags: ['潮服', '帅气'] },
   { id: 'avatar-008', name: '雪儿·轻奢珠宝', preview_image: '/person/girl5.png', gender: 'female', tags: ['珠宝', '典雅'] },
 ];
 
 export function getAvatarMatchedVideo(avatarName?: string, avatarImage?: string): string {
-  if (!avatarName && !avatarImage) return '/Video/CreatOK_2.mp4';
+  if (!avatarName && !avatarImage) return '/Video/CreatOK_10.mp4';
   const name = avatarName || '';
   const img = avatarImage || '';
 
+  if (name.includes('萌萌') || img.includes('girl3')) return '/Video/CreatOK_10.mp4';
+  if (name.includes('安娜') || img.includes('girl2')) return '/Video/CreatOK_7.mp4';
+  if (name.includes('张总') || name.includes('Pocket') || img.includes('boy2')) return '/Video/CreatOK_8.mp4';
   if (name.includes('小雅') || img.includes('girl1')) return '/Video/CreatOK_2.mp4';
   if (name.includes('阿杰') || img.includes('boy1')) return '/Video/CreatOK_4.mp4';
-  if (name.includes('安娜') || img.includes('girl2')) return '/Video/CreatOK_7.mp4';
-  if (name.includes('张总') || img.includes('boy2')) return '/Video/CreatOK_8.mp4';
-  if (name.includes('萌萌') || img.includes('girl3')) return '/Video/CreatOK_10.mp4';
-  if (name.includes('陆沉') || img.includes('boy3')) return '/Video/CreatOK_6.mp4';
   if (name.includes('美玲') || img.includes('girl4')) return '/Video/CreatOK_9.mp4';
+  if (name.includes('陆沉') || img.includes('boy3')) return '/Video/CreatOK_6.mp4';
   if (name.includes('雪儿') || img.includes('girl5')) return '/Video/CreatOK_11.mp4';
 
-  return '/Video/CreatOK_2.mp4';
+  return '/Video/CreatOK_10.mp4';
 }
 
 // ── 主页组件 ───────────────────────────────────────────────────────────
