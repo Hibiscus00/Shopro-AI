@@ -581,6 +581,7 @@ function PromoVideoPlayer() {
           <video
             ref={videoRef}
             src="/Shopro.mp4"
+            preload="metadata"
             className="w-full h-full object-contain"
             onTimeUpdate={handleTimeUpdate}
             onPlay={() => setIsPlaying(true)}
