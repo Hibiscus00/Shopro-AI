@@ -566,27 +566,6 @@ export default function StyleCopyPage() {
             </ul>
           </div>
 
-          {/* DNA六维指纹条形图 (CR-02) */}
-          {report && (
-            <div className="rounded-2xl border border-border/70 bg-card overflow-hidden">
-              <div className="px-5 py-3.5 border-b border-border/50 flex items-center gap-2">
-                <Fingerprint className="w-4 h-4 text-primary" />
-                <h2 className="text-sm font-semibold">DNA六维指纹评分</h2>
-                <Badge variant="outline" className="text-xs ml-auto">CR-02</Badge>
-              </div>
-              <div className="p-4 space-y-3">
-                {DNA_DIMENSIONS.map(dim => (
-                  <DnaBar
-                    key={dim.key}
-                    label={dim.label}
-                    desc={dim.desc}
-                    score={report.dna_scores?.[dim.key] ?? 60}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* 风格详情分析 */}
           {report && (
             <div className="rounded-2xl border border-border/70 bg-card overflow-hidden">

@@ -12,12 +12,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
   LayoutDashboard, Video, FolderOpen, ImageIcon,
   Menu, ChevronRight, Sparkles, ShoppingBag,
   Package, Users2, CreditCard, Wand2,
   Search, X, ArrowRight, Scissors, Moon, Sun,
   Layers, Share2, Code2, Gift, LayoutGrid, Bell, House, CheckCheck, LogOut,
+  Zap, History, CheckCircle2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -460,6 +462,195 @@ function TopBarNotificationBell({ isDarkHeader }: { isDarkHeader: boolean }) {
   );
 }
 
+// ── 积分详情与充值弹窗 ───────────────────────────────────────────────────
+function CreditsDetailModal({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
+  const { profile } = useAuth();
+  const [activeTab, setActiveTab] = useState<'recharge' | 'history'>('recharge');
+  const [selectedPkg, setSelectedPkg] = useState<string>('pkg-2');
+  const [couponCode, setCouponCode] = useState('');
+
+  const PACKAGES = [
+    { id: 'pkg-1', name: '基础体验包', credits: 500, bonus: 0, price: 29, tag: '新手首选' },
+    { id: 'pkg-2', name: '爆款进阶包', credits: 2000, bonus: 300, price: 99, tag: '🔥 最受欢迎', popular: true },
+    { id: 'pkg-3', name: '团队尊享包', credits: 5000, bonus: 1000, price: 199, tag: '👑 优先渲染' },
+    { id: 'pkg-4', name: '全能旗舰包', credits: 15000, bonus: 3500, price: 499, tag: '💎 无限创作' },
+  ];
+
+  const MOCK_LOGS = [
+    { id: 'l-1', type: 'recharge', desc: '充值爆款进阶套餐', amount: '+2,300', date: '2026-08-20 10:30', status: '完成' },
+    { id: 'l-2', type: 'consume', desc: 'AI 黄金爆款带货脚本生成', amount: '-10', date: '2026-08-20 09:15', status: '支出' },
+    { id: 'l-3', type: 'consume', desc: '多模态视频 DNA 风格分析', amount: '-25', date: '2026-08-19 16:40', status: '支出' },
+    { id: 'l-4', type: 'reward', desc: '每日登录签到奖励', amount: '+50', date: '2026-08-19 09:00', status: '赠送' },
+    { id: 'l-5', type: 'reward', desc: '新用户注册欢迎礼包', amount: '+500', date: '2026-08-18 14:20', status: '赠送' },
+  ];
+
+  const handleRedeem = () => {
+    if (!couponCode.trim()) { toast.error('请输入兑换码'); return; }
+    toast.success(`兑换码「${couponCode}」核销成功！已为您到账 +500 积分`);
+    setCouponCode('');
+  };
+
+  const handlePay = (pkgName: string, price: number) => {
+    toast.success(`已发起「${pkgName}」(￥${price}) 支付，积分即刻到账！`);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[620px] p-0 overflow-hidden bg-[#16151f] border border-amber-500/20 text-white rounded-2xl shadow-2xl">
+        <DialogHeader className="p-6 pb-4 bg-gradient-to-r from-amber-950/40 via-purple-950/30 to-zinc-900 border-b border-white/10">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/20 shrink-0">
+                <Zap className="w-5 h-5 text-white fill-white" />
+              </div>
+              <div>
+                <DialogTitle className="text-lg font-bold text-white flex items-center gap-2">
+                  积分管理与充值
+                  <Badge variant="outline" className="border-amber-500/40 text-amber-400 text-[10px] font-normal">VIP尊享</Badge>
+                </DialogTitle>
+                <p className="text-xs text-zinc-400 mt-0.5">驱动全套 AI 工具生成，积分永不下线</p>
+              </div>
+            </div>
+          </div>
+
+          {/* 当前余额卡片 */}
+          <div className="mt-4 p-4 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between">
+            <div>
+              <span className="text-xs text-zinc-400">当前可用积分余额</span>
+              <div className="flex items-baseline gap-1.5 mt-0.5">
+                <span className="text-2xl font-bold font-mono text-amber-300">{(profile?.credits ?? 1280).toLocaleString()}</span>
+                <span className="text-xs text-amber-400 font-medium">积分</span>
+              </div>
+            </div>
+            <div className="text-right">
+              <span className="text-[11px] text-zinc-400 block">今日免费额度</span>
+              <span className="text-xs text-emerald-400 font-medium">已刷新 (无限额)</span>
+            </div>
+          </div>
+
+          {/* 切换 Tab */}
+          <div className="flex gap-2 pt-3">
+            <button
+              onClick={() => setActiveTab('recharge')}
+              className={cn('flex-1 py-2 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5',
+                activeTab === 'recharge' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' : 'text-zinc-400 hover:text-white bg-white/5')}
+            >
+              <CreditCard className="w-3.5 h-3.5" />积分充值套餐
+            </button>
+            <button
+              onClick={() => setActiveTab('history')}
+              className={cn('flex-1 py-2 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5',
+                activeTab === 'history' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' : 'text-zinc-400 hover:text-white bg-white/5')}
+            >
+              <History className="w-3.5 h-3.5" />积分变动明细
+            </button>
+          </div>
+        </DialogHeader>
+
+        <div className="p-6 pt-3 max-h-[400px] overflow-y-auto space-y-4">
+          {activeTab === 'recharge' ? (
+            <>
+              {/* 充值套餐网格 */}
+              <div className="grid grid-cols-2 gap-3">
+                {PACKAGES.map(pkg => (
+                  <div
+                    key={pkg.id}
+                    onClick={() => setSelectedPkg(pkg.id)}
+                    className={cn(
+                      'relative p-4 rounded-xl border cursor-pointer transition-all duration-200 flex flex-col justify-between',
+                      selectedPkg === pkg.id
+                        ? 'bg-amber-500/10 border-amber-500 shadow-md shadow-amber-500/10 scale-[1.02]'
+                        : 'bg-white/5 border-white/10 hover:border-amber-500/40'
+                    )}
+                  >
+                    {pkg.popular && (
+                      <span className="absolute -top-2.5 right-3 px-2 py-0.5 rounded-full text-[10px] font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-sm">
+                        {pkg.tag}
+                      </span>
+                    )}
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-semibold text-zinc-200">{pkg.name}</span>
+                        {!pkg.popular && <span className="text-[10px] text-amber-400/80">{pkg.tag}</span>}
+                      </div>
+                      <div className="mt-2 flex items-baseline gap-1">
+                        <span className="text-xl font-bold font-mono text-white">{pkg.credits}</span>
+                        <span className="text-xs text-zinc-400">积分</span>
+                        {pkg.bonus > 0 && (
+                          <Badge className="ml-1 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] px-1 py-0">
+                            +{pkg.bonus}赠额
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between">
+                      <div className="flex items-baseline gap-0.5">
+                        <span className="text-xs text-amber-400 font-bold">¥</span>
+                        <span className="text-lg font-bold text-amber-300 font-mono">{pkg.price}</span>
+                      </div>
+                      <Button
+                        size="sm"
+                        onClick={(e) => { e.stopPropagation(); handlePay(pkg.name, pkg.price); }}
+                        className={cn('h-7 text-xs px-2.5 font-medium', selectedPkg === pkg.id ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white' : 'variant-outline text-zinc-300')}
+                      >
+                        立即充值
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* 兑换码兑换 */}
+              <div className="mt-3 p-3.5 rounded-xl bg-white/5 border border-white/10 space-y-2">
+                <span className="text-xs font-semibold text-zinc-300 flex items-center gap-1.5">
+                  <Gift className="w-3.5 h-3.5 text-amber-400" />兑换码 / 卡券快速核销
+                </span>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={couponCode}
+                    onChange={e => setCouponCode(e.target.value)}
+                    placeholder="输入兑换码 (例如 VIP888)"
+                    className="flex-1 h-8 px-3 rounded-lg bg-black/40 border border-white/15 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-amber-500"
+                  />
+                  <Button size="sm" onClick={handleRedeem} className="h-8 text-xs bg-amber-500 hover:bg-amber-600 text-black font-semibold">
+                    兑换
+                  </Button>
+                </div>
+              </div>
+            </>
+          ) : (
+            /* 变动明细 */
+            <div className="space-y-2">
+              {MOCK_LOGS.map(log => (
+                <div key={log.id} className="p-3 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between hover:bg-white/8 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className={cn('w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold',
+                      log.amount.startsWith('+') ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30')}>
+                      {log.amount.startsWith('+') ? '+' : '-'}
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-white">{log.desc}</p>
+                      <p className="text-[10px] text-zinc-400 mt-0.5">{log.date}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span className={cn('text-sm font-bold font-mono block', log.amount.startsWith('+') ? 'text-emerald-400' : 'text-amber-400')}>
+                      {log.amount}
+                    </span>
+                    <span className="text-[10px] text-zinc-500">{log.status}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 // ── 顶栏用户菜单 ──────────────────────────────────────────────────────────
 const DEFAULT_AVATAR = 'https://pica.zhimg.com/v2-d69f515a23964f8fba2ccedb7385de86_1440w.jpg';
 
@@ -503,9 +694,11 @@ function TopBarUserMenu({ isDarkHeader }: { isDarkHeader: boolean }) {
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [creditsModalOpen, setCreditsModalOpen] = useState(false);
   const { theme, setTheme } = useThemePersist();
   const location = useLocation();
-  const { signOut } = useAuth();
+  const { profile, signOut } = useAuth();
+  const navigate = useNavigate();
 
   // 判断是否为生成视频界面
   const isVideoCreatePage = location.pathname.startsWith('/video/create');
@@ -555,19 +748,31 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
               {/* 占位弹性空间 */}
               <div className="flex-1 min-w-0" />
 
-              {/* 右上角工具栏：通知 + 主题切换 + 邀请/积分 + 头像 */}
-              <div className="flex items-center gap-1 shrink-0">
+              {/* 右上角工具栏：通知 + 邀请有礼 + 积分余额 + 头像 */}
+              <div className="flex items-center gap-2 shrink-0">
                 {/* 消息通知 */}
                 <TopBarNotificationBell isDarkHeader={isDarkHeader} />
 
-                {/* 邀请有礼 + 积分套餐 */}
+                {/* 邀请有礼 */}
                 <div className="hidden md:flex items-center">
                   <Link to="/credits?tab=invite">
-                    <button className="flex items-center gap-1.5 h-8 px-3.5 rounded-full font-bold text-[11px] sm:text-xs text-white bg-gradient-to-r from-[#FFB706] to-[#FF5E03] shadow-md shadow-orange-500/20 hover:brightness-110 active:scale-95 transition-all duration-200">
+                    <button className="flex items-center gap-1.5 h-8 px-3 rounded-full font-bold text-[11px] sm:text-xs text-white bg-gradient-to-r from-[#FFB706] to-[#FF5E03] shadow-md shadow-orange-500/20 hover:brightness-110 active:scale-95 transition-all duration-200">
                       <Gift className="w-3.5 h-3.5 shrink-0 text-white" />
-                      <span>邀请有礼 · 积分</span>
+                      <span>邀请有礼</span>
                     </button>
                   </Link>
+                </div>
+
+                {/* 积分余额按钮 (触发积分管理/充值弹窗) */}
+                <div className="hidden md:flex items-center">
+                  <button
+                    onClick={() => setCreditsModalOpen(true)}
+                    className="flex items-center gap-1.5 h-8 px-3 rounded-full font-semibold text-xs text-amber-300 bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/20 active:scale-95 transition-all duration-200 shadow-sm"
+                    title="点击管理积分与充值"
+                  >
+                    <Zap className="w-3.5 h-3.5 text-amber-400 fill-amber-400 shrink-0" />
+                    <span>积分余额: <strong className="font-bold font-mono text-amber-200">{(profile?.credits ?? 1280).toLocaleString()}</strong></span>
+                  </button>
                 </div>
 
                 {/* 头像 */}
@@ -608,6 +813,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           {children}
         </main>
       </div>
+
+      {/* 积分详情与充值弹窗 */}
+      <CreditsDetailModal open={creditsModalOpen} onOpenChange={setCreditsModalOpen} />
     </div>
   );
 }

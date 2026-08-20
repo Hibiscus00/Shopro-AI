@@ -177,7 +177,7 @@ const FILTER_CONFIG = [
 ];
 
 const MAIN_TABS = ['视频生成', '分镜编辑', '图片生成'];
-const INPUT_TABS = ['参考', '首尾帧', '数字人'];
+const INPUT_TABS = ['参考', '数字人', '首尾帧'];
 
 // ── 图片生成模型与对应标识 ──────────────────────────────────────────────
 const IMG_MODELS = [
