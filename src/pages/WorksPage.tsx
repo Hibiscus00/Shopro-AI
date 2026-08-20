@@ -708,13 +708,6 @@ async function seedTestUserVideos(userId: string) {
       video_style: '服装',
     },
     {
-      title: '无线耳机落水测试',
-      video_url: '/Video/CreatOK_10.mp4',
-      thumbnail_url: UNIQUE_THUMBNAILS['/Video/CreatOK_10.mp4'],
-      duration: 8,
-      video_style: '数码',
-    },
-    {
       title: '咖啡拿铁拉花艺术过程',
       video_url: '/Video/CreatOK_11.mp4',
       thumbnail_url: UNIQUE_THUMBNAILS['/Video/CreatOK_11.mp4'],
@@ -764,11 +757,21 @@ async function seedTestUserVideos(userId: string) {
 
   const loadProjects = async () => {
     setLoading(true);
+    // 自动清洗历史测试废弃项 "无线耳机落水测试"
+    try {
+      await supabase.from('video_projects').delete().eq('title', '无线耳机落水测试');
+      await supabase.from('materials').delete().eq('name', '无线耳机落水测试');
+    } catch (e) {
+      console.error('Clean legacy project err', e);
+    }
+
     if (user?.email === 'test_user@example.com') {
       await seedTestUserVideos(user.id);
     }
     const { data } = await supabase.from('video_projects').select('*').order('created_at', { ascending: false });
-    const formattedData = (data ?? []).map((p: any, idx: number) => {
+    const formattedData = (data ?? [])
+      .filter((p: any) => p.title !== '无线耳机落水测试' && !p.title.includes('无线耳机落水测试'))
+      .map((p: any, idx: number) => {
       let thumb = p.thumbnail_url;
       if (!thumb || thumb.includes('photo-1618005182384-a83a8bd57fbe')) {
         if (p.video_url && UNIQUE_THUMBNAILS[p.video_url]) {

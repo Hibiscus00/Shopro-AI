@@ -2500,13 +2500,6 @@ export default function VideoEditPage() {
         video_style: '服装',
       },
       {
-        title: '无线耳机落水测试',
-        video_url: '/Video/CreatOK_10.mp4',
-        thumbnail_url: null,
-        duration: 8,
-        video_style: '数码',
-      },
-      {
         title: '咖啡拿铁拉花艺术过程',
         video_url: '/Video/CreatOK_11.mp4',
         thumbnail_url: null,
