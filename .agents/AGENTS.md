@@ -1,4 +1,5 @@
 # Project Rules
 
-## Git Commit Rule
-每次修改完代码或项目文档后，必须自动执行 git add 与 git commit 将修改提交并同步至 git 仓库，提交说明（commit message）使用简明、规范的中文描述。
+## Git Commit & Push Rule
+每次修改完代码或项目文档后，必须自动执行 git add、git commit 并执行 git push 将修改提交并同步推送至 Git 远程仓库，提交说明（commit message）使用简明、规范的中文描述。
+
