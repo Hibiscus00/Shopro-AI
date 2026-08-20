@@ -444,13 +444,25 @@ export default function AvatarsPage() {
         { id: 'av-p8', name: '雪儿·轻奢珠宝饰品', gender: 'female', language: 'zh', style: '轻奢典雅', description: '珠宝黄金与高端饰品主播，端庄典雅，话术感染力强', preview_image: '/person/girl5.png', is_active: true, use_count: 17900, tags: ['轻奢珠宝', '黄金饰品', '端庄典雅'] },
       ];
 
-      const existingIds = new Set(mapped.map(a => a.id));
-      const combined = [...mapped];
-      DEFAULT_PERSON_AVATARS.forEach(d => {
-        if (!existingIds.has(d.id)) combined.unshift(d);
+      const ORDER_KEYS = ['萌萌', '安娜', '张总', '小雅', '阿杰', '美玲', '陆沉', '雪儿'];
+      const getOrderIndex = (avatar: AvatarType) => {
+        const name = avatar.name || '';
+        const idx = ORDER_KEYS.findIndex(key => name.includes(key));
+        return idx !== -1 ? idx : 99;
+      };
+
+      const avatarMap = new Map<string, AvatarType>();
+      DEFAULT_PERSON_AVATARS.forEach(d => avatarMap.set(d.name, d));
+      mapped.forEach(m => {
+        const exists = Array.from(avatarMap.values()).some(d => d.name.includes(m.name) || m.name.includes(d.name.split('·')[0]));
+        if (!exists) {
+          avatarMap.set(m.name, m);
+        }
       });
 
-      setAvatars(combined);
+      const sortedAvatars = Array.from(avatarMap.values()).sort((a, b) => getOrderIndex(a) - getOrderIndex(b));
+
+      setAvatars(sortedAvatars);
       setLoading(false);
     })();
   }, []);

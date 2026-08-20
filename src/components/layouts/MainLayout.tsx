@@ -785,11 +785,16 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                 <div className="hidden md:flex items-center">
                   <button
                     onClick={() => setCreditsModalOpen(true)}
-                    className="flex items-center gap-1.5 h-8 px-3.5 rounded-full font-semibold text-xs text-white bg-gradient-to-r from-pink-500/20 via-rose-500/20 to-pink-500/20 border border-pink-500/40 hover:bg-pink-500/30 active:scale-95 transition-all duration-200 shadow-md shadow-pink-500/10"
+                    className={cn(
+                      "flex items-center gap-1.5 h-8 px-3.5 rounded-full font-semibold text-xs transition-all duration-200 active:scale-95 shadow-sm border",
+                      isDarkHeader
+                        ? "text-white bg-gradient-to-r from-pink-600/30 via-rose-600/30 to-pink-600/30 border-pink-500/40 hover:bg-pink-600/40"
+                        : "text-white bg-zinc-900 border-zinc-700 hover:bg-zinc-800 shadow-zinc-200"
+                    )}
                     title="点击管理积分与充值"
                   >
                     <Zap className="w-3.5 h-3.5 text-pink-400 fill-pink-400 shrink-0 animate-pulse" />
-                    <span>积分余额: <strong className="font-bold font-mono text-white">{(profile?.credits ?? 50).toLocaleString()}</strong></span>
+                    <span>积分余额: <strong className="font-bold font-mono text-pink-300">{(profile?.credits ?? 50).toLocaleString()}</strong></span>
                   </button>
                 </div>
 
