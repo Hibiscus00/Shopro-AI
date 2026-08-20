@@ -352,7 +352,7 @@ export default function AnalyticsPage() {
       <div className="flex items-center justify-between gap-4">
         <div className="min-w-0">
           <h1 className="text-xl md:text-2xl font-bold text-balance flex items-center gap-2">
-            <BarChart3 className="w-5 h-5 text-primary shrink-0" />流量分析
+            <BarChart3 className="w-5 h-5 text-primary shrink-0" />作品流量预测
           </h1>
           <p className="text-sm text-muted-foreground mt-0.5">AI预测视频流量 · 一键优化闭环 · 智能投放时间推荐</p>
         </div>

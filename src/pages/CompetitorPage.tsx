@@ -23,7 +23,8 @@ import {
   LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid,
   ResponsiveContainer, Legend,
 } from 'recharts';
-import { TrendingPatternsSection } from './TrendingPatternsPage';
+import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 // ─── 类型 ────────────────────────────────────────────────────────────────────
 interface CompetitorAccount {
@@ -186,7 +187,7 @@ export default function CompetitorPage() {
   const [search, setSearch] = useState('');
   const [tab, setTab] = useState(() => {
     const params = new URLSearchParams(window.location.search);
-    return params.get('tab') || 'patterns';
+    return params.get('tab') || 'overview';
   });
   const [analysisOpen, setAnalysisOpen] = useState(false);
   const [analysisTarget, setAnalysisTarget] = useState<CompetitorAccount | null>(null);
@@ -384,20 +385,11 @@ export default function CompetitorPage() {
 
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList className="flex-wrap h-auto gap-1">
-          <TabsTrigger value="patterns" className="gap-1.5 font-medium">
-            <Flame className="w-3.5 h-3.5 text-rose-500 fill-rose-500/20" />
-            爆款特征库
-          </TabsTrigger>
           <TabsTrigger value="overview">账号总览</TabsTrigger>
           <TabsTrigger value="trending">爆款追踪</TabsTrigger>
           <TabsTrigger value="strategy">策略分析</TabsTrigger>
           <TabsTrigger value="trend">趋势图表</TabsTrigger>
         </TabsList>
-
-        {/* 爆款特征库 */}
-        <TabsContent value="patterns" className="mt-4">
-          <TrendingPatternsSection showTitle={false} />
-        </TabsContent>
 
         {/* 账号总览 */}
         <TabsContent value="overview" className="mt-4">

@@ -80,7 +80,7 @@ export default function EmotionAnalysisPage({ initialText = '' }: Props) {
       <div className="flex items-center justify-between gap-3">
         <div>
           <h1 className="text-xl font-bold flex items-center gap-2 text-balance">
-            <Heart className="w-5 h-5 text-primary shrink-0" />情绪 NLP 分析
+            <Heart className="w-5 h-5 text-primary shrink-0" />口播台词优化
           </h1>
           <p className="text-sm text-muted-foreground mt-0.5">
             识别脚本台词中的情绪类型与强度，优化带货转化节奏

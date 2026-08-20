@@ -39,12 +39,10 @@ const AI_TOOLBOX_ITEMS = [
   { label: 'AI智能脚本', path: '/script', badge: '脚本', badgeColor: '#a855f7', desc: '智能生成短视频爆款带货脚本' },
   { label: '爆款风格复刻', path: '/style-copy', badge: '热门', badgeColor: '#f97316', desc: '一键复刻高转化内容风格' },
   { label: '竞品爆款分析', path: '/competitor', badge: '24h', badgeColor: '#3b82f6', desc: '抓取竞品爆款视频策略' },
-  { label: '流量分析', path: '/analytics', badge: '实时', badgeColor: '#22c55e', desc: '实时追踪完播率与转化漏斗' },
+  { label: '作品流量预测', path: '/analytics', badge: '预测', badgeColor: '#22c55e', desc: '实时追踪完播率与流量预测' },
   { label: '直播高光切片', path: '/live-highlight', badge: 'NEW', badgeColor: '#ef4444', desc: 'AI自动识别直播精华' },
-  { label: '知识库', path: '/knowledge', badge: '语义', badgeColor: '#14b8a6', desc: '沉淀带货话术，AI语义检索' },
-  { label: '情绪NLP分析', path: '/emotion-analysis', badge: 'NLP', badgeColor: '#6366f1', desc: '深度分析评论情感倾向' },
-  { label: '爆款特征库', path: '/competitor?tab=patterns', badge: '持续更新', badgeColor: '#f59e0b', desc: '沉淀千万级爆款特征' },
-  { label: 'AI个性化微调', path: '/personalize', badge: 'Pro', badgeColor: '#7c3aed', desc: '基于账号风格私有化训练' },
+  { label: 'Prompt知识库', path: '/knowledge', badge: 'Prompt', badgeColor: '#14b8a6', desc: '聚合优质 Prompt，整合提效写作' },
+  { label: '口播台词优化', path: '/emotion-analysis', badge: '口播', badgeColor: '#6366f1', desc: '深度优化台词表达与情感重音' },
 ];
 
 const navGroups = [
@@ -59,7 +57,7 @@ const navGroups = [
       { path: '/works', label: '作品素材', icon: FolderOpen },
       // AI工具箱通过 AIToolboxNavItem 单独渲染
       { path: '/export-formats', label: '跨平台导出', icon: Layers },
-      { path: '/data-feedback', label: '投放数据回流', icon: Share2 },
+      { path: '/data-feedback', label: '账号数据分析', icon: Share2 },
     ],
   },
   {
