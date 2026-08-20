@@ -565,6 +565,43 @@ export default function StyleCopyPage() {
               </li>
             </ul>
           </div>
+
+          {/* DNA六维指纹条形图 (CR-02) */}
+          {report && (
+            <div className="rounded-2xl border border-border/70 bg-card overflow-hidden">
+              <div className="px-5 py-3.5 border-b border-border/50 flex items-center gap-2">
+                <Fingerprint className="w-4 h-4 text-primary" />
+                <h2 className="text-sm font-semibold">DNA六维指纹评分</h2>
+                <Badge variant="outline" className="text-xs ml-auto">CR-02</Badge>
+              </div>
+              <div className="p-4 space-y-3">
+                {DNA_DIMENSIONS.map(dim => (
+                  <DnaBar
+                    key={dim.key}
+                    label={dim.label}
+                    desc={dim.desc}
+                    score={report.dna_scores?.[dim.key] ?? 60}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 风格详情分析 */}
+          {report && (
+            <div className="rounded-2xl border border-border/70 bg-card overflow-hidden">
+              <div className="px-5 py-3.5 border-b border-border/50">
+                <h2 className="text-sm font-semibold">风格详情分析</h2>
+              </div>
+              <div className="p-4 grid grid-cols-1 gap-3">
+                <InfoRow icon={Zap}     label="节奏类型" value={`${report.rhythm} · ${report.pacing_label || report.pacing || ''}`} />
+                <InfoRow icon={Play}    label="转场特点" value={report.transitions_summary || (report.transitions ?? []).join('、')} />
+                <InfoRow icon={Type}    label="字幕样式" value={report.subtitle_summary || report.subtitle_style} />
+                <InfoRow icon={Music}   label="背景音乐" value={report.bgm_summary || `${report.bgm_type} · ${report.bgm_mood}`} />
+                <InfoRow icon={Palette} label="色调风格" value={report.color_tone} />
+              </div>
+            </div>
+          )}
         </div>
 
         {/* ── 右侧：分析报告 ── */}
@@ -630,39 +667,6 @@ export default function StyleCopyPage() {
                       </RadarChart>
                     </ResponsiveContainer>
                   </div>
-                </div>
-              </div>
-
-              {/* DNA六维指纹条形图 (CR-02) */}
-              <div className="rounded-2xl border border-border/70 bg-card overflow-hidden">
-                <div className="px-5 py-3.5 border-b border-border/50 flex items-center gap-2">
-                  <Fingerprint className="w-4 h-4 text-primary" />
-                  <h2 className="text-sm font-semibold">DNA六维指纹评分</h2>
-                  <Badge variant="outline" className="text-xs ml-auto">CR-02</Badge>
-                </div>
-                <div className="p-4 space-y-3">
-                  {DNA_DIMENSIONS.map(dim => (
-                    <DnaBar
-                      key={dim.key}
-                      label={dim.label}
-                      desc={dim.desc}
-                      score={report.dna_scores?.[dim.key] ?? 60}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              {/* 风格详情 */}
-              <div className="rounded-2xl border border-border/70 bg-card overflow-hidden">
-                <div className="px-5 py-3.5 border-b border-border/50">
-                  <h2 className="text-sm font-semibold">风格详情分析</h2>
-                </div>
-                <div className="p-4 grid grid-cols-1 gap-3">
-                  <InfoRow icon={Zap}     label="节奏类型" value={`${report.rhythm} · ${report.pacing_label || report.pacing || ''}`} />
-                  <InfoRow icon={Play}    label="转场特点" value={report.transitions_summary || (report.transitions ?? []).join('、')} />
-                  <InfoRow icon={Type}    label="字幕样式" value={report.subtitle_summary || report.subtitle_style} />
-                  <InfoRow icon={Music}   label="背景音乐" value={report.bgm_summary || `${report.bgm_type} · ${report.bgm_mood}`} />
-                  <InfoRow icon={Palette} label="色调风格" value={report.color_tone} />
                 </div>
               </div>
 

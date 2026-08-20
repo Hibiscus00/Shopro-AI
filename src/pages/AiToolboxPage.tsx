@@ -285,7 +285,7 @@ export default function AiToolboxPage() {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-xl md:text-2xl font-bold text-foreground text-balance">AI工具箱7+</h1>
+                <h1 className="text-xl md:text-2xl font-bold text-foreground text-balance">AI工具箱</h1>
                 <span className="hidden md:inline px-2 py-0.5 text-[10px] font-medium bg-primary/10 text-primary rounded-full border border-primary/20">
                   {AI_TOOLS.length} 个工具
                 </span>

@@ -175,7 +175,13 @@ const STYLES = ['全部风格', '知性优雅', '活力青春', '商务专业', 
 const GENDER_LABEL: Record<string, string> = { male: '男性', female: '女性' };
 const LANG_LABEL: Record<string, string>   = { zh: '中文', en: '英文', both: '双语' };
 
-function AvatarCard({ avatar, onPreview }: { avatar: AvatarType; onPreview: (a: AvatarType) => void }) {
+function AvatarCard({
+  avatar, onPreview, onUseAvatar
+}: {
+  avatar: AvatarType;
+  onPreview: (a: AvatarType) => void;
+  onUseAvatar: (a: AvatarType) => void;
+}) {
   return (
     <Card className="h-full flex flex-col card-hover overflow-hidden group">
       {/* 预览图 */}
@@ -215,9 +221,23 @@ function AvatarCard({ avatar, onPreview }: { avatar: AvatarType; onPreview: (a: 
           ))}
         </div>
 
-        <Button size="sm" variant="outline" className="mt-auto h-8 text-xs w-full" onClick={() => onPreview(avatar)}>
-          <Play className="w-3 h-3 mr-1.5" />查看示例
-        </Button>
+        <div className="flex items-center gap-1.5 mt-auto pt-1">
+          <Button
+            size="sm"
+            className="h-8 text-xs flex-1 bg-primary hover:bg-primary/90 text-primary-foreground gap-1"
+            onClick={() => onUseAvatar(avatar)}
+          >
+            <Users2 className="w-3 h-3" />使用数字人
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-8 text-xs flex-1 gap-1"
+            onClick={() => onPreview(avatar)}
+          >
+            <Play className="w-3 h-3" />查看示例
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
@@ -488,6 +508,16 @@ export default function AvatarsPage() {
     if (matchedVoice) setTtsVoice(matchedVoice.id);
   };
 
+  const handleUseAvatar = (a: AvatarType) => {
+    toast.success(`已选择数字人「${a.name}」，已为您自动切换至工作台！`);
+    navigate('/video/create', {
+      state: {
+        inputTab: '数字人',
+        selectedAvatar: a,
+      },
+    });
+  };
+
   // CR-06: 脚本融合分析
   const handleFusionAnalyze = async () => {
     if (!fusionScript.trim()) { toast.error('请输入带货脚本'); return; }
@@ -641,7 +671,7 @@ export default function AvatarsPage() {
               </div>
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {filtered.map(a => <AvatarCard key={a.id} avatar={a} onPreview={handleAvatarOpen} />)}
+                {filtered.map(a => <AvatarCard key={a.id} avatar={a} onPreview={handleAvatarOpen} onUseAvatar={handleUseAvatar} />)}
               </div>
             )}
           </div>

@@ -1,9 +1,9 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import {
   Sparkles, ChevronDown, ImageIcon, Video, Wand2,
   BarChart2, Droplets, ArrowUpCircle, Mic, Globe, RefreshCcw,
-  MoreHorizontal, Maximize2, Copy, Plus, ChevronRight, Loader2, X, Download, Image as ImageIcon2, Layers, Play
+  MoreHorizontal, Maximize2, Copy, Plus, ChevronRight, Loader2, X, Download, Image as ImageIcon2, Layers, Play, User, Users2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/db/supabase';
@@ -177,7 +177,7 @@ const FILTER_CONFIG = [
 ];
 
 const MAIN_TABS = ['视频生成', '分镜编辑', '图片生成'];
-const INPUT_TABS = ['参考', '首尾帧'];
+const INPUT_TABS = ['参考', '首尾帧', '数字人'];
 
 // ── 图片生成模型与对应标识 ──────────────────────────────────────────────
 const IMG_MODELS = [
@@ -191,13 +191,34 @@ const IMG_RESOLUTIONS = [
   '9:16 · 竖屏 (720×1280)'
 ];
 
+// 预设高频常用数字人快捷列表
+const QUICK_AVATARS = [
+  { id: 'avatar-001', name: '小雅·美妆达人', preview_image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80', gender: 'female', tags: ['美妆', '亲和力'] },
+  { id: 'avatar-002', name: '阿杰·数码评测', preview_image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80', gender: 'male', tags: ['数码', '专业'] },
+  { id: 'avatar-003', name: '安娜·时尚穿搭', preview_image: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=200&q=80', gender: 'female', tags: ['服装', '高级感'] },
+  { id: 'avatar-004', name: '张总·商务金牌讲师', preview_image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80', gender: 'male', tags: ['商务', '沉稳'] },
+];
+
 // ── 主页组件 ───────────────────────────────────────────────────────────
 export default function HomePage() {
   const { projectId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
+
   const [mainTab, setMainTab] = useState(projectId ? '分镜编辑' : '视频生成');
-  const [inputTab, setInputTab] = useState('参考');
+  const [inputTab, setInputTab] = useState(location.state?.inputTab || '参考');
+  const [selectedAvatar, setSelectedAvatar] = useState<{ id?: string; name: string; preview_image?: string } | null>(
+    location.state?.selectedAvatar ?? null
+  );
+
+  useEffect(() => {
+    if (location.state?.selectedAvatar) {
+      setSelectedAvatar(location.state.selectedAvatar);
+      setInputTab(location.state?.inputTab || '数字人');
+    }
+  }, [location.state]);
+
   const [prompt, setPrompt] = useState('');
   const [model, setModel] = useState<{ label: string; id: ModelId }>({ label: 'Seedance 2.0', id: 'Seedance' });
   const [resolution, setResolution] = useState('720P · 16:9 · 5s');
@@ -985,6 +1006,7 @@ export default function HomePage() {
                     >
                       {t === '参考' && <ImageIcon className="w-3.5 h-3.5" />}
                       {t === '首尾帧' && <Copy className="w-3.5 h-3.5" />}
+                      {t === '数字人' && <Users2 className="w-3.5 h-3.5 text-primary" />}
                       {t === '编辑' && <Wand2 className="w-3.5 h-3.5" />}
                       {t}
                     </button>
@@ -1106,6 +1128,55 @@ export default function HomePage() {
                             </>
                           )}
                         </div>
+                      </div>
+                    ) : inputTab === '数字人' ? (
+                      <div className="flex flex-col gap-1.5 shrink-0 mr-1 select-none">
+                        {selectedAvatar ? (
+                          <div className="flex items-center gap-2 bg-primary/15 border border-primary/40 rounded-xl px-2.5 py-1.5 text-xs text-white relative group">
+                            <img
+                              src={selectedAvatar.preview_image || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80'}
+                              alt={selectedAvatar.name}
+                              className="w-10 h-10 rounded-lg object-cover border border-primary/50"
+                            />
+                            <div className="flex flex-col">
+                              <span className="font-semibold text-primary-foreground text-xs leading-tight">{selectedAvatar.name}</span>
+                              <span className="text-[10px] text-primary/90">已选数字人形象</span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => setSelectedAvatar(null)}
+                              className="w-4 h-4 rounded-full bg-black/60 hover:bg-black flex items-center justify-center text-white ml-1.5"
+                              title="清除数字人"
+                            >
+                              <X className="w-2.5 h-2.5" />
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-1.5 flex-wrap max-w-md">
+                            {QUICK_AVATARS.map(avatar => (
+                              <button
+                                key={avatar.id}
+                                type="button"
+                                onClick={() => {
+                                  setSelectedAvatar(avatar);
+                                  toast.success(`已选择数字人「${avatar.name}」！`);
+                                }}
+                                className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg border border-white/10 hover:border-primary/50 bg-white/5 hover:bg-primary/10 transition-all text-xs text-white/80"
+                              >
+                                <img src={avatar.preview_image} className="w-5 h-5 rounded-full object-cover" />
+                                <span className="text-[11px] font-medium truncate max-w-[80px]">{avatar.name.split('·')[0]}</span>
+                              </button>
+                            ))}
+                            <button
+                              type="button"
+                              onClick={() => navigate('/avatars')}
+                              className="px-2.5 py-1.5 rounded-lg border border-dashed border-primary/50 text-primary hover:bg-primary/10 transition-all text-xs font-medium shrink-0 flex items-center gap-1"
+                            >
+                              <Users2 className="w-3.5 h-3.5" />
+                              更多数字人
+                            </button>
+                          </div>
+                        )}
                       </div>
                     ) : (
                       <>
