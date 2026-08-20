@@ -59,7 +59,7 @@ const navGroups = [
       { path: '/works', label: '作品素材', icon: FolderOpen },
       // AI工具箱通过 AIToolboxNavItem 单独渲染
       { path: '/export-formats', label: '跨平台导出', icon: Layers },
-      { path: '/data-feedback', label: '账号数据分析', icon: Share2 },
+      { path: '/data-feedback', label: '多平台分析', icon: Share2 },
     ],
   },
   {
@@ -470,23 +470,22 @@ function CreditsDetailModal({ open, onOpenChange }: { open: boolean; onOpenChang
   const [couponCode, setCouponCode] = useState('');
 
   const PACKAGES = [
-    { id: 'pkg-1', name: '基础体验包', credits: 500, bonus: 0, price: 29, tag: '新手首选' },
-    { id: 'pkg-2', name: '爆款进阶包', credits: 2000, bonus: 300, price: 99, tag: '🔥 最受欢迎', popular: true },
-    { id: 'pkg-3', name: '团队尊享包', credits: 5000, bonus: 1000, price: 199, tag: '👑 优先渲染' },
-    { id: 'pkg-4', name: '全能旗舰包', credits: 15000, bonus: 3500, price: 499, tag: '💎 无限创作' },
+    { id: 'pkg-1', name: '基础体验包', credits: 100, bonus: 0, price: 10, tag: '生成 10 个视频' },
+    { id: 'pkg-2', name: '爆款进阶包', credits: 500, bonus: 50, price: 50, tag: '🔥 生成 55 个视频', popular: true },
+    { id: 'pkg-3', name: '团队尊享包', credits: 1000, bonus: 150, price: 100, tag: '👑 生成 115 个视频' },
+    { id: 'pkg-4', name: '全能旗舰包', credits: 3000, bonus: 600, price: 300, tag: '💎 生成 360 个视频' },
   ];
 
   const MOCK_LOGS = [
-    { id: 'l-1', type: 'recharge', desc: '充值爆款进阶套餐', amount: '+2,300', date: '2026-08-20 10:30', status: '完成' },
-    { id: 'l-2', type: 'consume', desc: 'AI 黄金爆款带货脚本生成', amount: '-10', date: '2026-08-20 09:15', status: '支出' },
-    { id: 'l-3', type: 'consume', desc: '多模态视频 DNA 风格分析', amount: '-25', date: '2026-08-19 16:40', status: '支出' },
-    { id: 'l-4', type: 'reward', desc: '每日登录签到奖励', amount: '+50', date: '2026-08-19 09:00', status: '赠送' },
-    { id: 'l-5', type: 'reward', desc: '新用户注册欢迎礼包', amount: '+500', date: '2026-08-18 14:20', status: '赠送' },
+    { id: 'l-1', type: 'recharge', desc: '充值爆款进阶套餐', amount: '+550', date: '2026-08-20 10:30', status: '完成' },
+    { id: 'l-2', type: 'consume', desc: 'AI 视频生成任务', amount: '-10', date: '2026-08-20 09:15', status: '支出' },
+    { id: 'l-3', type: 'consume', desc: 'AI 视频生成任务', amount: '-10', date: '2026-08-19 16:40', status: '支出' },
+    { id: 'l-4', type: 'reward', desc: '新用户注册赠送包', amount: '+50', date: '2026-08-18 14:20', status: '赠送' },
   ];
 
   const handleRedeem = () => {
     if (!couponCode.trim()) { toast.error('请输入兑换码'); return; }
-    toast.success(`兑换码「${couponCode}」核销成功！已为您到账 +500 积分`);
+    toast.success(`兑换码「${couponCode}」核销成功！已为您到账 +100 积分`);
     setCouponCode('');
   };
 
@@ -496,19 +495,19 @@ function CreditsDetailModal({ open, onOpenChange }: { open: boolean; onOpenChang
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[620px] p-0 overflow-hidden bg-[#16151f] border border-amber-500/20 text-white rounded-2xl shadow-2xl">
-        <DialogHeader className="p-6 pb-4 bg-gradient-to-r from-amber-950/40 via-purple-950/30 to-zinc-900 border-b border-white/10">
+      <DialogContent className="sm:max-w-[620px] p-0 overflow-hidden bg-[#16151f] border border-pink-500/20 text-white rounded-2xl shadow-2xl">
+        <DialogHeader className="p-6 pb-4 bg-gradient-to-r from-pink-950/40 via-purple-950/30 to-zinc-900 border-b border-white/10">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/20 shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-pink-500 to-rose-500 flex items-center justify-center shadow-lg shadow-pink-500/20 shrink-0">
                 <Zap className="w-5 h-5 text-white fill-white" />
               </div>
               <div>
                 <DialogTitle className="text-lg font-bold text-white flex items-center gap-2">
                   积分管理与充值
-                  <Badge variant="outline" className="border-amber-500/40 text-amber-400 text-[10px] font-normal">VIP尊享</Badge>
+                  <Badge variant="outline" className="border-pink-500/40 text-pink-400 text-[10px] font-normal">10积分 = 1元</Badge>
                 </DialogTitle>
-                <p className="text-xs text-zinc-400 mt-0.5">驱动全套 AI 工具生成，积分永不下线</p>
+                <p className="text-xs text-zinc-400 mt-0.5">注册新用户免费赠送 50 积分，生成视频消耗 10 积分/次</p>
               </div>
             </div>
           </div>
@@ -518,13 +517,13 @@ function CreditsDetailModal({ open, onOpenChange }: { open: boolean; onOpenChang
             <div>
               <span className="text-xs text-zinc-400">当前可用积分余额</span>
               <div className="flex items-baseline gap-1.5 mt-0.5">
-                <span className="text-2xl font-bold font-mono text-amber-300">{(profile?.credits ?? 1280).toLocaleString()}</span>
-                <span className="text-xs text-amber-400 font-medium">积分</span>
+                <span className="text-2xl font-bold font-mono text-pink-300">{(profile?.credits ?? 50).toLocaleString()}</span>
+                <span className="text-xs text-pink-400 font-medium">积分 (约可生成 {Math.floor((profile?.credits ?? 50) / 10)} 个视频)</span>
               </div>
             </div>
             <div className="text-right">
-              <span className="text-[11px] text-zinc-400 block">今日免费额度</span>
-              <span className="text-xs text-emerald-400 font-medium">已刷新 (无限额)</span>
+              <span className="text-[11px] text-zinc-400 block">注册赠送积分</span>
+              <span className="text-xs text-emerald-400 font-medium">已自动到账 (+50)</span>
             </div>
           </div>
 
@@ -767,11 +766,11 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                 <div className="hidden md:flex items-center">
                   <button
                     onClick={() => setCreditsModalOpen(true)}
-                    className="flex items-center gap-1.5 h-8 px-3 rounded-full font-semibold text-xs text-amber-300 bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/20 active:scale-95 transition-all duration-200 shadow-sm"
+                    className="flex items-center gap-1.5 h-8 px-3.5 rounded-full font-semibold text-xs text-pink-200 bg-gradient-to-r from-pink-500/20 via-rose-500/20 to-pink-500/20 border border-pink-500/40 hover:bg-pink-500/30 active:scale-95 transition-all duration-200 shadow-md shadow-pink-500/10"
                     title="点击管理积分与充值"
                   >
-                    <Zap className="w-3.5 h-3.5 text-amber-400 fill-amber-400 shrink-0" />
-                    <span>积分余额: <strong className="font-bold font-mono text-amber-200">{(profile?.credits ?? 1280).toLocaleString()}</strong></span>
+                    <Zap className="w-3.5 h-3.5 text-pink-400 fill-pink-400 shrink-0 animate-pulse" />
+                    <span>积分余额: <strong className="font-bold font-mono text-pink-300">{(profile?.credits ?? 50).toLocaleString()}</strong></span>
                   </button>
                 </div>
 

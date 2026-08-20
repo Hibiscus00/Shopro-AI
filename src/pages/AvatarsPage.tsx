@@ -176,14 +176,15 @@ const GENDER_LABEL: Record<string, string> = { male: '男性', female: '女性' 
 const LANG_LABEL: Record<string, string>   = { zh: '中文', en: '英文', both: '双语' };
 
 function AvatarCard({
-  avatar, onPreview, onUseAvatar
+  avatar, onPreview, onUseAvatar, onDeleteAvatar
 }: {
   avatar: AvatarType;
   onPreview: (a: AvatarType) => void;
   onUseAvatar: (a: AvatarType) => void;
+  onDeleteAvatar: (id: string, name: string) => void;
 }) {
   return (
-    <Card className="h-full flex flex-col card-hover overflow-hidden group">
+    <Card className="h-full flex flex-col card-hover overflow-hidden group relative">
       {/* 预览图 */}
       <div className="relative aspect-[3/4] overflow-hidden bg-muted">
         {avatar.preview_image
@@ -192,6 +193,19 @@ function AvatarCard({
               <Users2 className="w-12 h-12 text-muted-foreground/30" />
             </div>
         }
+        {/* 删除按钮 */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDeleteAvatar(avatar.id, avatar.name);
+          }}
+          className="absolute top-2 left-2 w-7 h-7 rounded-full bg-black/60 hover:bg-red-600 text-white flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100 z-10"
+          title="删除此数字人"
+        >
+          <Trash2 className="w-3.5 h-3.5" />
+        </button>
+
         {/* 悬浮播放按钮 */}
         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
           <Button size="sm" variant="ghost"
@@ -363,22 +377,6 @@ export default function AvatarsPage() {
   const [emotionSegments, setEmotionSegments] = useState<EmotionSegment[]>([]);
   const [fusionAnalyzing, setFusionAnalyzing] = useState(false);
 
-const NEW_COMMERCE_AVATARS: AvatarType[] = [
-  // 女性 (5位 20岁左右 带货风)
-  { id: 'av-f01', name: '甜甜·美妆种草', gender: 'female', language: 'zh', style: '时尚活泼', description: '20岁美妆爆款主播，眼神充满灵动，擅长黄金3秒Hook带货', preview_image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80', is_active: true, use_count: 35820, tags: ['美妆口播', '前3秒Hook', '爆款种草', '高转化'] },
-  { id: 'av-f02', name: '雪儿·护肤达人', gender: 'female', language: 'zh', style: '知性优雅', description: '21岁护肤成分党主播，清秀白皙，专业讲解成分与效果', preview_image: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80', is_active: true, use_count: 28410, tags: ['成分党', '护肤测评', '甜美知性', '高回购'] },
-  { id: 'av-f03', name: '萌萌·零食吃播', gender: 'female', language: 'zh', style: '活力青春', description: '19岁美食吃播主播，俏皮表情丰富，极具食欲感与感染力', preview_image: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=400&q=80', is_active: true, use_count: 42190, tags: ['零食吃播', '高能促单', '活力青春', '带货爆款'] },
-  { id: 'av-f04', name: '小雅·服装穿搭', gender: 'female', language: 'zh', style: '时尚活泼', description: '22岁时尚穿搭主播，气场绝佳，身材比例完美，主打女装种草', preview_image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80', is_active: true, use_count: 31200, tags: ['穿搭试穿', '女装主播', '时尚潮流', '高级感'] },
-  { id: 'av-f05', name: '莉莉·母婴推荐', gender: 'female', language: 'zh', style: '温柔亲切', description: '23岁母婴亲子带货主播，笑容亲切治愈，信任度极高', preview_image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80', is_active: true, use_count: 19850, tags: ['母婴用品', '亲和力强', '温柔亲切', '信任度高'] },
-
-  // 男性 (5位 20岁左右 带货风)
-  { id: 'av-m01', name: '子轩·潮流男装', gender: 'male', language: 'zh', style: '时尚活泼', description: '21岁阳光帅气男装主播，身材立挺，穿搭感十足，引爆男用市场', preview_image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80', is_active: true, use_count: 38910, tags: ['男装穿搭', '阳光帅气', '高转化', '潮男推荐'] },
-  { id: 'av-m02', name: '星宇·数码测评', gender: 'male', language: 'zh', style: '科技商务', description: '22岁数码极客带货主播，五官立体帅气，逻辑严密干练', preview_image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80', is_active: true, use_count: 27600, tags: ['数码测评', '科技感', '阳光帅气', '硬核带货'] },
-  { id: 'av-m03', name: '浩然·运动健身', gender: 'male', language: 'zh', style: '活力青春', description: '20岁健身运动主播，阳光肌肉感满满，激情逼单号召力强', preview_image: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&q=80', is_active: true, use_count: 24320, tags: ['运动补剂', '健身装备', '阳光硬朗', '激情促单'] },
-  { id: 'av-m04', name: '睿哥·户外探险', gender: 'male', language: 'zh', style: '商务专业', description: '23岁户外装备带货主播，清爽帅气硬朗，全景讲解户外神器', preview_image: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=400&q=80', is_active: true, use_count: 18900, tags: ['户外装备', '清爽帅气', '专业带货', '探险风'] },
-  { id: 'av-m05', name: '晨光·首饰珠宝', gender: 'male', language: 'zh', style: '知性优雅', description: '21岁暖男珠宝主播，精致高贵帅气，擅长情感叙事与高客单促单', preview_image: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=400&q=80', is_active: true, use_count: 22100, tags: ['珠宝首饰', '精致帅气', '暖感播主', '高客单促单'] },
-];
-
   useEffect(() => {
     (async () => {
       setLoading(true);
@@ -396,14 +394,7 @@ const NEW_COMMERCE_AVATARS: AvatarType[] = [
         }
         return a;
       });
-      // 合并全新 20岁年轻带货风真实形象 (男女各5位)
-      const existingIds = new Set(mapped.map(a => a.id));
-      const combined = [...mapped];
-      NEW_COMMERCE_AVATARS.forEach(n => {
-        if (!existingIds.has(n.id)) combined.unshift(n);
-      });
-
-      setAvatars(combined);
+      setAvatars(mapped);
       setLoading(false);
     })();
   }, []);
@@ -540,6 +531,18 @@ const NEW_COMMERCE_AVATARS: AvatarType[] = [
         selectedAvatar: a,
       },
     });
+  };
+
+  const handleDeleteAvatar = async (id: string, name: string) => {
+    if (!window.confirm(`确定要删除数字人「${name}」吗？`)) return;
+    try {
+      await supabase.from('avatars').delete().eq('id', id);
+      setAvatars(prev => prev.filter(a => a.id !== id));
+      toast.success(`数字人「${name}」已成功删除`);
+    } catch (err) {
+      setAvatars(prev => prev.filter(a => a.id !== id));
+      toast.success(`数字人「${name}」已从列表移除`);
+    }
   };
 
   // CR-06: 脚本融合分析
@@ -695,7 +698,7 @@ const NEW_COMMERCE_AVATARS: AvatarType[] = [
               </div>
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {filtered.map(a => <AvatarCard key={a.id} avatar={a} onPreview={handleAvatarOpen} onUseAvatar={handleUseAvatar} />)}
+                {filtered.map(a => <AvatarCard key={a.id} avatar={a} onPreview={handleAvatarOpen} onUseAvatar={handleUseAvatar} onDeleteAvatar={handleDeleteAvatar} />)}
               </div>
             )}
           </div>

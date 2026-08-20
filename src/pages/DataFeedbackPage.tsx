@@ -237,7 +237,7 @@ export default function DataFeedbackPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
           <h1 className="text-xl md:text-2xl font-bold flex items-center gap-2">
-            <BarChart3 className="w-5 h-5 text-primary" />账号数据分析
+            <BarChart3 className="w-5 h-5 text-primary" />多平台分析
           </h1>
           <p className="text-sm text-muted-foreground mt-0.5">P3-S02 · 广告投放效果全链路追踪，优化 ROI</p>
         </div>

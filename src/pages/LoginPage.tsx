@@ -100,7 +100,7 @@ function PhoneSmsPanel() {
                 await supabase.from('user_plans').upsert({
                   user_id: signUpData.user.id,
                   plan_id: freePlan.id,
-                  credits_total: 100,
+                  credits_total: 50,
                   credits_used: 0,
                 }, { onConflict: 'user_id' });
               }
@@ -418,7 +418,7 @@ export default function LoginPage() {
                 await supabase.from('user_plans').upsert({
                   user_id: data.user.id,
                   plan_id: freePlan.id,
-                  credits_total: 100,
+                  credits_total: 50,
                   credits_used: 0,
                 }, { onConflict: 'user_id' });
               }
@@ -707,7 +707,7 @@ export default function LoginPage() {
                                 await supabase.from('user_plans').upsert({
                                   user_id: signUpData.user.id,
                                   plan_id: freePlan.id,
-                                  credits_total: 100,
+                                  credits_total: 50,
                                   credits_used: 0,
                                 }, { onConflict: 'user_id' });
                               }

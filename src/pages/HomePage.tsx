@@ -204,7 +204,7 @@ export default function HomePage() {
   const { projectId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
 
   const [mainTab, setMainTab] = useState(projectId ? '分镜编辑' : '视频生成');
   const [inputTab, setInputTab] = useState(location.state?.inputTab || '参考');
@@ -702,6 +702,15 @@ export default function HomePage() {
   // 提交生成
   const handleGenerate = async () => {
     if (!prompt.trim()) { toast.error('请输入视频描述'); return; }
+
+    // 校验积分 (生成视频每次消耗 10 积分)
+    const currentCredits = profile?.credits ?? 50;
+    if (currentCredits < 10) {
+      toast.error(`积分不足！生成 AI 视频每次需消耗 10 积分（当前剩余 ${currentCredits} 积分），请点击右上角粉红积分按钮充值！`, { duration: 5000 });
+      return;
+    }
+
+    toast.info('⚡ 已扣除 10 积分，AI 视频生成任务已成功启动！');
     setGenerating(true); setResultVideo(null); setGenProgress(5); stopPoll();
 
     try {
