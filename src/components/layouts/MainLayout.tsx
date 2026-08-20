@@ -53,7 +53,7 @@ const navGroups = [
     label: '主要功能',
     items: [
       { path: '/video/create', label: '工作台', icon: Video },
-      { path: '/product-selection', label: '智能选品', icon: ShoppingBag },
+      { path: '/product-selection', label: '全球选品', icon: ShoppingBag },
       { path: '/products', label: '商品管理', icon: Package },
       { path: '/avatars', label: '数字人库', icon: Users2 },
       { path: '/video/edit', label: '视频剪辑', icon: Scissors },
@@ -785,16 +785,11 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                 <div className="hidden md:flex items-center">
                   <button
                     onClick={() => setCreditsModalOpen(true)}
-                    className={cn(
-                      "flex items-center gap-1.5 h-8 px-3.5 rounded-full font-semibold text-xs transition-all duration-200 active:scale-95 shadow-sm border",
-                      isDarkHeader
-                        ? "text-white bg-gradient-to-r from-pink-600/30 via-rose-600/30 to-pink-600/30 border-pink-500/40 hover:bg-pink-600/40"
-                        : "text-white bg-zinc-900 border-zinc-700 hover:bg-zinc-800 shadow-zinc-200"
-                    )}
+                    className="flex items-center gap-1.5 h-8 px-3.5 rounded-full font-bold text-xs text-white bg-gradient-to-r from-pink-500 via-rose-500 to-pink-600 border border-pink-400/50 hover:brightness-110 active:scale-95 transition-all duration-200 shadow-md shadow-pink-500/25"
                     title="点击管理积分与充值"
                   >
-                    <Zap className="w-3.5 h-3.5 text-pink-400 fill-pink-400 shrink-0 animate-pulse" />
-                    <span>积分余额: <strong className="font-bold font-mono text-pink-300">{(profile?.credits ?? 50).toLocaleString()}</strong></span>
+                    <Zap className="w-3.5 h-3.5 text-white fill-white shrink-0 animate-pulse" />
+                    <span>积分余额: <strong className="font-extrabold font-mono text-amber-200 drop-shadow-sm">{(profile?.credits ?? 50).toLocaleString()}</strong></span>
                   </button>
                 </div>
 

@@ -51,6 +51,20 @@ const FORM_STEPS = [
   { id: 3, label: '图片规格', desc: '图片、规格参数' },
   { id: 4, label: '发布设置', desc: '状态配置' },
 ];
+export const DEFAULT_CATEGORY_IMAGES: Record<string, string> = {
+  '服装配饰': 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=500&auto=format&fit=crop&q=80',
+  '美妆护肤': 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=500&auto=format&fit=crop&q=80',
+  '数码电器': 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=500&auto=format&fit=crop&q=80',
+  '食品饮料': 'https://images.unsplash.com/photo-1612927601601-6638404737ce?w=500&auto=format&fit=crop&q=80',
+  '家居用品': 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=500&auto=format&fit=crop&q=80',
+  '母婴用品': 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=500&auto=format&fit=crop&q=80',
+  '运动户外': 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=500&auto=format&fit=crop&q=80',
+  '其他': 'https://images.unsplash.com/photo-1544816155-12df9643f363?w=500&auto=format&fit=crop&q=80',
+};
+
+export const getCategoryFallbackImage = (category?: string) => {
+  return DEFAULT_CATEGORY_IMAGES[category || ''] || DEFAULT_CATEGORY_IMAGES['其他'];
+};
 
 // ── 初始表单 ──────────────────────────────────────────────────────────────
 const EMPTY_FORM = {
@@ -114,7 +128,14 @@ function ProductCard({ product, selected, onSelect, onEdit, onDelete, onToggle }
       <div className="relative" onClick={() => onSelect(product.id)}>
         <div className="aspect-square overflow-hidden rounded-t-xl bg-muted">
           {product.cover_image
-            ? <img src={product.cover_image} alt={product.name} className="w-full h-full object-cover" />
+            ? <img
+                src={product.cover_image}
+                alt={product.name}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = getCategoryFallbackImage(product.category);
+                }}
+              />
             : <div className="w-full h-full flex items-center justify-center"><ImageIcon className="w-10 h-10 text-muted-foreground/30" /></div>
           }
         </div>
@@ -614,18 +635,9 @@ ${textToParse}`;
             // 确保卖点数组格式完整
             if (!Array.isArray(parsed.selling_points)) {
               parsed.selling_points = ['爆款推荐', '品质保证', '限时特惠'];
-            }
-
-            // 图像兜底
-            if (!parsed.cover_image || !parsed.cover_image.startsWith('http')) {
-              const defaultCovers: Record<string, string> = {
-                '服装配饰': 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=300',
-                '美妆护肤': 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=300',
-                '数码电器': 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=300',
-                '食品饮料': 'https://images.unsplash.com/photo-1612927601601-6638404737ce?w=300',
-                '家居用品': 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=300',
-              };
-              parsed.cover_image = defaultCovers[parsed.category] || 'https://images.unsplash.com/photo-1544816155-12df9643f363?w=300';
+            }            // 图像兜底校验
+            if (!parsed.cover_image || !parsed.cover_image.startsWith('http') || parsed.cover_image.includes('taobao.com') || parsed.cover_image.includes('douyin.com')) {
+              parsed.cover_image = getCategoryFallbackImage(parsed.category);
             }
 
             setParsedResult(parsed);
@@ -642,7 +654,7 @@ ${textToParse}`;
               original_price: 199,
               sale_price: 99,
               stock: 2000,
-              cover_image: 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=300',
+              cover_image: 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=500&auto=format&fit=crop&q=80',
               target_platform: parsePlatform,
               target_language: 'zh'
             });
@@ -670,6 +682,10 @@ ${textToParse}`;
     setSavingParsed(true);
 
     try {
+      const validCover = (parsedResult.cover_image && parsedResult.cover_image.startsWith('http') && !parsedResult.cover_image.includes('taobao.com') && !parsedResult.cover_image.includes('douyin.com'))
+        ? parsedResult.cover_image
+        : getCategoryFallbackImage(parsedResult.category);
+
       const payload = {
         name: parsedResult.name,
         category: parsedResult.category || '其他',
@@ -680,8 +696,8 @@ ${textToParse}`;
         sale_price: parseFloat(parsedResult.sale_price) || 0,
         stock: parseInt(parsedResult.stock) || 1000,
         specs: [],
-        images: [parsedResult.cover_image],
-        cover_image: parsedResult.cover_image,
+        images: [validCover],
+        cover_image: validCover,
         status: 'active',
         user_id: user.id,
       };

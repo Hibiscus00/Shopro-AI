@@ -2589,7 +2589,7 @@ export default function ProductSelectionPage() {
         <div>
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold flex items-center gap-2 text-balance text-rose-600 dark:text-rose-400">
-              <Sparkles className="w-6 h-6 animate-pulse" /> 智能选品
+              <Sparkles className="w-6 h-6 animate-pulse" /> 全球选品
             </h1>
             <Button
               variant="outline"
