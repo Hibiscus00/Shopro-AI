@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/db/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { deductUserCredits } from '@/hooks/useCredits';
 import { useDraft } from '@/hooks/useDraft';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -1631,6 +1632,16 @@ function Step5Generate({ productData, promptConfig, shots, materials, onPrev, on
 
   const handleGenerate = async () => {
     if (!user) return;
+
+    // 校验与扣除积分 (生成视频每次消耗 10 积分)
+    const videoTitle = promptConfig.prompt_text?.trim() || productData.name?.trim() || '带货视频';
+    const deductRes = await deductUserCredits(user.id, 10, `生成AI视频《${videoTitle}》`, 'video_generate');
+    if (!deductRes.success) {
+      toast.error(deductRes.message || `积分不足！生成 AI 视频每次需消耗 10 积分（当前剩余 ${deductRes.creditsLeft} 积分），请充值！`, { duration: 5000 });
+      return;
+    }
+    toast.success(`⚡ 已成功扣除 10 积分（当前剩余 ${deductRes.creditsLeft} 积分），AI 视频生成任务已成功启动！`);
+
     setGenerating(true);
     setProgress(5); setStatusMsg('初始化任务...'); setStatusIcon('🔧');
     setStageLog([{ msg: '初始化任务...', pct: 5, done: true, time: format(new Date(), 'HH:mm:ss') }]);

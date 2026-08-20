@@ -265,6 +265,12 @@ export default function CreditsPage() {
   useEffect(() => { loadPlan(); }, [loadPlan]);
   useEffect(() => { loadLogs(); }, [loadLogs]);
 
+  useEffect(() => {
+    const handleChanged = () => { loadPlan(); loadLogs(); };
+    window.addEventListener('credits_changed', handleChanged);
+    return () => window.removeEventListener('credits_changed', handleChanged);
+  }, [loadPlan, loadLogs]);
+
 
   // 轮询订单状态
   useEffect(() => {

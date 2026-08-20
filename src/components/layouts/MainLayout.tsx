@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCredits } from '@/hooks/useCredits';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -466,6 +467,7 @@ function TopBarNotificationBell({ isDarkHeader }: { isDarkHeader: boolean }) {
 // ── 积分详情与充值弹窗 ───────────────────────────────────────────────────
 function CreditsDetailModal({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
   const { profile } = useAuth();
+  const { creditsLeft } = useCredits();
   const [activeTab, setActiveTab] = useState<'recharge' | 'history'>('recharge');
   const [selectedPkg, setSelectedPkg] = useState<string>('pkg-2');
   const [couponCode, setCouponCode] = useState('');
@@ -527,8 +529,8 @@ function CreditsDetailModal({ open, onOpenChange }: { open: boolean; onOpenChang
             <div>
               <span className="text-xs text-zinc-400">当前可用积分余额</span>
               <div className="flex items-baseline gap-1.5 mt-0.5">
-                <span className="text-2xl font-bold font-mono text-pink-300">{(profile?.credits ?? 50).toLocaleString()}</span>
-                <span className="text-xs text-pink-400 font-medium">积分 (约可生成 {Math.floor((profile?.credits ?? 50) / 10)} 个视频)</span>
+                <span className="text-2xl font-bold font-mono text-pink-300">{creditsLeft.toLocaleString()}</span>
+                <span className="text-xs text-pink-400 font-medium">积分 (约可生成 {Math.floor(creditsLeft / 10)} 个视频)</span>
               </div>
             </div>
             <div className="text-right">
@@ -716,6 +718,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   const { theme, setTheme } = useThemePersist();
   const location = useLocation();
   const { profile, signOut } = useAuth();
+  const { creditsLeft } = useCredits();
   const navigate = useNavigate();
 
   // 判断是否为生成视频界面
@@ -789,7 +792,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                     title="点击管理积分与充值"
                   >
                     <Zap className="w-3.5 h-3.5 text-white fill-white shrink-0 animate-pulse" />
-                    <span>积分余额: <strong className="font-extrabold font-mono text-amber-200 drop-shadow-sm">{(profile?.credits ?? 50).toLocaleString()}</strong></span>
+                    <span>积分余额: <strong className="font-extrabold font-mono text-amber-200 drop-shadow-sm">{creditsLeft.toLocaleString()}</strong></span>
                   </button>
                 </div>
 

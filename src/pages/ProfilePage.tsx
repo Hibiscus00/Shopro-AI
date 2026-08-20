@@ -156,6 +156,9 @@ export default function ProfilePage() {
       setNotification(profile.notification_enabled ?? true);
     }
     loadAll();
+    const handleChanged = () => { loadAll(); };
+    window.addEventListener('credits_changed', handleChanged);
+    return () => window.removeEventListener('credits_changed', handleChanged);
   }, [profile]);
 
   const loadAll = async () => {

@@ -8,6 +8,7 @@ import {
 import { cn } from '@/lib/utils';
 import { supabase } from '@/db/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { deductUserCredits } from '@/hooks/useCredits';
 import { toast } from 'sonner';
 import ProductVideoWizard from './VideoCreatePage';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -737,14 +738,19 @@ export default function HomePage() {
   const handleGenerate = async () => {
     if (!prompt.trim()) { toast.error('请输入视频描述'); return; }
 
-    // 校验积分 (生成视频每次消耗 10 积分)
-    const currentCredits = profile?.credits ?? 50;
-    if (currentCredits < 10) {
-      toast.error(`积分不足！生成 AI 视频每次需消耗 10 积分（当前剩余 ${currentCredits} 积分），请点击右上角粉红积分按钮充值！`, { duration: 5000 });
-      return;
+    // 校验与扣除积分 (生成视频每次消耗 10 积分)
+    if (user) {
+      const videoTitle = prompt.trim().slice(0, 15) || `${model.label}视频`;
+      const deductRes = await deductUserCredits(user.id, 10, `生成AI视频《${videoTitle}》`, 'video_generate');
+      if (!deductRes.success) {
+        toast.error(deductRes.message || `积分不足！生成 AI 视频每次需消耗 10 积分（当前剩余 ${deductRes.creditsLeft} 积分），请点击右上角粉红积分按钮充值！`, { duration: 5000 });
+        return;
+      }
+      toast.info(`⚡ 已扣除 10 积分（当前剩余 ${deductRes.creditsLeft} 积分），AI 视频生成任务已成功启动！`);
+    } else {
+      toast.info('⚡ 已扣除 10 积分，AI 视频生成任务已成功启动！');
     }
 
-    toast.info('⚡ 已扣除 10 积分，AI 视频生成任务已成功启动！');
     setGenerating(true); setResultVideo(null); setGenProgress(5); stopPoll();
 
     try {

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/db/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { deductUserCredits } from '@/hooks/useCredits';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -245,6 +246,14 @@ export default function BatchCreatePage() {
       toast.error('请先选择至少一个商品');
       return;
     }
+
+    const totalCost = selectedProducts.length * 10;
+    const deductRes = await deductUserCredits(user.id, totalCost, `批量生成 ${selectedProducts.length} 个商品视频`, 'video_generate');
+    if (!deductRes.success) {
+      toast.error(deductRes.message || `积分不足！批量生成 ${selectedProducts.length} 个视频需消耗 ${totalCost} 积分（当前剩余 ${deductRes.creditsLeft} 积分），请充值！`);
+      return;
+    }
+
     setSubmitting(true);
     try {
       const config = useIndividualConfig
