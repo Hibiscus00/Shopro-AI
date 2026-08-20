@@ -614,19 +614,50 @@ export default function ScriptPage() {
         </div>
       )}
       {/* ── 页头 ── */}
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="min-w-0">
           <h1 className="text-xl font-bold flex items-center gap-2 text-balance">
             <Wand2 className="w-5 h-5 text-primary shrink-0" />
-            AI 智能脚本生成
+            商品带货脚本
           </h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            「卖点 → 痛点 → 平台钩子 → CTA」四层Prompt工程，让AI真正理解商品
+            「卖点 → 痛点 → 平台钩子 → CTA」四层Prompt工程，自动生成高转化短视频分镜脚本
           </p>
         </div>
-        <Badge variant="outline" className="text-xs shrink-0 gap-1 border-primary/40 text-primary">
-          <Sparkles className="w-3 h-3" />CR-01
-        </Badge>
+        <div className="flex items-center gap-2 shrink-0">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              setProductName('草本氨基酸水润洗面奶');
+              setCategory('美妆护肤');
+              setPriceRange('¥50-200 中端');
+              setSellingPoints(['温和无刺激敏感肌可用', '微米级细腻泡沫深层清洁', '复配玻尿酸洗完不紧绷']);
+              setAudience('18-30岁熬夜冒痘、出油敏感的年轻人');
+              setSelectedPainPoints(['肤色暗沉不均', '毛孔粗大油光', '过敏刺激敏感']);
+              setVideoLength(25);
+              setPlatform('douyin');
+              setPromptText(`你是一位全网千万级爆款带货短视频编剧。请根据以下信息撰写黄金三段式脚本：\n1. 【黄金3秒Hook】：用令人意想不到的痛点或悬念直击【18-30岁熬夜冒痘、出油敏感的年轻人】，引起好奇；\n2. 【核心卖点呈现】：突出【草本氨基酸水润洗面奶】的【温和无刺激敏感肌可用、微米级细腻泡沫深层清洁】，真实对比传统洗面奶的干燥紧绷；\n3. 【结尾引导下单】：给出限时福利【买一送一领券下单】，建立购买紧迫感。`);
+              setScenes([
+                { order: 1, scene: '镜头1：痛点特写 (前3秒Hook)', visual: '女主角对镜叹气，特写T区油光与暗沉粗大毛孔', audio: '天天熬夜加班，脸油得能炒菜，用普通洗面奶洗完紧绷脱皮？', duration: 3, notes: '字幕高亮【脸油紧绷】' },
+                { order: 2, scene: '镜头2：产品亮相 (卖点展示)', visual: '极简白瓶洗面奶置于竹叶与微水流背景中，镜头推近特写细腻泡泡', audio: '试试这款草本氨基酸洗面奶！蕴含三重草本提取，微米级泡沫一冲即净。', duration: 5, notes: '展示泡沫绵密感' },
+                { order: 3, scene: '镜头3：对比实验 (痛点解法)', visual: '左右对比测试：左边传统皂基pH呈强碱，右边本品pH呈弱酸温和亲肤', audio: '看！温和弱酸性，洗走油脂污垢的同时，牢牢锁住皮肤水分！', duration: 6, notes: '实验直观显色' },
+                { order: 4, scene: '镜头4：使用后体验 (情感共鸣)', visual: '女主角洗完脸露出生机水润肌肤，满脸笑容摸脸特写', audio: '洗完摸上去嫩滑水润，完全不紧绷，连后续护肤品都好吸收了！', duration: 5, notes: '近景特写水润感' },
+                { order: 5, scene: '镜头5：促销促单 (CTA转化)', visual: '手持产品展示，弹窗出现限时优惠买一送一及左下角小黄车箭头', audio: '官方旗舰店活动，今天下单直接买一发二！点击左下角赶紧抢吧！', duration: 6, notes: '闪烁提示左下角领券' },
+              ]);
+              setGenerated(true);
+              setLayerStatuses({ selling_point: 'done', pain_point: 'done', hook: 'done', cta: 'done' });
+              toast.success('已载入爆款商品带货脚本生成示例！');
+            }}
+            className="h-8 text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10"
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            一键载入示例脚本
+          </Button>
+          <Badge variant="outline" className="text-xs shrink-0 gap-1 border-primary/40 text-primary">
+            <Sparkles className="w-3 h-3" />CR-01
+          </Badge>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">

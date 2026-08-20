@@ -382,19 +382,57 @@ export default function StyleCopyPage() {
   return (
     <div className="p-4 md:p-6 space-y-6">
       {/* ── 页头 ── */}
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="min-w-0">
           <h1 className="text-xl font-bold flex items-center gap-2 text-balance">
             <Copy className="w-5 h-5 text-primary shrink-0" />
-            爆款风格 DNA 提取
+            爆款风格复刻
           </h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            视频帧+音频+字幕多模态分析，量化风格DNA指纹，驱动高相似度复刻
+            视频帧+音频+字幕多模态分析，量化爆款风格DNA指纹，一键生成同款复刻文案
           </p>
         </div>
-        <Badge variant="outline" className="text-xs shrink-0 gap-1 border-primary/40 text-primary">
-          <Sparkles className="w-3 h-3" />CR-02
-        </Badge>
+        <div className="flex items-center gap-2 shrink-0">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              setLinkUrl('https://www.douyin.com/video/728912384918237');
+              setInputMode('link');
+              const sampleReport: StyleReport = {
+                rhythm: '快节奏强按拍', pacing: '快节奏（1.8s/镜头）',
+                transitions: ['快切闪白', '视差放大', 'J-Cut混音'],
+                subtitle_style: '黄白高亮+黑描边加粗',
+                bgm_type: '抖音极速电子音律', bgm_mood: '激昂充满紧迫感',
+                color_tone: '明亮高对比暖色',
+                rhythm_score: 92,
+                virality_score: 89,
+                completion_score: 86,
+                strengths: ['前3秒痛点开场强抓眼球', '字幕高亮与声画重音同步', '结尾限时诱惑行动号召高'],
+                improvements: ['中段讲解可增加更多产品实测特写'],
+                dna_scores: {
+                  openingHook: 94,
+                  paceRhythm: 91,
+                  emotionCurve: 88,
+                  productShow: 85,
+                  ctaStrength: 90,
+                  audioVisual: 92,
+                },
+                dna_fingerprint: 'A3E8B9C1',
+              };
+              setReport(sampleReport);
+              setLlmAnalysis('根据该爆款视频风格DNA分析：其核心成功要素为「痛点反差Hook + 黄金15秒视觉高频切换」。复刻建议在开场使用【极简痛点提问】，配乐选择128BPM快节奏电音，关键卖点使用黑描边黄字高亮。');
+              toast.success('已载入爆款风格复刻生成示例数据！');
+            }}
+            className="h-8 text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10"
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            一键载入复刻示例
+          </Button>
+          <Badge variant="outline" className="text-xs shrink-0 gap-1 border-primary/40 text-primary">
+            <Sparkles className="w-3 h-3" />CR-02
+          </Badge>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">

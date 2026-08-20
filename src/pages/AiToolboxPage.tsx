@@ -26,7 +26,7 @@ const AI_TOOLS = [
   {
     id: 'ai-script',
     path: '/script',
-    label: 'AI 智能脚本',
+    label: '商品带货脚本',
     desc: '智能生成高转化率爆款电商带货分镜脚本与文案',
     icon: FileText,
     from: '#ec4899', to: '#8b5cf6',
@@ -285,7 +285,7 @@ export default function AiToolboxPage() {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-xl md:text-2xl font-bold text-foreground text-balance">AI 工具箱</h1>
+                <h1 className="text-xl md:text-2xl font-bold text-foreground text-balance">7+AI工具箱</h1>
                 <span className="hidden md:inline px-2 py-0.5 text-[10px] font-medium bg-primary/10 text-primary rounded-full border border-primary/20">
                   {AI_TOOLS.length} 个工具
                 </span>

@@ -66,6 +66,24 @@ const PLATFORM_COLORS: Record<string, string> = {
   xiaohongshu: 'bg-[#ff2442]/15 text-[#ff2442]',
   kuaishou: 'bg-[#ff6600]/15 text-[#ff6600]',
 };
+const MOCK_ACCOUNTS: CompetitorAccount[] = [
+  { id: 'ca-001', platform: 'douyin', account_id: 'douyin_meizhuang', account_name: '小美美妆种草日记', category: '美妆护肤', follower_count: 3250000, is_monitoring: true, last_crawled_at: new Date().toISOString(), created_at: '2026-08-10T10:00:00Z' },
+  { id: 'ca-002', platform: 'tiktok', account_id: 'tiktok_skincare', account_name: 'GlowSkin Official', category: '美妆护肤', follower_count: 1850000, is_monitoring: true, last_crawled_at: new Date().toISOString(), created_at: '2026-08-11T12:00:00Z' },
+  { id: 'ca-003', platform: 'xiaohongshu', account_id: 'xhs_outfit', account_name: '穿搭指南小夏', category: '服装配饰', follower_count: 980000, is_monitoring: true, last_crawled_at: new Date().toISOString(), created_at: '2026-08-12T15:00:00Z' },
+];
+
+const MOCK_SNAPSHOTS: Record<string, CompetitorSnapshot[]> = {
+  'ca-001': [
+    { id: 'sn-001', account_id: 'ca-001', video_id: 'v-101', title: '熬夜痘肌救星！3天实测全过程', cover_url: null, play_count: 2450000, like_count: 182000, comment_count: 12400, share_count: 31000, duration: 28, style_tags: ['痛点共鸣', '对比测试'], hook_type: '悬念痛点', is_trending: true, published_at: '2026-08-18T10:00:00Z', crawled_at: new Date().toISOString() },
+    { id: 'sn-002', account_id: 'ca-001', video_id: 'v-102', title: '为什么明星皮肤都这么好？秘密揭晓', cover_url: null, play_count: 1280000, like_count: 95000, comment_count: 5200, share_count: 14000, duration: 32, style_tags: ['干货知识', '产品植入'], hook_type: '明星揭秘', is_trending: false, published_at: '2026-08-17T15:00:00Z', crawled_at: new Date().toISOString() },
+  ],
+  'ca-002': [
+    { id: 'sn-003', account_id: 'ca-002', video_id: 'v-201', title: 'Night Routine for Glass Skin ✨', cover_url: null, play_count: 3890000, like_count: 420000, comment_count: 18900, share_count: 65000, duration: 22, style_tags: ['沉浸式', '治愈风'], hook_type: '视觉ASMR', is_trending: true, published_at: '2026-08-19T08:00:00Z', crawled_at: new Date().toISOString() },
+  ],
+  'ca-003': [
+    { id: 'sn-004', account_id: 'ca-003', video_id: 'v-301', title: '158小个子秋季显高穿搭模版', cover_url: null, play_count: 1650000, like_count: 135000, comment_count: 8800, share_count: 24000, duration: 25, style_tags: ['实用穿搭', '显高拉长'], hook_type: '痛点解决方案', is_trending: true, published_at: '2026-08-19T14:00:00Z', crawled_at: new Date().toISOString() },
+  ],
+};
 
 function fmt(n: number) {
   if (n >= 10000) return `${(n / 10000).toFixed(1)}w`;
@@ -208,8 +226,7 @@ export default function CompetitorPage() {
       .order('created_at', { ascending: false });
     setAccounts((accts ?? []) as CompetitorAccount[]);
 
-    // 加载每个账号的快照
-    if (accts?.length) {
+    if (accts && accts.length > 0) {
       const snapMap: Record<string, CompetitorSnapshot[]> = {};
       await Promise.all(accts.map(async (a) => {
         const { data: snaps } = await supabase
@@ -221,6 +238,10 @@ export default function CompetitorPage() {
         snapMap[a.id] = (snaps ?? []) as CompetitorSnapshot[];
       }));
       setSnapshots(snapMap);
+    } else {
+      // 预置竞品爆款分析生成示例数据
+      setAccounts(MOCK_ACCOUNTS);
+      setSnapshots(MOCK_SNAPSHOTS);
     }
     setLoading(false);
   }, [user]);

@@ -176,11 +176,38 @@ export default function LiveHighlightPage() {
   return (
     <div className="space-y-6 p-4 md:p-6">
       {/* 标题 */}
-      <div>
-        <h1 className="text-xl font-bold flex items-center gap-2">
-          <Scissors className="w-5 h-5 text-primary" />直播高光切片
-        </h1>
-        <p className="text-sm text-muted-foreground mt-0.5">P3-M02 · ASR语音识别 + AI高光识别，自动提取直播精华片段</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h1 className="text-xl font-bold flex items-center gap-2">
+            <Scissors className="w-5 h-5 text-primary" />直播高光切片
+          </h1>
+          <p className="text-sm text-muted-foreground mt-0.5">P3-M02 · ASR语音识别 + AI高光识别，自动提取直播精华片段</p>
+        </div>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => {
+            setSourceUrl('https://live.douyin.com/playback/89123849123');
+            setTitle('618年中狂欢美妆专场直播');
+            const sampleResult: AnalysisResult = {
+              task_id: 'live-task-888',
+              transcript_summary: '全场直播持续3.5小时，最高在线观看人数达12.5万人。在00:15及01:40处出现两次显著订单爆单峰值，商品弹幕互动率达 48.2%。',
+              highlights: [
+                { type: 'promo', start_sec: 900, end_sec: 960, title: '【爆单高光】洗面奶买一发三限量抢购', score: 96, peak_viewers: 125000, keyword: '买一送一 / 抢完即止', suggested_title: '疯了吧！买一送三直接炸场！', selected: true },
+                { type: 'product_pitch', start_sec: 1820, end_sec: 1910, title: '【干货演示】3分钟黑头导出实测过程', score: 91, peak_viewers: 98000, keyword: '黑头导出 / 干净透亮', suggested_title: '看傻了！鼻子上黑头居然能这样洗出来？', selected: true },
+                { type: 'demo', start_sec: 3600, end_sec: 3680, title: '【产品对比】左右脸半边测试，紧致对比明显', score: 88, peak_viewers: 86000, keyword: '紧致提拉 / 歪脸对比', suggested_title: '做完半边脸直接惊呆！这对比也太真实了！', selected: true },
+                { type: 'qa', start_sec: 5400, end_sec: 5460, title: '【粉丝答疑】敏感肌/孕妇到底能不能用？', score: 82, peak_viewers: 72000, keyword: '成分安全 / 零添加', suggested_title: '主播亲测！敏感肌姐妹放心用！', selected: true },
+              ]
+            };
+            setResult(sampleResult);
+            setSlices(sampleResult.highlights.map(h => ({ ...h, selected: true })));
+            toast.success('已载入直播高光切片示例数据！');
+          }}
+          className="h-8 text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10 shrink-0"
+        >
+          <Sparkles className="w-3.5 h-3.5" />
+          一键载入切片示例
+        </Button>
       </div>
 
       {/* 输入区 */}
