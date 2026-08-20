@@ -440,8 +440,8 @@ const personas = [
 
 // ── 统计数据 ──────────────────────────────────────────────────────────────
 const stats = [
-  { value: 120000, suffix: '+', label: '已生成视频', icon: Video },
-  { value: 8500, suffix: '+', label: '服务商家', icon: Users2 },
+  { value: 1798, suffix: '+', label: '已生成视频', icon: Video },
+  { value: 169, suffix: '+', label: '服务商家', icon: Users2 },
   { value: 80, suffix: '%', label: '平均时间节省', icon: Zap },
   { value: 61, suffix: '%', label: '平均完播率提升', icon: TrendingUp },
 ];

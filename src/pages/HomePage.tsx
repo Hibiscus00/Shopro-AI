@@ -426,9 +426,16 @@ export default function HomePage() {
     loadGeneratedVideos();
   }, [loadGeneratedVideos]);
 
+  const [imgEnhanceProgress, setImgEnhanceProgress] = useState(0);
+
   const handleEnhanceImgPrompt = async () => {
     if (!imgPrompt.trim()) { toast.error('请输入图片描述'); return; }
     setEnhancingImg(true);
+    setImgEnhanceProgress(15);
+    const progressTimer = setInterval(() => {
+      setImgEnhanceProgress(p => (p < 92 ? p + Math.floor(Math.random() * 8 + 5) : p));
+    }, 200);
+
     const originalPrompt = imgPrompt;
     abortRef.current = new AbortController();
     let fullText = '';
@@ -459,17 +466,24 @@ export default function HomePage() {
           }
         },
         onComplete: () => {
+          clearInterval(progressTimer);
+          setImgEnhanceProgress(100);
           toast.success('图片提示词已增强');
         },
         onError: (err) => {
+          clearInterval(progressTimer);
           toast.error(`增强失败：${err.message}`);
         },
         signal: abortRef.current?.signal,
       });
     } catch (e: unknown) {
+      clearInterval(progressTimer);
       toast.error(`增强失败：${(e as Error).message}`);
     } finally {
-      setEnhancingImg(false);
+      setTimeout(() => {
+        setImgEnhanceProgress(0);
+        setEnhancingImg(false);
+      }, 500);
     }
   };
 
@@ -1499,6 +1513,25 @@ export default function HomePage() {
                   disabled={imgGenerating}
                 />
               </div>
+
+              {/* 图片提示词增强进度条动效 */}
+              {(enhancingImg || imgEnhanceProgress > 0) && (
+                <div className="px-4 pb-2.5 animate-in fade-in duration-300">
+                  <div className="w-full h-1.5 rounded-full bg-white/10 overflow-hidden relative border border-white/5">
+                    <div
+                      className="h-full bg-gradient-to-r from-pink-500 via-purple-500 to-rose-500 transition-all duration-300 rounded-full"
+                      style={{ width: `${imgEnhanceProgress}%` }}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between text-[11px] text-pink-400 mt-1 font-medium">
+                    <span className="flex items-center gap-1.5">
+                      <Sparkles className="w-3 h-3 animate-spin text-pink-400" />
+                      AI 多模态画质与画面提示词智能增强中...
+                    </span>
+                    <span className="font-mono font-bold text-pink-300">{imgEnhanceProgress}%</span>
+                  </div>
+                </div>
+              )}
 
               {/* 上传的参考图预览 */}
               {imgRefImage && (

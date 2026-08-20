@@ -176,13 +176,29 @@ const GENDER_LABEL: Record<string, string> = { male: '男性', female: '女性' 
 const LANG_LABEL: Record<string, string>   = { zh: '中文', en: '英文', both: '双语' };
 
 function AvatarCard({
-  avatar, onPreview, onUseAvatar, onDeleteAvatar
+  avatar, onPreview, onUseAvatar, onDeleteAvatar, onUpdateCover
 }: {
   avatar: AvatarType;
   onPreview: (a: AvatarType) => void;
   onUseAvatar: (a: AvatarType) => void;
   onDeleteAvatar: (id: string, name: string) => void;
+  onUpdateCover: (id: string, newImage: string) => void;
 }) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (reader.result) {
+          onUpdateCover(avatar.id, reader.result as string);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   return (
     <Card className="h-full flex flex-col card-hover overflow-hidden group relative">
       {/* 预览图 */}
@@ -205,6 +221,26 @@ function AvatarCard({
         >
           <Trash2 className="w-3.5 h-3.5" />
         </button>
+
+        {/* 修改封面按钮 */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            fileInputRef.current?.click();
+          }}
+          className="absolute top-2 left-10 w-7 h-7 rounded-full bg-black/60 hover:bg-pink-600 text-white flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100 z-10"
+          title="更换封面图片"
+        >
+          <Upload className="w-3.5 h-3.5" />
+        </button>
+        <input
+          type="file"
+          ref={fileInputRef}
+          accept="image/*"
+          className="hidden"
+          onChange={handleFileChange}
+        />
 
         {/* 悬浮播放按钮 */}
         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -545,6 +581,16 @@ export default function AvatarsPage() {
     }
   };
 
+  const handleUpdateCover = async (id: string, newImage: string) => {
+    setAvatars(prev => prev.map(a => a.id === id ? { ...a, preview_image: newImage } : a));
+    try {
+      await supabase.from('avatars').update({ preview_image: newImage }).eq('id', id);
+    } catch (e) {
+      console.error(e);
+    }
+    toast.success('封面图片更新成功！');
+  };
+
   // CR-06: 脚本融合分析
   const handleFusionAnalyze = async () => {
     if (!fusionScript.trim()) { toast.error('请输入带货脚本'); return; }
@@ -698,7 +744,7 @@ export default function AvatarsPage() {
               </div>
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {filtered.map(a => <AvatarCard key={a.id} avatar={a} onPreview={handleAvatarOpen} onUseAvatar={handleUseAvatar} onDeleteAvatar={handleDeleteAvatar} />)}
+                {filtered.map(a => <AvatarCard key={a.id} avatar={a} onPreview={handleAvatarOpen} onUseAvatar={handleUseAvatar} onDeleteAvatar={handleDeleteAvatar} onUpdateCover={handleUpdateCover} />)}
               </div>
             )}
           </div>
